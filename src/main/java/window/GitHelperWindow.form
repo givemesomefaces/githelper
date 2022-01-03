@@ -21,7 +21,7 @@
               <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="7" anchor="8" fill="1" indent="1" use-parent-layout="false"/>
             </constraints>
             <properties>
-              <text value="🔍这里应该是搜索但是还没加"/>
+              <text value="🔍这里好像应该是搜索"/>
             </properties>
           </component>
         </children>
