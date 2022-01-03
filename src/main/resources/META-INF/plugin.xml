@@ -2,7 +2,7 @@
 <idea-plugin>
     <id>com.github.lvlifeng.githelper</id>
     <name>GitHelper</name>
-    <vendor>lv-lifeng</vendor>
+    <vendor>lvlifeng</vendor>
 
     <depends>com.intellij.modules.platform</depends>
     <depends>Git4Idea</depends>

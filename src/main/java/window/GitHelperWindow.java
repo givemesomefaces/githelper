@@ -327,8 +327,13 @@ public class GitHelperWindow {
     private void executGit(String operation, String branchName, String startPoint, boolean isCheckout, Boolean isRemote) {
         if (StringUtils.equalsIgnoreCase("Checkout", operation)
                 && StringUtils.isNotEmpty(branchName)) {
-            gitBrancher.checkout(branchName, false, new ArrayList<>(choosedRepositories), null);
-
+            if (isRemote) {
+                final String startPointfinal = branchName;
+                branchName = branchName.split("/")[1];
+                gitBrancher.checkoutNewBranchStartingFrom(branchName, startPointfinal, false, new ArrayList<>(choosedRepositories), null);
+            } else {
+                gitBrancher.checkout(branchName, false, new ArrayList<>(choosedRepositories), null);
+            }
         }
         if (StringUtils.equalsIgnoreCase("Checkout New branch", operation)
                 && StringUtils.isNotEmpty(branchName)) {
