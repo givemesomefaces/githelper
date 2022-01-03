@@ -5,14 +5,20 @@
     <vendor>lv-lifeng</vendor>
 
     <depends>com.intellij.modules.platform</depends>
+    <depends>Git4Idea</depends>
 
     <extensions defaultExtensionNs="com.intellij">
         <applicationService serviceImplementation="com.github.lvlifeng.githelper.services.MyApplicationService"/>
         <projectService serviceImplementation="com.github.lvlifeng.githelper.services.MyProjectService"/>
+        <toolWindow factoryClass="window.GitHelperWindowFactory" id="GitHelper" anchor="right" />
     </extensions>
 
     <applicationListeners>
         <listener class="com.github.lvlifeng.githelper.listeners.MyProjectManagerListener"
                   topic="com.intellij.openapi.project.ProjectManagerListener"/>
     </applicationListeners>
+
+    <actions>
+        <!-- Add your actions here -->
+    </actions>
 </idea-plugin>
