@@ -3,6 +3,7 @@ package window;
 import cn.hutool.core.collection.CollectionUtil;
 import com.github.lvlifeng.githelper.Bundle;
 import com.google.common.collect.Lists;
+import com.intellij.dvcs.repo.Repository;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.SingleSelectionModel;
@@ -110,9 +111,15 @@ public class GitHelperWindow {
         initRepositoryList(searchWord);
 
         if (CollectionUtil.isNotEmpty(choosedRepositories)) {
-            //gitRepositories.stream().sorted(o -> o.getRoot().getName());
+            List<String> sortGitRepositories = gitRepositories.stream()
+                    .map(Repository::getRoot)
+                    .map(VirtualFile::getName)
+                    .collect(Collectors.toList())
+                    .stream()
+                    .sorted(String::compareToIgnoreCase)
+                    .collect(Collectors.toList());
             repositoryList.setSelectedIndices(choosedRepositories.stream()
-                    .map(o -> gitRepositories.indexOf(o))
+                    .map(o -> sortGitRepositories.indexOf(o.getRoot().getName()))
                     .mapToInt(Integer::valueOf)
                     .toArray());
             assembleCommonLocalBranchDataList();
@@ -157,7 +164,9 @@ public class GitHelperWindow {
             repositoryList.setListData(gitRepositories.stream()
                     .map(GitRepository::getRoot)
                     .map(VirtualFile::getName)
-                    .filter(o -> (StringUtils.isNotEmpty(searchWord) && o.contains(searchWord)) || StringUtils.isEmpty(searchWord))
+                    .filter(o -> (StringUtils.isNotEmpty(searchWord)
+                            && o.toLowerCase().contains(searchWord.toLowerCase()))
+                            || StringUtils.isEmpty(searchWord))
                     .collect(Collectors.toList())
                     .stream()
                     .sorted(String::compareToIgnoreCase)
