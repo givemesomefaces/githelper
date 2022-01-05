@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="window.GitHelperWindow">
-  <grid id="27dc6" binding="gitHelperPanel" layout-manager="GridLayoutManager" row-count="4" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+  <grid id="27dc6" binding="gitHelperPanel" layout-manager="GridLayoutManager" row-count="2" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
     <margin top="0" left="0" bottom="0" right="0"/>
     <constraints>
-      <xy x="20" y="20" width="1260" height="400"/>
+      <xy x="20" y="20" width="1260" height="894"/>
     </constraints>
     <properties/>
     <border type="none"/>
@@ -21,151 +21,180 @@
               <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="7" anchor="8" fill="1" indent="1" use-parent-layout="false"/>
             </constraints>
             <properties>
-              <text value="🔍这里好像应该是搜索"/>
+              <text value=""/>
             </properties>
           </component>
         </children>
       </grid>
-      <grid id="f6b52" layout-manager="GridLayoutManager" row-count="3" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
-        <margin top="0" left="0" bottom="0" right="0"/>
+      <splitpane id="a9bbe">
         <constraints>
-          <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+          <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="7" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
         </constraints>
-        <properties/>
-        <border type="empty" title=""/>
-        <children>
-          <component id="37e27" class="javax.swing.JLabel">
-            <constraints>
-              <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="1" use-parent-layout="false"/>
-            </constraints>
-            <properties>
-              <text value="Repositories"/>
-            </properties>
-          </component>
-          <component id="79b97" class="javax.swing.JCheckBox" binding="allCheckBox">
-            <constraints>
-              <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-            </constraints>
-            <properties>
-              <text value="全选"/>
-            </properties>
-          </component>
-          <component id="30a03" class="javax.swing.JLabel" binding="repositoryDefaultText">
-            <constraints>
-              <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="1" use-parent-layout="false"/>
-            </constraints>
-            <properties>
-              <text value="&lt;None&gt;"/>
-            </properties>
-          </component>
-          <scrollpane id="4ba27">
-            <constraints>
-              <grid row="2" column="0" row-span="1" col-span="2" vsize-policy="7" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
-            </constraints>
-            <properties>
-              <enabled value="true"/>
-              <toolTipText value=""/>
-            </properties>
-            <border type="empty"/>
-            <children>
-              <component id="cc42e" class="javax.swing.JList" binding="repositoryList">
-                <constraints/>
-                <properties>
-                  <model/>
-                </properties>
-              </component>
-            </children>
-          </scrollpane>
-        </children>
-      </grid>
-      <grid id="32023" layout-manager="GridLayoutManager" row-count="3" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
-        <margin top="0" left="0" bottom="0" right="0"/>
-        <constraints>
-          <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="7" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
-        </constraints>
-        <properties/>
+        <properties>
+          <continuousLayout value="true"/>
+          <dividerLocation value="320"/>
+          <dividerSize value="5"/>
+          <orientation value="0"/>
+        </properties>
         <border type="empty"/>
         <children>
-          <component id="1886f" class="javax.swing.JLabel">
+          <grid id="f6b52" layout-manager="GridLayoutManager" row-count="3" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+            <margin top="0" left="0" bottom="0" right="0"/>
             <constraints>
-              <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="1" use-parent-layout="false"/>
+              <splitpane position="left"/>
             </constraints>
-            <properties>
-              <text value="Common Local Branches"/>
-            </properties>
-          </component>
-          <component id="54b9a" class="javax.swing.JLabel" binding="localDefaultText">
-            <constraints>
-              <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="1" use-parent-layout="false"/>
-            </constraints>
-            <properties>
-              <text value="&lt;None&gt;"/>
-            </properties>
-          </component>
-          <scrollpane id="2cc66">
-            <constraints>
-              <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="7" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
-            </constraints>
-            <properties>
-              <toolTipText value="local"/>
-            </properties>
+            <properties/>
             <border type="empty"/>
             <children>
-              <component id="a0f8c" class="javax.swing.JList" binding="commonLocalBranchList">
-                <constraints/>
+              <component id="37e27" class="javax.swing.JLabel">
+                <constraints>
+                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="1" use-parent-layout="false"/>
+                </constraints>
                 <properties>
-                  <model/>
-                  <selectionMode value="0"/>
+                  <text value="Repositories"/>
                 </properties>
               </component>
-            </children>
-          </scrollpane>
-        </children>
-      </grid>
-      <grid id="ef859" layout-manager="GridLayoutManager" row-count="3" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
-        <margin top="0" left="0" bottom="0" right="0"/>
-        <constraints>
-          <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="7" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
-        </constraints>
-        <properties/>
-        <border type="empty"/>
-        <children>
-          <component id="fd0ef" class="javax.swing.JLabel">
-            <constraints>
-              <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="1" use-parent-layout="false"/>
-            </constraints>
-            <properties>
-              <text value="Common Remote Branches"/>
-            </properties>
-          </component>
-          <component id="44c" class="javax.swing.JLabel" binding="remoteDefaultText">
-            <constraints>
-              <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="1" use-parent-layout="false"/>
-            </constraints>
-            <properties>
-              <text value="&lt;None&gt;"/>
-            </properties>
-          </component>
-          <scrollpane id="a7bd1">
-            <constraints>
-              <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="7" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
-            </constraints>
-            <properties>
-              <toolTipText value="remote"/>
-            </properties>
-            <border type="empty"/>
-            <children>
-              <component id="8dffb" class="javax.swing.JList" binding="commonRemoteBranchList">
-                <constraints/>
+              <component id="79b97" class="javax.swing.JCheckBox" binding="allCheckBox">
+                <constraints>
+                  <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
                 <properties>
-                  <model/>
+                  <text value="全选"/>
+                </properties>
+              </component>
+              <component id="30a03" class="javax.swing.JLabel" binding="repositoryDefaultText">
+                <constraints>
+                  <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="1" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <text value="&lt;None&gt;"/>
+                </properties>
+              </component>
+              <scrollpane id="4ba27">
+                <constraints>
+                  <grid row="2" column="0" row-span="1" col-span="2" vsize-policy="7" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false">
+                    <preferred-size width="256" height="115"/>
+                  </grid>
+                </constraints>
+                <properties>
+                  <enabled value="true"/>
                   <toolTipText value=""/>
                 </properties>
-              </component>
+                <border type="empty"/>
+                <children>
+                  <component id="cc42e" class="javax.swing.JList" binding="repositoryList">
+                    <constraints/>
+                    <properties>
+                      <model/>
+                    </properties>
+                  </component>
+                </children>
+              </scrollpane>
             </children>
-          </scrollpane>
+          </grid>
+          <splitpane id="fa1bf">
+            <constraints>
+              <splitpane position="right"/>
+            </constraints>
+            <properties>
+              <dividerLocation value="238"/>
+              <dividerSize value="5"/>
+              <orientation value="0"/>
+            </properties>
+            <border type="empty"/>
+            <children>
+              <grid id="32023" layout-manager="GridLayoutManager" row-count="3" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                <margin top="0" left="0" bottom="0" right="0"/>
+                <constraints>
+                  <splitpane position="left"/>
+                </constraints>
+                <properties/>
+                <border type="empty"/>
+                <children>
+                  <component id="1886f" class="javax.swing.JLabel">
+                    <constraints>
+                      <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="1" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <text value="Common Local Branches"/>
+                    </properties>
+                  </component>
+                  <component id="54b9a" class="javax.swing.JLabel" binding="localDefaultText">
+                    <constraints>
+                      <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="1" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <text value="&lt;None&gt;"/>
+                    </properties>
+                  </component>
+                  <scrollpane id="2cc66">
+                    <constraints>
+                      <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="7" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <toolTipText value="local"/>
+                    </properties>
+                    <border type="empty"/>
+                    <children>
+                      <component id="a0f8c" class="javax.swing.JList" binding="commonLocalBranchList">
+                        <constraints/>
+                        <properties>
+                          <model/>
+                          <selectionMode value="0"/>
+                        </properties>
+                      </component>
+                    </children>
+                  </scrollpane>
+                </children>
+              </grid>
+              <grid id="ef859" layout-manager="GridLayoutManager" row-count="3" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                <margin top="0" left="0" bottom="0" right="0"/>
+                <constraints>
+                  <splitpane position="right"/>
+                </constraints>
+                <properties/>
+                <border type="empty"/>
+                <children>
+                  <component id="fd0ef" class="javax.swing.JLabel">
+                    <constraints>
+                      <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="1" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <text value="Common Remote Branches"/>
+                    </properties>
+                  </component>
+                  <component id="44c" class="javax.swing.JLabel" binding="remoteDefaultText">
+                    <constraints>
+                      <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="1" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <text value="&lt;None&gt;"/>
+                    </properties>
+                  </component>
+                  <scrollpane id="a7bd1">
+                    <constraints>
+                      <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="7" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <toolTipText value="remote"/>
+                    </properties>
+                    <border type="empty"/>
+                    <children>
+                      <component id="8dffb" class="javax.swing.JList" binding="commonRemoteBranchList">
+                        <constraints/>
+                        <properties>
+                          <model/>
+                          <toolTipText value=""/>
+                        </properties>
+                      </component>
+                    </children>
+                  </scrollpane>
+                </children>
+              </grid>
+            </children>
+          </splitpane>
         </children>
-      </grid>
+      </splitpane>
     </children>
   </grid>
 </form>
