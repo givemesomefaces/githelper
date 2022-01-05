@@ -10,7 +10,7 @@
     <extensions defaultExtensionNs="com.intellij">
         <applicationService serviceImplementation="com.github.lvlifeng.githelper.services.MyApplicationService"/>
         <projectService serviceImplementation="com.github.lvlifeng.githelper.services.MyProjectService"/>
-        <toolWindow factoryClass="window.GitHelperWindowFactory" id="GitHelper" anchor="right" />
+        <toolWindow factoryClass="window.GitHelperWindowFactory" id="GitHelper" anchor="right" icon="Icons.ToolWindow"/>
     </extensions>
 
     <applicationListeners>

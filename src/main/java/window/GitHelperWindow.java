@@ -1,6 +1,7 @@
 package window;
 
 import cn.hutool.core.collection.CollectionUtil;
+import com.github.lvlifeng.githelper.Bundle;
 import com.google.common.collect.Lists;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -66,7 +67,7 @@ public class GitHelperWindow {
         }
         this.gitRepositories = repositories;
         this.gitBrancher = GitBrancher.getInstance(project);
-        initRepositoryList();
+        initRepositoryList(null);
         initAllCheckBox();
         initSearchText();
     }
@@ -76,10 +77,7 @@ public class GitHelperWindow {
             @Override
             public void insertUpdate(DocumentEvent e) {
                 try {
-                    String text = e.getDocument().getText(e.getDocument().getStartPosition().getOffset(), e.getDocument().getLength());
-                    if (StringUtils.isEmpty(text)) {
-                        return;
-                    }
+                    handleSearch(e);
                 } catch (BadLocationException badLocationException) {
                     badLocationException.printStackTrace();
                 }
@@ -87,15 +85,41 @@ public class GitHelperWindow {
 
             @Override
             public void removeUpdate(DocumentEvent e) {
-
+                try {
+                    handleSearch(e);
+                } catch (BadLocationException badLocationException) {
+                    badLocationException.printStackTrace();
+                }
             }
 
             @Override
             public void changedUpdate(DocumentEvent e) {
-
+                try {
+                    handleSearch(e);
+                } catch (BadLocationException badLocationException) {
+                    badLocationException.printStackTrace();
+                }
             }
         });
 
+    }
+
+    private void handleSearch(DocumentEvent e) throws BadLocationException {
+        String searchWord = e.getDocument().getText(e.getDocument().getStartPosition().getOffset(), e.getDocument().getLength());
+
+        initRepositoryList(searchWord);
+
+        if (CollectionUtil.isNotEmpty(choosedRepositories)) {
+            //gitRepositories.stream().sorted(o -> o.getRoot().getName());
+            repositoryList.setSelectedIndices(choosedRepositories.stream()
+                    .map(o -> gitRepositories.indexOf(o))
+                    .mapToInt(Integer::valueOf)
+                    .toArray());
+            assembleCommonLocalBranchDataList();
+            assembleCommonRemoteBranchDataList();
+        } else {
+            repositoryList.clearSelection();
+        }
     }
 
     private void initAllCheckBox() {
@@ -119,7 +143,7 @@ public class GitHelperWindow {
     }
 
 
-    private void initRepositoryList() {
+    private void initRepositoryList(String searchWord) {
 
         if (CollectionUtil.isEmpty(gitRepositories)) {
             repositoryDefaultText.setVisible(true);
@@ -133,6 +157,7 @@ public class GitHelperWindow {
             repositoryList.setListData(gitRepositories.stream()
                     .map(GitRepository::getRoot)
                     .map(VirtualFile::getName)
+                    .filter(o -> (StringUtils.isNotEmpty(searchWord) && o.contains(searchWord)) || StringUtils.isEmpty(searchWord))
                     .collect(Collectors.toList())
                     .stream()
                     .sorted(String::compareToIgnoreCase)
@@ -163,10 +188,11 @@ public class GitHelperWindow {
         if (CollectionUtil.isEmpty(commonRemoteBranches)) {
             remoteDefaultText.setVisible(true);
             commonRemoteBranchList.setVisible(false);
+            commonRemoteBranchList.setListData(new Object[]{});
         } else {
             remoteDefaultText.setVisible(false);
             commonRemoteBranchList.setVisible(true);
-            JPopupMenu jPopupMenu = getjPopupMenu("remote");
+            JPopupMenu jPopupMenu = getjPopupMenu(Bundle.message("remote"));
             commonRemoteBranchList.setListData(commonRemoteBranches.stream()
                     .map(GitRemoteBranch::getName)
                     .collect(Collectors.toList())
@@ -178,7 +204,7 @@ public class GitHelperWindow {
                 public void setSelectionInterval(int index0, int index1) {
                     super.setSelectionInterval(index0, index1);
                     jPopupMenu.setName(commonRemoteBranches.get(index0).getName());
-                    jPopupMenu.setToolTipText("remote");
+                    jPopupMenu.setToolTipText(Bundle.message("remote"));
                     jPopupMenu.show(commonRemoteBranchList, commonRemoteBranchList.getX() - jPopupMenu.getWidth(), (int) commonRemoteBranchList.getMousePosition().getY());
                 }
             });
@@ -188,12 +214,12 @@ public class GitHelperWindow {
     @NotNull
     private JPopupMenu getjPopupMenu(String remote) {
         JPopupMenu jPopupMenu = new JPopupMenu();
-        JMenuItem checkout = new JMenuItem("Checkout");
-        JMenuItem update = new JMenuItem("Update");
-        JMenuItem checkoutNew = new JMenuItem("New Branch from Selected");
-        JMenuItem delete = new JMenuItem("Delete");
+        JMenuItem checkout = new JMenuItem(Bundle.message("checkout"));
+        JMenuItem update = new JMenuItem(Bundle.message("update"));
+        JMenuItem checkoutNew = new JMenuItem(Bundle.message("newBranchFromSelected"));
+        JMenuItem delete = new JMenuItem(Bundle.message("delete"));
         jPopupMenu.add(checkout);
-        if (StringUtils.equalsIgnoreCase("local", remote)) {
+        if (StringUtils.equalsIgnoreCase(Bundle.message("local"), remote)) {
             jPopupMenu.add(update);
             addMouseListener(update);
         }
@@ -209,10 +235,11 @@ public class GitHelperWindow {
         if (CollectionUtil.isEmpty(commonLocalBranches)) {
             localDefaultText.setVisible(true);
             commonLocalBranchList.setVisible(false);
+            commonLocalBranchList.setListData(new Object[]{});
         } else {
             localDefaultText.setVisible(false);
             commonLocalBranchList.setVisible(true);
-            JPopupMenu jPopupMenu = getjPopupMenu("local");
+            JPopupMenu jPopupMenu = getjPopupMenu(Bundle.message("local"));
             commonLocalBranchList.setListData(commonLocalBranches.stream()
                     .map(GitLocalBranch::getName)
                     .collect(Collectors.toList())
@@ -224,7 +251,7 @@ public class GitHelperWindow {
                 public void setSelectionInterval(int index0, int index1) {
                     super.setSelectionInterval(index0, index1);
                     jPopupMenu.setName(commonLocalBranches.get(index0).getName());
-                    jPopupMenu.setToolTipText("local");
+                    jPopupMenu.setToolTipText(Bundle.message("local"));
                     jPopupMenu.show(commonLocalBranchList, commonLocalBranchList.getX() - jPopupMenu.getWidth(), (int) commonLocalBranchList.getMousePosition().getY());
                 }
             });
@@ -244,14 +271,14 @@ public class GitHelperWindow {
                     JMenuItem j = (JMenuItem) e.getSource();
                     JPopupMenu popupMenu = (JPopupMenu) j.getParent();
                     popupDialog(j);
-                    executGit(j.getText(), popupMenu.getName(), StringUtils.equalsIgnoreCase("remote", popupMenu.getToolTipText()));
+                    executGit(j.getText(), popupMenu.getName(), StringUtils.equalsIgnoreCase(Bundle.message("remote"), popupMenu.getToolTipText()));
                 }
             });
         });
     }
 
     private void popupDialog(JMenuItem j) {
-        if (StringUtils.equalsIgnoreCase(j.getText(), "New Branch from Selected")) {
+        if (StringUtils.equalsIgnoreCase(j.getText(), Bundle.message("newBranchFromSelected"))) {
             getNewBranchDialog(j.getParent().getName()).show();
         }
     }
@@ -275,7 +302,7 @@ public class GitHelperWindow {
         branchName.add(newBranchName);
 
         JPanel checkBoxes = new JPanel();
-        JCheckBox checkOutcheckBox = new JCheckBox("Checkout", true);
+        JCheckBox checkOutcheckBox = new JCheckBox(Bundle.message("checkout"), true);
         checkBoxes.setLayout(new FlowLayout(FlowLayout.LEFT));
         checkBoxes.add(checkOutcheckBox);
 
@@ -346,7 +373,7 @@ public class GitHelperWindow {
     }
 
     private void executGit(String operation, String branchName, Boolean isRemote) {
-        if (StringUtils.equalsIgnoreCase("Checkout", operation)
+        if (StringUtils.equalsIgnoreCase(Bundle.message("checkout"), operation)
                 && StringUtils.isNotEmpty(branchName)) {
             if (isRemote) {
                 final String startPointfinal = branchName;
@@ -361,7 +388,7 @@ public class GitHelperWindow {
             //gitBrancher.checkoutNewBranch(jMenuItem.getText(), choosedRepositories);
 
         }
-        if (StringUtils.equalsIgnoreCase("Delete", operation) && popupConfirmDialog(isRemote, branchName)) {
+        if (StringUtils.equalsIgnoreCase(Bundle.message("delete"), operation) && popupConfirmDialog(isRemote, branchName)) {
             if (isRemote){
                 gitBrancher.deleteRemoteBranch(branchName, new ArrayList<>(choosedRepositories));
             } else {
@@ -369,7 +396,7 @@ public class GitHelperWindow {
             }
         }
 
-        if (StringUtils.equalsIgnoreCase("Update", operation)) {
+        if (StringUtils.equalsIgnoreCase(Bundle.message("update"), operation)) {
             // gitBrancher
         }
 

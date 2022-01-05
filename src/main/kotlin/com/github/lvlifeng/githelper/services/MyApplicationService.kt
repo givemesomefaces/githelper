@@ -1,10 +1,10 @@
 package com.github.lvlifeng.githelper.services
 
-import com.github.lvlifeng.githelper.MyBundle
+import com.github.lvlifeng.githelper.Bundle
 
 class MyApplicationService {
 
     init {
-        println(MyBundle.message("applicationService"))
+        println(Bundle.message("applicationService"))
     }
 }
