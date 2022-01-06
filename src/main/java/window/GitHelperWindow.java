@@ -47,7 +47,7 @@ public class GitHelperWindow {
     private JLabel localDefaultText;
     private JLabel remoteDefaultText;
     private JLabel repositoryDefaultText;
-    private JLabel choosedNum;
+    private JLabel choosedSum;
 
     private List<GitRepository> gitRepositories;
     private List<GitLocalBranch> commonLocalBranches;
@@ -64,6 +64,7 @@ public class GitHelperWindow {
         System.out.println("repositories->size=" + repositories.size());
         if (CollectionUtil.isEmpty(repositories)) {
             allCheckBox.setVisible(false);
+            choosedSum.setVisible(false);
             return;
         }
         this.gitRepositories = repositories;
@@ -138,7 +139,7 @@ public class GitHelperWindow {
                     choosedRepositories.clear();
                     repositoryList.clearSelection();
                 }
-                setChoosedNum();
+                setChoosedSum();
                 assembleCommonLocalBranchDataList();
                 assembleCommonRemoteBranchDataList();
                 System.out.println("choosedRepositories=" + choosedRepositories.size());
@@ -153,10 +154,12 @@ public class GitHelperWindow {
             repositoryDefaultText.setVisible(true);
             repositoryList.setVisible(false);
             allCheckBox.setVisible(false);
+            choosedSum.setVisible(false);
         } else {
             repositoryDefaultText.setVisible(false);
             repositoryList.setVisible(true);
             allCheckBox.setVisible(true);
+            choosedSum.setVisible(true);
 
             List<GitRepository> filterRepositories = gitRepositories
                     .stream()
@@ -184,7 +187,7 @@ public class GitHelperWindow {
                         choosedRepositories.add(filterRepositories.get(index0));
                         super.addSelectionInterval(index0, index1);
                     }
-                    setChoosedNum();
+                    setChoosedSum();
                     assembleCommonLocalBranchDataList();
                     assembleCommonRemoteBranchDataList();
                     System.out.println("choosedRepositories=" + choosedRepositories.size());
@@ -201,8 +204,8 @@ public class GitHelperWindow {
         }
     }
 
-    private void setChoosedNum() {
-        choosedNum.setText(String.format("(已选%s)", choosedRepositories.size()));
+    private void setChoosedSum() {
+        choosedSum.setText(String.format("(已选%s)", choosedRepositories.size()));
     }
 
     private void assembleCommonRemoteBranchDataList() {
