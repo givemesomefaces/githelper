@@ -127,39 +127,46 @@ public class GitHelperWindow {
     }
 
     private void initAllCheckBox() {
-        allCheckBox.addChangeListener(new ChangeListener() {
+        allCheckBox.addKeyListener(new KeyAdapter() {
             @Override
-            public void stateChanged(ChangeEvent e) {
-                JCheckBox checkBox = (JCheckBox) e.getSource();
-                System.out.println("allCheckBox="+ checkBox.isSelected());
-                if (checkBox.isSelected()) {
-                    choosedRepositories.addAll(gitRepositories);
-                    repositoryList.addSelectionInterval(0, gitRepositories.size());
-                } else {
-                    choosedRepositories.clear();
-                    repositoryList.clearSelection();
+            public void keyTyped(KeyEvent e) {
+                super.keyTyped(e);
+                if (StringUtils.equalsIgnoreCase(" ", Character.toString(e.getKeyChar()))) {
+                    initAllCheckData((JCheckBox) e.getSource());
                 }
-                setChoosedSum();
-                assembleCommonLocalBranchDataList();
-                assembleCommonRemoteBranchDataList();
-                System.out.println("choosedRepositories=" + choosedRepositories.size());
             }
         });
+        allCheckBox.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                super.mouseClicked(e);
+                initAllCheckData((JCheckBox) e.getSource());
+            }
+        });
+    }
+
+    private void initAllCheckData(JCheckBox checkBox) {
+        System.out.println("allCheckBox="+ checkBox.isSelected());
+        if (checkBox.isSelected()) {
+            choosedRepositories.addAll(gitRepositories);
+            repositoryList.addSelectionInterval(0, gitRepositories.size());
+        } else {
+            choosedRepositories.clear();
+            repositoryList.clearSelection();
+        }
+        setChoosedSum();
+        assembleCommonLocalBranchDataList();
+        assembleCommonRemoteBranchDataList();
+        System.out.println("choosedRepositories=" + choosedRepositories.size());
     }
 
 
     private void initRepositoryList(String searchWord) {
 
         if (CollectionUtil.isEmpty(gitRepositories)) {
-            repositoryDefaultText.setVisible(true);
-            repositoryList.setVisible(false);
-            allCheckBox.setVisible(false);
-            choosedSum.setVisible(false);
+            hideRepositoryRelMenu();
         } else {
-            repositoryDefaultText.setVisible(false);
-            repositoryList.setVisible(true);
-            allCheckBox.setVisible(true);
-            choosedSum.setVisible(true);
+            showRepositoryRelMenu(searchWord);
 
             List<GitRepository> filterRepositories = gitRepositories
                     .stream()
@@ -181,11 +188,17 @@ public class GitHelperWindow {
                 @Override
                 public void setSelectionInterval(int index0, int index1) {
                     if (super.isSelectedIndex(index0)) {
-                        choosedRepositories.remove(filterRepositories.get(index0));
                         super.removeSelectionInterval(index0, index1);
+                        choosedRepositories.remove(filterRepositories.get(index0));
+                        allCheckBox.setSelected(false);
                     } else {
-                        choosedRepositories.add(filterRepositories.get(index0));
                         super.addSelectionInterval(index0, index1);
+                        choosedRepositories.add(filterRepositories.get(index0));
+                        checkAll(filterRepositories);
+                        if (choosedRepositories.size() == gitRepositories.size()
+                                && filterRepositories.size() == gitRepositories.size()) {
+                            allCheckBox.setSelected(true);
+                        }
                     }
                     setChoosedSum();
                     assembleCommonLocalBranchDataList();
@@ -198,14 +211,42 @@ public class GitHelperWindow {
                         .map(o -> filterRepositories.indexOf(o))
                         .mapToInt(Integer::valueOf)
                         .toArray());
+                checkAll(filterRepositories);
             } else {
                 repositoryList.clearSelection();
             }
         }
     }
 
+    private void checkAll(List<GitRepository> filterRepositories) {
+        if (choosedRepositories.size() == gitRepositories.size()
+                && filterRepositories.size() == gitRepositories.size()) {
+            allCheckBox.setSelected(true);
+        }
+    }
+
+    private void hideRepositoryRelMenu() {
+        repositoryDefaultText.setVisible(true);
+        repositoryList.setVisible(false);
+        allCheckBox.setVisible(false);
+        choosedSum.setVisible(false);
+    }
+
+    private void showRepositoryRelMenu(String searchWord) {
+        repositoryDefaultText.setVisible(false);
+        repositoryList.setVisible(true);
+        allCheckBox.setVisible(true);
+        if (StringUtils.isEmpty(searchWord)) {
+            allCheckBox.setEnabled(true);
+        } else {
+            allCheckBox.setSelected(false);
+            allCheckBox.setEnabled(false);
+        }
+        choosedSum.setVisible(true);
+    }
+
     private void setChoosedSum() {
-        choosedSum.setText(String.format("(已选%s)", choosedRepositories.size()));
+        choosedSum.setText(String.format("(Selected %s)", choosedRepositories.size()));
     }
 
     private void assembleCommonRemoteBranchDataList() {
@@ -240,14 +281,14 @@ public class GitHelperWindow {
     private JPopupMenu getjPopupMenu(String remote) {
         JPopupMenu jPopupMenu = new JPopupMenu();
         JMenuItem checkout = new JMenuItem(Bundle.message("checkout"));
-        JMenuItem update = new JMenuItem(Bundle.message("update"));
+        //JMenuItem update = new JMenuItem(Bundle.message("update"));
         JMenuItem checkoutNew = new JMenuItem(Bundle.message("newBranchFromSelected"));
         JMenuItem delete = new JMenuItem(Bundle.message("delete"));
         jPopupMenu.add(checkout);
-        if (StringUtils.equalsIgnoreCase(Bundle.message("local"), remote)) {
-            jPopupMenu.add(update);
-            addMouseListener(update);
-        }
+//        if (StringUtils.equalsIgnoreCase(Bundle.message("local"), remote)) {
+//            jPopupMenu.add(update);
+//            addMouseListener(update);
+//        }
         jPopupMenu.add(checkoutNew);
         jPopupMenu.add(delete);
         addMouseListener(checkout, checkoutNew, delete);
@@ -432,7 +473,7 @@ public class GitHelperWindow {
 
     private boolean popupConfirmDialog(boolean isRemote, String branchName) {
         int res = JOptionPane.showConfirmDialog(this.getGitHelperPanel().getRootPane(),
-                "Continue to delete" + (isRemote ? " remote " : " local ") + branchName, ":)", JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE);
+                "Continue to delete" + (isRemote ? " remote " : " local ") + "branch " + branchName, ":)", JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE);
         return res==JOptionPane.YES_OPTION;
     }
 
