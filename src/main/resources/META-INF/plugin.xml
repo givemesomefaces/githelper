@@ -21,7 +21,7 @@
     <actions>
         <!-- Add your actions here -->
 
-        <action id="GitLab" class="window.GitLabAction" text="GitLab">
+        <action id="GitLab" class="gitlab.GitLabAction" text="GitLab">
             <add-to-group group-id="Git.MainMenu" anchor="after" relative-to-action="GitHub.MainMenu"/>
         </action>
     </actions>
