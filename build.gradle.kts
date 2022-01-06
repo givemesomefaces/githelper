@@ -32,6 +32,7 @@ repositories {
 
 dependencies {
     implementation("cn.hutool:hutool-all:5.7.7")
+    implementation("org.gitlab:java-gitlab-api:4.1.1")
 }
 
 
