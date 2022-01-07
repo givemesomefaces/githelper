@@ -1,10 +1,10 @@
-package gitlab;
+package gitlab.settings;
 
 import com.intellij.openapi.components.PersistentStateComponent;
-import com.intellij.openapi.project.Project;
-import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.openapi.components.ServiceManager;
+import com.intellij.openapi.components.State;
+import com.intellij.openapi.components.Storage;
 import com.intellij.util.xmlb.XmlSerializerUtil;
-import git4idea.repo.GitRepository;
 import gitlab.api.ApiFacade;
 import gitlab.dto.GitlabServerDto;
 import gitlab.dto.ProjectDto;
@@ -16,6 +16,7 @@ import org.gitlab.api.models.GitlabProject;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -30,7 +31,13 @@ import java.util.Map;
 @Getter
 @Setter
 @Accessors(chain = true)
-public class GitLabState implements PersistentStateComponent<GitLabState> {
+@State(
+        name = "SettingsState",
+        storages = {
+                @Storage("$APP_CONFIG$/gitlab-settings-persistentstate.xml")
+        }
+)
+public class GitLabSettingsState implements PersistentStateComponent<GitLabSettingsState> {
 
     public String host;
 
@@ -38,17 +45,19 @@ public class GitLabState implements PersistentStateComponent<GitLabState> {
 
     public boolean defaultRemoveBranch;
 
-    public Collection<ProjectDto> projects = new ArrayList<>();
-
     public Collection<GitlabServerDto> gitlabServers = new ArrayList<>();
 
+    public static GitLabSettingsState getInstance() {
+        return ServiceManager.getService(GitLabSettingsState.class);
+    }
+
     @Override
-    public @Nullable GitLabState getState() {
+    public @Nullable GitLabSettingsState getState() {
         return this;
     }
 
     @Override
-    public void loadState(@NotNull GitLabState state) {
+    public void loadState(@NotNull GitLabSettingsState state) {
         XmlSerializerUtil.copyBean(state, this);
     }
 
@@ -78,15 +87,31 @@ public class GitLabState implements PersistentStateComponent<GitLabState> {
 
     }
 
-    public Collection<ProjectDto> getProjects() {
-        return projects;
-    }
-
-    public void setProjects(Collection<ProjectDto> projects) {
-        this.projects = projects;
+    public void isApiValid(String host, String key) throws IOException {
+        ApiFacade apiFacade = new ApiFacade();
+        apiFacade.reload(host, key);
+        apiFacade.getSession();
     }
 
     public ApiFacade api(GitlabServerDto serverDto) {
         return new ApiFacade(serverDto.getApiUrl(), serverDto.getApiToken());
+    }
+
+    public void addServer(GitlabServerDto server) {
+        if(getGitlabServers().stream().noneMatch(s -> server.getApiUrl().equals(s.getApiUrl()))) {
+            getGitlabServers().add(server);
+        } else {
+            getGitlabServers().stream().filter(s -> server.getApiUrl().equals(s.getApiUrl())).forEach(changedServer -> {
+                changedServer.setApiUrl(server.getApiUrl());
+                changedServer.setRepositoryUrl(server.getRepositoryUrl());
+                changedServer.setApiToken(server.getApiToken());
+                changedServer.setPreferredConnection(server.getPreferredConnection());
+                changedServer.setRemoveSourceBranch(server.isRemoveSourceBranch());
+            });
+        }
+    }
+
+    public void deleteServer(GitlabServerDto server) {
+        getGitlabServers().stream().filter(s -> server.getApiUrl().equals(s.getApiUrl())).forEach(removedServer -> getGitlabServers().remove(removedServer));
     }
 }
