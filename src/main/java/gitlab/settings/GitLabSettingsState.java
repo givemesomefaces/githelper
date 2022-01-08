@@ -1,5 +1,6 @@
 package gitlab.settings;
 
+import cn.hutool.core.bean.BeanUtil;
 import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.components.State;
@@ -21,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  *
@@ -74,17 +76,12 @@ public class GitLabSettingsState implements PersistentStateComponent<GitLabSetti
     public Collection<ProjectDto> loadProjects(GitlabServerDto server) throws Throwable {
         ApiFacade apiFacade = api(server);
 
-        Collection<ProjectDto> projects = new ArrayList<>();
-        for (GitlabProject gitlabProject : apiFacade.getProjects()) {
+        return apiFacade.getProjects().stream().map(o -> {
             ProjectDto projectDto = new ProjectDto();
-            projectDto.setName(gitlabProject.getName());
-            projectDto.setNamespace(gitlabProject.getNamespace().getName());
-            projectDto.setHttpUrl(gitlabProject.getHttpUrl());
-            projectDto.setSshUrl(gitlabProject.getSshUrl());
-            projects.add(projectDto);
-        }
-        return projects;
-
+            BeanUtil.copyProperties(o, projectDto);
+            projectDto.setGitlabServerDto(server);
+            return projectDto;
+        }).collect(Collectors.toList());
     }
 
     public void isApiValid(String host, String key) throws IOException {

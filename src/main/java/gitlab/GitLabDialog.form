@@ -45,20 +45,23 @@
         <properties/>
         <border type="none"/>
         <children>
-          <component id="ea62b" class="javax.swing.JTextField" binding="textField1" default-binding="true">
+          <component id="ea62b" class="javax.swing.JTextField" binding="search">
             <constraints>
               <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
                 <preferred-size width="150" height="-1"/>
               </grid>
             </constraints>
-            <properties/>
+            <properties>
+              <toolTipText value="Search by project name or branch name"/>
+            </properties>
           </component>
           <component id="5ed0" class="javax.swing.JRadioButton" binding="branchNameRadioButton" default-binding="true">
             <constraints>
               <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
-              <text value="branch name"/>
+              <text value="Branch name"/>
+              <toolTipText value="Search by project name or branch name"/>
             </properties>
           </component>
           <component id="8310d" class="javax.swing.JRadioButton" binding="projectNameRadioButton" default-binding="true">
@@ -66,12 +69,13 @@
               <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
-              <text value="project name"/>
+              <text value="Project name"/>
+              <toolTipText value="Search by project name or branch name"/>
             </properties>
           </component>
         </children>
       </grid>
-      <grid id="a024d" layout-manager="GridLayoutManager" row-count="1" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+      <grid id="a024d" layout-manager="GridLayoutManager" row-count="1" column-count="5" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
         <margin top="0" left="0" bottom="0" right="0"/>
         <constraints>
           <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="true"/>
@@ -81,7 +85,7 @@
         <children>
           <component id="45f77" class="javax.swing.JButton" binding="cloneButton" default-binding="true">
             <constraints>
-              <grid row="0" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+              <grid row="0" column="4" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
               <text value="Clone"/>
@@ -89,12 +93,12 @@
           </component>
           <hspacer id="6495f">
             <constraints>
-              <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+              <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
             </constraints>
           </hspacer>
           <component id="43dca" class="javax.swing.JButton" binding="createMergeRequestButton" default-binding="true">
             <constraints>
-              <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+              <grid row="0" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
               <text value="Create merge request"/>
@@ -106,6 +110,14 @@
             </constraints>
             <properties>
               <text value="Select All"/>
+            </properties>
+          </component>
+          <component id="4a291" class="javax.swing.JLabel" binding="selectedCount">
+            <constraints>
+              <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text value="(Selected 0)"/>
             </properties>
           </component>
         </children>
