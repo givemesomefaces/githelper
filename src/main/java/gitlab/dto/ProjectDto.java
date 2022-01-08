@@ -1,7 +1,9 @@
 package gitlab.dto;
 
+import git4idea.repo.GitRepository;
 import lombok.Getter;
 import lombok.Setter;
+import org.gitlab.api.models.GitlabProject;
 
 /**
  *
@@ -12,10 +14,8 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class ProjectDto {
+public class ProjectDto extends GitlabProject {
 
-    private String name;
-    private String namespace;
-    private String sshUrl;
-    private String httpUrl;
+    private GitRepository gitRepository;
+    private GitlabServerDto gitlabServerDto;
 }
