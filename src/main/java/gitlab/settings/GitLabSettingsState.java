@@ -13,7 +13,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.experimental.Accessors;
-import org.gitlab.api.models.GitlabProject;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -100,7 +99,6 @@ public class GitLabSettingsState implements PersistentStateComponent<GitLabSetti
         } else {
             getGitlabServers().stream().filter(s -> server.getApiUrl().equals(s.getApiUrl())).forEach(changedServer -> {
                 changedServer.setApiUrl(server.getApiUrl());
-                changedServer.setRepositoryUrl(server.getRepositoryUrl());
                 changedServer.setApiToken(server.getApiToken());
                 changedServer.setPreferredConnection(server.getPreferredConnection());
                 changedServer.setRemoveSourceBranch(server.isRemoveSourceBranch());

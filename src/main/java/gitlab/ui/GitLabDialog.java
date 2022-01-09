@@ -45,8 +45,8 @@ public class GitLabDialog extends JDialog {
     private JPanel contentPane;
     private JList projectList;
     private JTextField search;
-//    private JRadioButton branchNameRadioButton;
-//    private JRadioButton projectNameRadioButton;
+    private JRadioButton branchNameRadioButton;
+    private JRadioButton projectNameRadioButton;
     private JButton cloneButton;
     private JButton createMergeRequestButton;
     private JCheckBox selectAllCheckBox;
@@ -141,6 +141,7 @@ public class GitLabDialog extends JDialog {
 
     private void showCreateMergeRequestDialog() {
         mergeRequestDialog = new MergeRequestDialog();
+        mergeRequestDialog.setLocationByPlatform(true);
         mergeRequestDialog.setLocationRelativeTo(this);
         mergeRequestDialog.getMergeTitle().setText("WIP:");
         List<String> commonBranch = selectedProjectList.stream()
@@ -283,6 +284,7 @@ public class GitLabDialog extends JDialog {
 
     private void showCloneDialog() {
         cloneDialog = new CloneDialog();
+        cloneDialog.setLocationByPlatform(true);
         cloneDialog.setLocationRelativeTo(this);
         cloneDialog.getButtonOK().addMouseListener(new MouseAdapter() {
             @Override
