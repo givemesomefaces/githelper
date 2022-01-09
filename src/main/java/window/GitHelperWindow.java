@@ -46,7 +46,6 @@ public class GitHelperWindow {
     private JLabel remoteDefaultText;
     private JLabel repositoryDefaultText;
     private JLabel choosedSum;
-    private JComboBox searchOption;
 
     private List<GitRepository> gitRepositories;
     private List<GitLocalBranch> commonLocalBranches;
@@ -69,8 +68,6 @@ public class GitHelperWindow {
         this.gitRepositories = repositories;
         this.gitBrancher = GitBrancher.getInstance(project);
 
-        initSearchOption();
-
         sortRepositoriesByName();
 
         initRepositoryList(null);
@@ -78,11 +75,6 @@ public class GitHelperWindow {
         initAllCheckBox();
 
         initSearchText();
-    }
-
-    private void initSearchOption() {
-        searchOption.setModel(new DefaultComboBoxModel(Lists.newArrayList("by project", "by branch").toArray()));
-        searchOption.setSelectedIndex(0);
     }
 
     private void sortRepositoriesByName() {
@@ -95,33 +87,18 @@ public class GitHelperWindow {
     }
 
     private void initSearchText() {
-        searchText.getDocument().addDocumentListener(new DocumentListener() {
+        searchText.addKeyListener(new KeyAdapter() {
             @Override
-            public void insertUpdate(DocumentEvent e) {
-                searchRepository(e);
-            }
-
-            @Override
-            public void removeUpdate(DocumentEvent e) {
-                searchRepository(e);
-            }
-
-            @Override
-            public void changedUpdate(DocumentEvent e) {
+            public void keyReleased(KeyEvent e) {
+                super.keyReleased(e);
                 searchRepository(e);
             }
         });
 
     }
 
-    private void searchRepository(DocumentEvent e) {
-        String searchWord = null;
-        try {
-            searchWord = e.getDocument().getText(e.getDocument().getStartPosition().getOffset(), e.getDocument().getLength());
-        } catch (BadLocationException badLocationException) {
-            badLocationException.printStackTrace();
-        }
-
+    private void searchRepository(KeyEvent e) {
+        String searchWord = ((JTextField) e.getSource()).getText();
         initRepositoryList(searchWord);
     }
 
@@ -166,26 +143,23 @@ public class GitHelperWindow {
             hideRepositoryRelMenu();
         } else {
             showRepositoryRelMenu(searchWord);
-            List<GitRepository> filterRepositories;
-            if (searchOption.getSelectedIndex() == 0) {
-                filterRepositories = gitRepositories
-                        .stream()
-                        .filter(o ->
-                                (StringUtils.isNotEmpty(searchWord)
-                                        && o.getRoot().getName().toLowerCase().contains(searchWord.toLowerCase()))
-                                        || StringUtils.isEmpty(searchWord)
-                        ).collect(Collectors.toList());
-            } else {
-                filterRepositories = gitRepositories
-                        .stream()
-                        .filter(o ->
-                                (StringUtils.isNotEmpty(searchWord)
-                                        && o.getBranches().getRemoteBranches()
-                                        .stream()
-                                        .anyMatch(i -> i.getName().toLowerCase().contains(searchWord.toLowerCase())))
-                                        || StringUtils.isEmpty(searchWord)
-                        ).collect(Collectors.toList());
-            }
+            List<GitRepository> filterRepositories = gitRepositories .stream()
+                    .filter(o ->
+                            (StringUtils.isNotEmpty(searchWord)
+                                    && o.getRoot().getName().toLowerCase().contains(searchWord.toLowerCase()))
+                                    || StringUtils.isEmpty(searchWord)
+                    ).collect(Collectors.toList());
+//            } else {
+//                filterRepositories = gitRepositories
+//                        .stream()
+//                        .filter(o ->
+//                                (StringUtils.isNotEmpty(searchWord)
+//                                        && o.getBranches().getRemoteBranches()
+//                                        .stream()
+//                                        .anyMatch(i -> i.getName().toLowerCase().contains(searchWord.toLowerCase())))
+//                                        || StringUtils.isEmpty(searchWord)
+//                        ).collect(Collectors.toList());
+//            }
             repositoryList.setListData(filterRepositories.stream()
                     .map(GitRepository::getRoot)
                     .map(VirtualFile::getName)

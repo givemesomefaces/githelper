@@ -30,7 +30,6 @@ public class ServerConfiguration extends DialogWrapper {
 
     private JPanel panel;
     private JTextField apiURl;
-    private JTextField repositoryUrl;
     private JTextField token;
     private JButton tokenPage;
     private JComboBox checkoutMethod;
@@ -100,11 +99,6 @@ public class ServerConfiguration extends DialogWrapper {
         super.doOKAction();
         gitlabServer.setApiUrl(apiURl.getText());
         gitlabServer.setApiToken(token.getText());
-        if(StringUtils.isNotBlank(repositoryUrl.getText())) {
-            gitlabServer.setRepositoryUrl(repositoryUrl.getText());
-        } else {
-            gitlabServer.setRepositoryUrl(ApiToRepoUrlConverter.convertApiUrlToRepoUrl(apiURl.getText()));
-        }
         gitlabServer.setPreferredConnection(GitlabServerDto.CloneType.values()[checkoutMethod.getSelectedIndex()]);
         gitlabServer.setRemoveSourceBranch(removeOnMerge.isSelected());
         settingsState.addServer(gitlabServer);
@@ -148,7 +142,6 @@ public class ServerConfiguration extends DialogWrapper {
         checkoutMethod.setSelectedIndex(gitlabServer.getPreferredConnection().ordinal());
         removeOnMerge.setSelected(gitlabServer.isRemoveSourceBranch());
         apiURl.setText(gitlabServer.getApiUrl());
-        repositoryUrl.setText(gitlabServer.getRepositoryUrl());
         token.setText(gitlabServer.getApiToken());
     }
 
