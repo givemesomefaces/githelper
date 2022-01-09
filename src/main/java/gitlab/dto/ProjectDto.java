@@ -3,7 +3,10 @@ package gitlab.dto;
 import git4idea.repo.GitRepository;
 import lombok.Getter;
 import lombok.Setter;
+import org.gitlab.api.models.GitlabBranch;
 import org.gitlab.api.models.GitlabProject;
+
+import java.util.List;
 
 /**
  *
@@ -16,6 +19,10 @@ import org.gitlab.api.models.GitlabProject;
 @Setter
 public class ProjectDto extends GitlabProject {
 
-    private GitRepository gitRepository;
     private GitlabServerDto gitlabServerDto;
+
+    @Override
+    public String toString() {
+        return this.getName() + "  (" + gitlabServerDto.getApiUrl() + ")";
+    }
 }

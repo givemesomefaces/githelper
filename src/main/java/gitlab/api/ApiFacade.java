@@ -1,6 +1,7 @@
 package gitlab.api;
 
 import gitlab.dto.NamespaceDto;
+import org.apache.commons.lang3.StringUtils;
 import org.gitlab.api.AuthMethod;
 import org.gitlab.api.GitlabAPI;
 import org.gitlab.api.TokenType;
@@ -153,8 +154,24 @@ public class ApiFacade {
         return users;
     }
 
-    public GitlabUser getCurrentUser() throws IOException {
-        checkApi();
-        return api.getUser();
+    public GitlabUser getCurrentUser() {
+        try {
+            checkApi();
+            return api.getUser();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public List<GitlabBranch> getBranchesByProject(GitlabProject project) {
+        return api.getBranches(project);
+    }
+
+    public List<GitlabUser> getActiveUsers(){
+        return api.getUsers()
+                .stream()
+                .filter(o -> StringUtils.equalsIgnoreCase(o.getState(), "active"))
+                .collect(Collectors.toList());
     }
 }
