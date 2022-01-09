@@ -1,17 +1,10 @@
 package gitlab.actions;
 
-import com.google.common.collect.Lists;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.vcs.CheckoutProvider;
-import com.intellij.openapi.vcs.ProjectLevelVcsManager;
-import gitlab.GitLabDialog;
-import gitlab.settings.GitLabSettingsState;
-import gitlab.dto.GitlabServerDto;
-
-import java.util.ArrayList;
+import gitlab.ui.GitLabDialog;
 
 /**
  *

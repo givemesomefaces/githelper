@@ -1,4 +1,4 @@
-package gitlab.dto;
+package gitlab.bean;
 
 import javax.swing.table.DefaultTableModel;
 import java.util.Vector;

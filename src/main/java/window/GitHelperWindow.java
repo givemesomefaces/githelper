@@ -46,6 +46,7 @@ public class GitHelperWindow {
     private JLabel remoteDefaultText;
     private JLabel repositoryDefaultText;
     private JLabel choosedSum;
+    private JComboBox searchOption;
 
     private List<GitRepository> gitRepositories;
     private List<GitLocalBranch> commonLocalBranches;
@@ -68,6 +69,8 @@ public class GitHelperWindow {
         this.gitRepositories = repositories;
         this.gitBrancher = GitBrancher.getInstance(project);
 
+        initSearchOption();
+
         sortRepositoriesByName();
 
         initRepositoryList(null);
@@ -75,6 +78,11 @@ public class GitHelperWindow {
         initAllCheckBox();
 
         initSearchText();
+    }
+
+    private void initSearchOption() {
+        searchOption.setModel(new DefaultComboBoxModel(Lists.newArrayList("by project", "by branch").toArray()));
+        searchOption.setSelectedIndex(0);
     }
 
     private void sortRepositoriesByName() {
@@ -90,36 +98,29 @@ public class GitHelperWindow {
         searchText.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
-                try {
-                    searchRepository(e);
-                } catch (BadLocationException badLocationException) {
-                    badLocationException.printStackTrace();
-                }
+                searchRepository(e);
             }
 
             @Override
             public void removeUpdate(DocumentEvent e) {
-                try {
-                    searchRepository(e);
-                } catch (BadLocationException badLocationException) {
-                    badLocationException.printStackTrace();
-                }
+                searchRepository(e);
             }
 
             @Override
             public void changedUpdate(DocumentEvent e) {
-                try {
-                    searchRepository(e);
-                } catch (BadLocationException badLocationException) {
-                    badLocationException.printStackTrace();
-                }
+                searchRepository(e);
             }
         });
 
     }
 
-    private void searchRepository(DocumentEvent e) throws BadLocationException {
-        String searchWord = e.getDocument().getText(e.getDocument().getStartPosition().getOffset(), e.getDocument().getLength());
+    private void searchRepository(DocumentEvent e) {
+        String searchWord = null;
+        try {
+            searchWord = e.getDocument().getText(e.getDocument().getStartPosition().getOffset(), e.getDocument().getLength());
+        } catch (BadLocationException badLocationException) {
+            badLocationException.printStackTrace();
+        }
 
         initRepositoryList(searchWord);
     }
@@ -165,15 +166,26 @@ public class GitHelperWindow {
             hideRepositoryRelMenu();
         } else {
             showRepositoryRelMenu(searchWord);
-
-            List<GitRepository> filterRepositories = gitRepositories
-                    .stream()
-                    .filter(o ->
-                        (StringUtils.isNotEmpty(searchWord)
-                                && o.getRoot().getName().toLowerCase().contains(searchWord.toLowerCase()))
-                                || StringUtils.isEmpty(searchWord)
-                    ).collect(Collectors.toList());
-
+            List<GitRepository> filterRepositories;
+            if (searchOption.getSelectedIndex() == 0) {
+                filterRepositories = gitRepositories
+                        .stream()
+                        .filter(o ->
+                                (StringUtils.isNotEmpty(searchWord)
+                                        && o.getRoot().getName().toLowerCase().contains(searchWord.toLowerCase()))
+                                        || StringUtils.isEmpty(searchWord)
+                        ).collect(Collectors.toList());
+            } else {
+                filterRepositories = gitRepositories
+                        .stream()
+                        .filter(o ->
+                                (StringUtils.isNotEmpty(searchWord)
+                                        && o.getBranches().getRemoteBranches()
+                                        .stream()
+                                        .anyMatch(i -> i.getName().toLowerCase().contains(searchWord.toLowerCase())))
+                                        || StringUtils.isEmpty(searchWord)
+                        ).collect(Collectors.toList());
+            }
             repositoryList.setListData(filterRepositories.stream()
                     .map(GitRepository::getRoot)
                     .map(VirtualFile::getName)
@@ -193,10 +205,6 @@ public class GitHelperWindow {
                         super.addSelectionInterval(index0, index1);
                         choosedRepositories.add(filterRepositories.get(index0));
                         checkAll(filterRepositories);
-                        if (choosedRepositories.size() == gitRepositories.size()
-                                && filterRepositories.size() == gitRepositories.size()) {
-                            allCheckBox.setSelected(true);
-                        }
                     }
                     setChoosedSum();
                     assembleCommonLocalBranchDataList();

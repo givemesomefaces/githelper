@@ -5,7 +5,7 @@ import com.intellij.openapi.options.SearchableConfigurable;
 import git4idea.DialogManager;
 
 import gitlab.dto.GitlabServerDto;
-import gitlab.dto.ReadOnlyTableModel;
+import gitlab.bean.ReadOnlyTableModel;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
