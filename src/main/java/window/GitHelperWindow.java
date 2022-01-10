@@ -12,6 +12,7 @@ import git4idea.GitUtil;
 import git4idea.branch.GitBranchUtil;
 import git4idea.branch.GitBrancher;
 import git4idea.repo.GitRepository;
+import gitlab.helper.RepositoryHelper;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -68,22 +69,13 @@ public class GitHelperWindow {
         this.gitRepositories = repositories;
         this.gitBrancher = GitBrancher.getInstance(project);
 
-        sortRepositoriesByName();
+        RepositoryHelper.sortRepositoriesByName(gitRepositories);
 
         initRepositoryList(null);
 
         initAllCheckBox();
 
         initSearchText();
-    }
-
-    private void sortRepositoriesByName() {
-        Collections.sort(gitRepositories, new Comparator<GitRepository>() {
-            @Override
-            public int compare(GitRepository o1, GitRepository o2) {
-                return StringUtils.compareIgnoreCase(o1.getRoot().getName(), o2.getRoot().getName());
-            }
-        });
     }
 
     private void initSearchText() {

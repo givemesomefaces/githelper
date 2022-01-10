@@ -18,6 +18,7 @@ public class GitlabServerDto {
 
     private String apiUrl = "";
     private String apiToken = "";
+    private String repositoryUrl = "";
     private CloneType preferredConnection = CloneType.SSH;
     private boolean removeSourceBranch = false;
 
