@@ -99,6 +99,7 @@ public class ServerConfiguration extends DialogWrapper {
         super.doOKAction();
         gitlabServer.setApiUrl(apiURl.getText());
         gitlabServer.setApiToken(token.getText());
+        gitlabServer.setRepositoryUrl(ApiToRepoUrlConverter.convertApiUrlToRepoUrl(apiURl.getText()));
         gitlabServer.setPreferredConnection(GitlabServerDto.CloneType.values()[checkoutMethod.getSelectedIndex()]);
         gitlabServer.setRemoveSourceBranch(removeOnMerge.isSelected());
         settingsState.addServer(gitlabServer);

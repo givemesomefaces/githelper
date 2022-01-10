@@ -1,6 +1,7 @@
 package gitlab.settings;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollectionUtil;
 import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.components.State;
@@ -99,6 +100,7 @@ public class GitLabSettingsState implements PersistentStateComponent<GitLabSetti
         } else {
             getGitlabServers().stream().filter(s -> server.getApiUrl().equals(s.getApiUrl())).forEach(changedServer -> {
                 changedServer.setApiUrl(server.getApiUrl());
+                changedServer.setRepositoryUrl(server.getRepositoryUrl());
                 changedServer.setApiToken(server.getApiToken());
                 changedServer.setPreferredConnection(server.getPreferredConnection());
                 changedServer.setRemoveSourceBranch(server.isRemoveSourceBranch());
@@ -108,5 +110,9 @@ public class GitLabSettingsState implements PersistentStateComponent<GitLabSetti
 
     public void deleteServer(GitlabServerDto server) {
         getGitlabServers().stream().filter(s -> server.getApiUrl().equals(s.getApiUrl())).forEach(removedServer -> getGitlabServers().remove(removedServer));
+    }
+
+    public boolean hasSettings(){
+        return CollectionUtil.isNotEmpty(getGitlabServers());
     }
 }
