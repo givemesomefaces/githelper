@@ -4,6 +4,7 @@ import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.DialogWrapper;
 import gitlab.ui.GitLabDialog;
 
 /**
@@ -19,10 +20,10 @@ public class GitLabAction extends AnAction {
 
         Project project = e.getRequiredData(CommonDataKeys.PROJECT);
 
-        GitLabDialog dialog = new GitLabDialog(project);
-        dialog.pack();
-        dialog.setLocationRelativeTo(null);
-        dialog.setVisible(true);
+        boolean dialog = new GitLabDialog(project, null, true, DialogWrapper.IdeModalityType.IDE, false).showAndGet();
+//        dialog.pack();
+//        dialog.setLocationRelativeTo(null);
+//        dialog.setVisible(true);
 
 //        Map<GitlabServerDto, Collection<ProjectDto>> gitlabServerDtoCollectionMap = new GitLabSettingsState().loadMapOfServersAndProjects(list);
 //        gitlabServerDtoCollectionMap.values().stream().forEach(o -> System.out.println(o.size()));
