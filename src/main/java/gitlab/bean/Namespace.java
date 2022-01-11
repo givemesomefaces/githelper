@@ -1,4 +1,4 @@
-package gitlab.dto;
+package gitlab.bean;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -11,7 +11,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-public class NamespaceDto {
+public class Namespace {
 
     private int id;
     private String path;

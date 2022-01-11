@@ -1,15 +1,24 @@
 package gitlab.ui;
 
+import com.intellij.dvcs.ui.CloneDvcsValidationUtils;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
+import com.intellij.openapi.ui.ValidationInfo;
+import com.intellij.openapi.vcs.CheckoutProvider;
+import com.intellij.openapi.vcs.ProjectLevelVcsManager;
+import com.intellij.openapi.vfs.LocalFileSystem;
+import com.intellij.openapi.vfs.VirtualFile;
+import git4idea.commands.Git;
+import gitlab.common.GitCheckoutProvider;
+import gitlab.bean.ProjectDto;
 import lombok.Getter;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
-import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
+import java.util.Set;
 
 /**
  *
@@ -19,56 +28,50 @@ import java.io.File;
  */
 @Getter
 public class CloneDialog extends DialogWrapper {
+    private static final Logger LOG = Logger.getInstance(CloneDialog.class);
     private JPanel contentPane;
-    private JButton buttonOK;
-    private JButton buttonCancel;
     private JPanel clonePane;
     private JTextField directory;
     private JButton HIHIHIButton;
+    private Set<ProjectDto> selectedProjectList;
+    private CheckoutProvider.Listener checkoutListener;
+    private Project project;
 
-//    public CloneDialog() {
-//        this.setTitle("Clone Settings");
-//        initDefaultDirectory();
-//        setModal(true);
-//        getRootPane().setDefaultButton(buttonOK);
-//
-//        buttonCancel.addActionListener(new ActionListener() {
-//            @Override
-//            public void actionPerformed(ActionEvent e) {
-//                onCancel();
-//            }
-//        });
-//
-//        // call onCancel() when cross is clicked
-////        setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-////        addWindowListener(new WindowAdapter() {
-////            @Override
-////            public void windowClosing(WindowEvent e) {
-////                onCancel();
-////            }
-////        });
-//
-//        // call onCancel() on ESCAPE
-//        contentPane.registerKeyboardAction(new ActionListener() {
-//            @Override
-//            public void actionPerformed(ActionEvent e) {
-//                onCancel();
-//            }
-//        }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
-//    }
-
-    protected CloneDialog(@Nullable Project project, @Nullable Component parentComponent, boolean canBeParent, @NotNull IdeModalityType ideModalityType, boolean createSouth) {
-        super(project, parentComponent, canBeParent, ideModalityType, createSouth);
+    protected CloneDialog(Project project, Set<ProjectDto> selectedProjectList) {
+        super(true);
         init();
         setTitle("Clone Settings");
+        this.selectedProjectList = selectedProjectList;
+        this.project = project;
         initDefaultDirectory();
-        getRootPane().setDefaultButton(buttonCancel);
-        buttonCancel.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                super.mouseClicked(e);
-                onCancel();
-            }
+    }
+
+    @Override
+    protected void doOKAction() {
+        super.doOKAction();
+        ValidationInfo destinationValidation = CloneDvcsValidationUtils.createDestination(directory.getText());
+        if (destinationValidation != null) {
+            LOG.error("Unable to create destination directory", destinationValidation.message);
+            return;
+        }
+
+        LocalFileSystem lfs = LocalFileSystem.getInstance();
+        File file = new File(directory.getText());
+        VirtualFile destinationParent = lfs.findFileByIoFile(file);
+        if (destinationParent == null) {
+            destinationParent = lfs.refreshAndFindFileByIoFile(file);
+        }
+        if (destinationParent == null) {
+            LOG.error("Clone Failed. Destination doesn't exist");
+            return;
+        }
+        dispose();
+
+        VirtualFile finalDestinationParent = destinationParent;
+        checkoutListener = ProjectLevelVcsManager.getInstance(project).getCompositeCheckoutListener();
+        selectedProjectList.stream().forEach(s -> {
+            GitCheckoutProvider.clone(project, Git.getInstance(), checkoutListener, finalDestinationParent,
+                    s.getSshUrl(), s.getName(), directory.getText());
         });
     }
 
@@ -85,16 +88,6 @@ public class CloneDialog extends DialogWrapper {
                 }
             }
         });
-    }
-
-    private void onOK() {
-        // add your code here
-        dispose();
-    }
-
-    private void onCancel() {
-        // add your code here if necessary
-        dispose();
     }
 
     @Override

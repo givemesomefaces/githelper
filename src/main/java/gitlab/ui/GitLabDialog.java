@@ -1,30 +1,19 @@
 package gitlab.ui;
 
 import cn.hutool.core.collection.CollectionUtil;
-import cn.hutool.core.map.MapUtil;
-import com.intellij.dvcs.ui.CloneDvcsValidationUtils;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
-import com.intellij.openapi.ui.ValidationInfo;
 import com.intellij.openapi.vcs.CheckoutProvider;
 import com.intellij.openapi.vcs.ProjectLevelVcsManager;
-import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import git4idea.GitUtil;
-import git4idea.commands.Git;
 import git4idea.repo.GitRepository;
-import gitlab.bean.UserModel;
-import gitlab.common.GitCheckoutProvider;
-import gitlab.dto.GitlabServerDto;
-import gitlab.dto.ProjectDto;
+import gitlab.bean.SelectedProjectDto;
+import gitlab.bean.ProjectDto;
 import gitlab.helper.RepositoryHelper;
 import gitlab.settings.GitLabSettingsState;
-import org.apache.commons.compress.utils.Lists;
 import org.apache.commons.lang3.StringUtils;
-import org.gitlab.api.models.GitlabBranch;
-import org.gitlab.api.models.GitlabMergeRequest;
-import org.gitlab.api.models.GitlabUser;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import window.LcheckBox;
@@ -32,13 +21,10 @@ import window.LcheckBox;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.io.File;
-import java.io.IOException;
 import java.util.List;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -60,6 +46,7 @@ public class GitLabDialog extends DialogWrapper {
     private JLabel selectedCount;
     private JButton cancelButton;
     private JLabel projectListDefaultText;
+    private JButton mergeButton;
 
     private GitLabSettingsState gitLabSettingsState = GitLabSettingsState.getInstance();
     private List<ProjectDto> projectDtoList = new ArrayList<>();
@@ -68,13 +55,8 @@ public class GitLabDialog extends DialogWrapper {
     private CheckoutProvider.Listener checkoutListener;
     private Project project;
 
-    private CloneDialog cloneDialog;
-    private MergeRequestDialog mergeRequestDialog;
     private ExecutorService executor = Executors.newSingleThreadExecutor();
     private LoadingPanel glasspane = new LoadingPanel();
-    private List<String> commonBranch = new ArrayList<>();
-    private Set<UserModel> users = new HashSet<>();
-    private List<UserModel> currentUser = new ArrayList<>();
     private List<ProjectDto> filterProjectList = new ArrayList<>();
 
     public GitLabDialog(@Nullable Project project, @Nullable Component parentComponent, boolean canBeParent, @NotNull IdeModalityType ideModalityType, boolean createSouth) {
@@ -90,7 +72,6 @@ public class GitLabDialog extends DialogWrapper {
             initRadioButton();
             initProjectList(filterProjectsByProject(null));
             initSelectAllCheckBox();
-            checkoutListener = ProjectLevelVcsManager.getInstance(project).getCompositeCheckoutListener();
         } else {
             projectListDefaultText.setVisible(true);
         }
@@ -115,6 +96,7 @@ public class GitLabDialog extends DialogWrapper {
             checkoutListener = ProjectLevelVcsManager.getInstance(project).getCompositeCheckoutListener();
         } else {
             projectListDefaultText.setVisible(true);
+            projectJList.setVisible(false);
         }
 
 //        setContentPane(contentPane);
@@ -157,14 +139,18 @@ public class GitLabDialog extends DialogWrapper {
     }
 
     private void getProjectListAndSortByName() {
-        createMergeRequestButton.setEnabled(false);
-        cloneButton.setEnabled(false);
+        unEnableBottomButton();
         executor.submit(() -> {
             projectDtoList = gitLabSettingsState.loadMapOfServersAndProjects(gitLabSettingsState.getGitlabServers())
                     .values()
                     .stream()
                     .flatMap(Collection::stream)
                     .collect(Collectors.toList());
+            if (CollectionUtil.isEmpty(projectDtoList)) {
+                projectListDefaultText.setVisible(true);
+                projectJList.setVisible(false);
+                return;
+            }
             bottomButtonState();
             Collections.sort(projectDtoList, new Comparator<ProjectDto>() {
                 @Override
@@ -177,222 +163,58 @@ public class GitLabDialog extends DialogWrapper {
         });
     }
 
+    private void unEnableBottomButton() {
+        createMergeRequestButton.setEnabled(false);
+        cloneButton.setEnabled(false);
+        mergeButton.setEnabled(false);
+    }
+
     private void bottomButtonState() {
         if (CollectionUtil.isEmpty(projectDtoList) || CollectionUtil.isEmpty(selectedProjectList)) {
             createMergeRequestButton.setEnabled(false);
             cloneButton.setEnabled(false);
+            mergeButton.setEnabled(false);
         }
         if (CollectionUtil.isNotEmpty(selectedProjectList)) {
             createMergeRequestButton.setEnabled(true);
             cloneButton.setEnabled(true);
+            mergeButton.setEnabled(true);
         }
         if (branchNameRadioButton.isSelected()) {
             cloneButton.setEnabled(false);
+            mergeButton.setEnabled(true);
         }
     }
 
     private void initBottomButton() {
+        mergeButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                new MergeDialog(new SelectedProjectDto()
+                        .setGitLabSettingsState(gitLabSettingsState)
+                        .setSelectedProjectList(selectedProjectList)).showAndGet();
+            }
+        });
+        cancelButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                onCancel();
+            }
+        });
         cloneButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                showCloneDialog();
+                new CloneDialog(project, selectedProjectList).showAndGet();
             }
         });
         createMergeRequestButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                showCreateMergeRequestDialog();
+                new MergeRequestDialog(new SelectedProjectDto()
+                        .setGitLabSettingsState(gitLabSettingsState)
+                        .setSelectedProjectList(selectedProjectList)).showAndGet();
             }
         });
-    }
-
-    private void showCreateMergeRequestDialog() {
-        mergeRequestDialog = new MergeRequestDialog();
-        mergeRequestDialog.setLocationByPlatform(true);
-//        mergeRequestDialog.setLocationRelativeTo(this);
-        List<String> commonBranch = selectedProjectList.stream()
-                .map(o -> gitLabSettingsState.api(o.getGitlabServerDto())
-                        .getBranchesByProject(o)
-                        .stream()
-                        .map(GitlabBranch::getName)
-                        .collect(Collectors.toList()))
-                .collect(Collectors.toList())
-                .stream()
-                .reduce((a, b) -> CollectionUtil.intersectionDistinct(a, b).stream().collect(Collectors.toList()))
-                .orElse(Lists.newArrayList());
-        commonBranch.stream().sorted(String::compareToIgnoreCase);
-        mergeRequestDialog.getSourceBranch().setModel(new DefaultComboBoxModel(commonBranch.toArray()));
-        mergeRequestDialog.getSourceBranch().setSelectedIndex(-1);
-        mergeRequestDialog.getTargetBranch().setModel(new DefaultComboBoxModel(commonBranch.toArray()));
-        mergeRequestDialog.getTargetBranch().setSelectedIndex(-1);
-        Set<GitlabServerDto> serverDtos = selectedProjectList.stream().map(ProjectDto::getGitlabServerDto).collect(Collectors.toSet());
-        currentUser = serverDtos.stream().map(o -> {
-            GitlabUser m = gitLabSettingsState.api(o).getCurrentUser();
-            UserModel u = new UserModel();
-            u.setServerUserIdMap(new HashMap<>() {{
-                put(o.getApiUrl(), m.getId());
-            }});
-            u.setUsername(m.getUsername());
-            u.setName(m.getName());
-            return u;
-        }).collect(Collectors.toMap(UserModel::getUsername, Function.identity(), (a, b) -> {
-            if (MapUtil.isNotEmpty(b.getServerUserIdMap())) {
-                a.getServerUserIdMap().putAll(b.getServerUserIdMap());
-            }
-            return a;
-        })).values().stream().collect(Collectors.toList());
-        users = serverDtos.stream()
-                .map(o -> gitLabSettingsState.api(o).getActiveUsers().stream().map(m -> {
-                            UserModel u = new UserModel();
-                            u.setServerUserIdMap(new HashMap<>(){{
-                                put(o.getApiUrl(), m.getId());
-                            }});
-                            u.setUsername(m.getUsername());
-                            u.setName(m.getName());
-                            return u;
-                        }).collect(Collectors.toList())
-                ).flatMap(Collection::stream)
-                .collect(Collectors.toList())
-                .stream().collect(Collectors.toMap(UserModel::getUsername, Function.identity(), (a, b) -> {
-                    if (MapUtil.isNotEmpty(b.getServerUserIdMap())) {
-                        a.getServerUserIdMap().putAll(b.getServerUserIdMap());
-                    }
-                    return a;
-                })).values().stream().collect(Collectors.toSet());
-
-        mergeRequestDialog.getAssignee().setModel(new DefaultComboBoxModel(users.toArray()));
-        mergeRequestDialog.getAssignee().setSelectedIndex(-1);
-        mergeRequestDialog.getMergeTitle().setText("merge");
-        mergeRequestDialog.getButtonOK().addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                String source = (String) mergeRequestDialog.getSourceBranch().getSelectedItem();
-                String target = (String) mergeRequestDialog.getTargetBranch().getSelectedItem();
-                String mergeTitle = mergeRequestDialog.getMergeTitle().getText();
-                String desc = mergeRequestDialog.getDescription().getText();
-                if (StringUtils.isEmpty(source) || StringUtils.isEmpty(target) || StringUtils.isEmpty(mergeTitle)) {
-                    return;
-                }
-                UserModel user = null;
-                if (mergeRequestDialog.getAssignee().getSelectedItem() != null) {
-                    user = (UserModel) mergeRequestDialog.getAssignee().getSelectedItem();
-                }
-                mergeRequestDialog.dispose();
-                dispose();
-                UserModel finalUser = user;
-                selectedProjectList.stream().forEach(s -> {
-                    try {
-                        GitlabMergeRequest mergeRequest = gitLabSettingsState.api(s.getGitlabServerDto())
-                                .createMergeRequest(s, finalUser == null ? null : finalUser.resetId(s.getGitlabServerDto().getApiUrl()),
-                                        source, target, mergeTitle, desc, false);
-                    } catch (IOException ioException) {
-                        ioException.printStackTrace();
-                    }
-                });
-            }
-        });
-        mergeRequestDialog.getSourceBranch().getEditor().getEditorComponent().addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyReleased(KeyEvent e) {
-                super.keyReleased(e);
-                JTextField textField = (JTextField) e.getSource();
-                String text = textField.getText();
-                mergeRequestDialog.getSourceBranch().setModel(new DefaultComboBoxModel(searchBranch(text, commonBranch).toArray()));
-                textField.setText(text);
-                mergeRequestDialog.getSourceBranch().showPopup();
-            }
-        });
-        mergeRequestDialog.getTargetBranch().getEditor().getEditorComponent().addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyReleased(KeyEvent e) {
-                super.keyReleased(e);
-                JTextField textField = (JTextField) e.getSource();
-                String text = textField.getText();
-                mergeRequestDialog.getTargetBranch().setModel(new DefaultComboBoxModel(searchBranch(text, commonBranch).toArray()));
-                textField.setText(text);
-                mergeRequestDialog.getTargetBranch().showPopup();
-            }
-        });
-        mergeRequestDialog.getAssignee().getEditor().getEditorComponent().addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyReleased(KeyEvent e) {
-                super.keyReleased(e);
-                searchUser(e, users);
-            }
-        });
-        mergeRequestDialog.getAssign2me().addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                super.mouseClicked(e);
-                mergeRequestDialog.getAssignee().setSelectedItem(currentUser.get(0));
-            }
-        });
-        mergeRequestDialog.pack();
-        mergeRequestDialog.setVisible(true);
-        removeLoading();
-    }
-
-    private void removeLoading() {
-        glasspane.stop();
-    }
-
-    private void searchUser(KeyEvent e, Set<UserModel> users) {
-        JTextField textField = (JTextField) e.getSource();
-        String text = textField.getText();
-        users = users.stream().filter(o ->
-                (StringUtils.isNotEmpty(textField.getText())
-                        && (o.getName().toLowerCase().contains(textField.getText().toLowerCase())
-                        || o.getUsername().toLowerCase().contains(textField.getText().toLowerCase())))
-                        || StringUtils.isEmpty(textField.getText()))
-                .collect(Collectors.toSet());
-        mergeRequestDialog.getAssignee().setModel(new DefaultComboBoxModel(users.toArray()));
-        textField.setText(text);
-        mergeRequestDialog.getAssignee().showPopup();
-    }
-
-    private List<String> searchBranch(String text, List<String> commonBranch) {
-        return commonBranch.stream().filter(o ->
-                (StringUtils.isNotEmpty(text)
-                        && o.toLowerCase().contains(text.toLowerCase()))
-                        || StringUtils.isEmpty(text))
-                .collect(Collectors.toList());
-    }
-
-    private void showCloneDialog() {
-        cloneDialog = new CloneDialog(project, contentPane, true, IdeModalityType.IDE, false);
-//        cloneDialog.setLocationByPlatform(true);
-//        cloneDialog.setLocationRelativeTo(this);
-        cloneDialog.getButtonOK().addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                super.mouseClicked(e);
-                ValidationInfo destinationValidation = CloneDvcsValidationUtils.createDestination(cloneDialog.getDirectory().getText());
-                if (destinationValidation != null) {
-                    LOG.error("Unable to create destination directory", destinationValidation.message);
-                    return;
-                }
-
-                LocalFileSystem lfs = LocalFileSystem.getInstance();
-                File file = new File(cloneDialog.getDirectory().getText());
-                VirtualFile destinationParent = lfs.findFileByIoFile(file);
-                if (destinationParent == null) {
-                    destinationParent = lfs.refreshAndFindFileByIoFile(file);
-                }
-                if (destinationParent == null) {
-                    LOG.error("Clone Failed. Destination doesn't exist");
-                    return;
-                }
-                cloneDialog.disposeIfNeeded();
-                dispose();
-
-                VirtualFile finalDestinationParent = destinationParent;
-                selectedProjectList.stream().forEach(s -> {
-                    GitCheckoutProvider.clone(project, Git.getInstance(), checkoutListener, finalDestinationParent,
-                            s.getSshUrl(), s.getName(), cloneDialog.getDirectory().getText());
-                });
-            }
-        });
-        cloneDialog.showAndGet();
     }
 
     private void initSerach() {
@@ -505,6 +327,8 @@ public class GitLabDialog extends DialogWrapper {
 
     private void initRadioButton() {
         ButtonGroup btnGroup = new ButtonGroup();
+        branchNameRadioButton.setMultiClickThreshhold(888);
+        projectNameRadioButton.setMultiClickThreshhold(888);
         btnGroup.add(branchNameRadioButton);
         btnGroup.add(projectNameRadioButton);
         projectNameRadioButton.setSelected(true);
@@ -516,8 +340,7 @@ public class GitLabDialog extends DialogWrapper {
                 JRadioButton jRadioButton = (JRadioButton) e.getSource();
                 if (jRadioButton.isSelected()) {
                     clearSelected();
-                    createMergeRequestButton.setEnabled(false);
-                    cloneButton.setEnabled(false);
+                    unEnableBottomButton();
                     initProjectList(filterProjectsByProject(search.getText()));
                 }
             }
@@ -530,8 +353,7 @@ public class GitLabDialog extends DialogWrapper {
                 JRadioButton jRadioButton = (JRadioButton) e.getSource();
                 if (jRadioButton.isSelected()) {
                     clearSelected();
-                    createMergeRequestButton.setEnabled(false);
-                    cloneButton.setEnabled(false);
+                    unEnableBottomButton();
                     initProjectList(filterProjectListByBranch(search.getText()));
                 }
             }
@@ -571,13 +393,8 @@ public class GitLabDialog extends DialogWrapper {
                                 .stream()
                                 .anyMatch(y -> y.getRemote().getUrls().stream()
                                         .anyMatch(re -> re.toLowerCase()
-                                                .contains(o.getGitlabServerDto().getRepositoryUrl().toLowerCase()))))
+                                                .contains(o.getGitlabServer().getRepositoryUrl().toLowerCase()))))
                 ).collect(Collectors.toList());
-    }
-
-    private void onOK() {
-        // add your code here
-        dispose();
     }
 
     private void onCancel() {

@@ -3,7 +3,7 @@ package gitlab.settings;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.ValidationInfo;
 import com.intellij.ui.EnumComboBoxModel;
-import gitlab.dto.GitlabServerDto;
+import gitlab.bean.GitlabServer;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.Nullable;
 
@@ -23,7 +23,7 @@ import static org.apache.commons.lang.StringUtils.isNotBlank;
 
 public class ServerConfiguration extends DialogWrapper {
 
-    private GitlabServerDto gitlabServer;
+    private GitlabServer gitlabServer;
     private GitLabSettingsState settingsState = GitLabSettingsState.getInstance();
     private ExecutorService executor = Executors.newSingleThreadExecutor();
 
@@ -35,10 +35,10 @@ public class ServerConfiguration extends DialogWrapper {
     private JComboBox checkoutMethod;
     private JCheckBox removeOnMerge;
 
-    protected ServerConfiguration(@Nullable GitlabServerDto gitlabServer) {
+    protected ServerConfiguration(@Nullable GitlabServer gitlabServer) {
         super(false);
         if(gitlabServer == null) {
-            this.gitlabServer = new GitlabServerDto();
+            this.gitlabServer = new GitlabServer();
         } else {
             this.gitlabServer = gitlabServer;
         }
@@ -100,7 +100,7 @@ public class ServerConfiguration extends DialogWrapper {
         gitlabServer.setApiUrl(apiURl.getText());
         gitlabServer.setApiToken(token.getText());
         gitlabServer.setRepositoryUrl(ApiToRepoUrlConverter.convertApiUrlToRepoUrl(apiURl.getText()));
-        gitlabServer.setPreferredConnection(GitlabServerDto.CloneType.values()[checkoutMethod.getSelectedIndex()]);
+        gitlabServer.setPreferredConnection(GitlabServer.CloneType.values()[checkoutMethod.getSelectedIndex()]);
         gitlabServer.setRemoveSourceBranch(removeOnMerge.isSelected());
         settingsState.addServer(gitlabServer);
     }
@@ -136,7 +136,7 @@ public class ServerConfiguration extends DialogWrapper {
     }
 
     private void setupModel() {
-        checkoutMethod.setModel(new EnumComboBoxModel(GitlabServerDto.CloneType.class));
+        checkoutMethod.setModel(new EnumComboBoxModel(GitlabServer.CloneType.class));
     }
 
     private void fillFormFromDto() {
