@@ -5,6 +5,7 @@ import cn.hutool.core.map.MapUtil;
 import com.intellij.dvcs.ui.CloneDvcsValidationUtils;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.ValidationInfo;
 import com.intellij.openapi.vcs.CheckoutProvider;
 import com.intellij.openapi.vcs.ProjectLevelVcsManager;
@@ -24,12 +25,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.gitlab.api.models.GitlabBranch;
 import org.gitlab.api.models.GitlabMergeRequest;
 import org.gitlab.api.models.GitlabUser;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import window.LcheckBox;
 
 import javax.swing.*;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
-import javax.swing.text.BadLocationException;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
@@ -47,10 +47,10 @@ import java.util.stream.Collectors;
  * @author Lv LiFeng
  * @date 2022/1/8 16:14
  */
-public class GitLabDialog extends JDialog {
+public class GitLabDialog extends DialogWrapper {
     private static final Logger LOG = Logger.getInstance(GitLabDialog.class);
     private JPanel contentPane;
-    private JList projectList;
+    private JList projectJList;
     private JTextField search;
     private JRadioButton branchNameRadioButton;
     private JRadioButton projectNameRadioButton;
@@ -59,6 +59,7 @@ public class GitLabDialog extends JDialog {
     private JCheckBox selectAllCheckBox;
     private JLabel selectedCount;
     private JButton cancelButton;
+    private JLabel projectListDefaultText;
 
     private GitLabSettingsState gitLabSettingsState = GitLabSettingsState.getInstance();
     private List<ProjectDto> projectDtoList = new ArrayList<>();
@@ -71,11 +72,18 @@ public class GitLabDialog extends JDialog {
     private MergeRequestDialog mergeRequestDialog;
     private ExecutorService executor = Executors.newSingleThreadExecutor();
     private LoadingPanel glasspane = new LoadingPanel();
+    private List<String> commonBranch = new ArrayList<>();
+    private Set<UserModel> users = new HashSet<>();
+    private List<UserModel> currentUser = new ArrayList<>();
+    private List<ProjectDto> filterProjectList = new ArrayList<>();
 
-    public GitLabDialog(Project project) {
-        this.setTitle("Gitlab");
+    public GitLabDialog(@Nullable Project project, @Nullable Component parentComponent, boolean canBeParent, @NotNull IdeModalityType ideModalityType, boolean createSouth) {
+        super(project, parentComponent, canBeParent, ideModalityType, createSouth);
+        setTitle("Gitlab");
+        init();
         if (gitLabSettingsState.hasSettings()) {
-            loading();
+            projectListDefaultText.setVisible(false);
+            //loading(this);
             this.project = project;
             getProjectListAndSortByName();
             initSerach();
@@ -84,21 +92,43 @@ public class GitLabDialog extends JDialog {
             initSelectAllCheckBox();
             checkoutListener = ProjectLevelVcsManager.getInstance(project).getCompositeCheckoutListener();
         } else {
+            projectListDefaultText.setVisible(true);
+        }
+        getRootPane().setDefaultButton(cancelButton);
+        initBottomButton();
+    }
 
+    public GitLabDialog(Project project) {
+        super(true);
+        setTitle("Gitlab");
+        init();
+        this.createSouthPanel().setVisible(false);
+        if (gitLabSettingsState.hasSettings()) {
+            projectListDefaultText.setVisible(false);
+            //loading(this);
+            this.project = project;
+            getProjectListAndSortByName();
+            initSerach();
+            initRadioButton();
+            initProjectList(filterProjectsByProject(null));
+            initSelectAllCheckBox();
+            checkoutListener = ProjectLevelVcsManager.getInstance(project).getCompositeCheckoutListener();
+        } else {
+            projectListDefaultText.setVisible(true);
         }
 
-        setContentPane(contentPane);
+//        setContentPane(contentPane);
         setModal(true);
         getRootPane().setDefaultButton(cancelButton);
         initBottomButton();
         // call onCancel() when cross is clicked
-        setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-        addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowClosing(WindowEvent e) {
-                onCancel();
-            }
-        });
+//        setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+//        addWindowListener(new WindowAdapter() {
+//            @Override
+//            public void windowClosing(WindowEvent e) {
+//                onCancel();
+//            }
+//        });
         cancelButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -114,10 +144,15 @@ public class GitLabDialog extends JDialog {
         }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
     }
 
-    private void loading() {
+    @Override
+    protected @Nullable JComponent createCenterPanel() {
+        return contentPane;
+    }
+
+    private void loading(JDialog jDialog) {
         Dimension dimension = Toolkit.getDefaultToolkit().getScreenSize();
         glasspane.setBounds(100, 100, (dimension.width) / 2, (dimension.height) / 2);
-        this.setGlassPane(glasspane);
+        jDialog.setGlassPane(glasspane);
         glasspane.start();//开始动画加载效果
     }
 
@@ -151,6 +186,9 @@ public class GitLabDialog extends JDialog {
             createMergeRequestButton.setEnabled(true);
             cloneButton.setEnabled(true);
         }
+        if (branchNameRadioButton.isSelected()) {
+            cloneButton.setEnabled(false);
+        }
     }
 
     private void initBottomButton() {
@@ -171,8 +209,7 @@ public class GitLabDialog extends JDialog {
     private void showCreateMergeRequestDialog() {
         mergeRequestDialog = new MergeRequestDialog();
         mergeRequestDialog.setLocationByPlatform(true);
-        mergeRequestDialog.setLocationRelativeTo(this);
-        mergeRequestDialog.getMergeTitle().setText("WIP:");
+//        mergeRequestDialog.setLocationRelativeTo(this);
         List<String> commonBranch = selectedProjectList.stream()
                 .map(o -> gitLabSettingsState.api(o.getGitlabServerDto())
                         .getBranchesByProject(o)
@@ -189,7 +226,7 @@ public class GitLabDialog extends JDialog {
         mergeRequestDialog.getTargetBranch().setModel(new DefaultComboBoxModel(commonBranch.toArray()));
         mergeRequestDialog.getTargetBranch().setSelectedIndex(-1);
         Set<GitlabServerDto> serverDtos = selectedProjectList.stream().map(ProjectDto::getGitlabServerDto).collect(Collectors.toSet());
-        List<UserModel> currentUser = serverDtos.stream().map(o -> {
+        currentUser = serverDtos.stream().map(o -> {
             GitlabUser m = gitLabSettingsState.api(o).getCurrentUser();
             UserModel u = new UserModel();
             u.setServerUserIdMap(new HashMap<>() {{
@@ -204,16 +241,16 @@ public class GitLabDialog extends JDialog {
             }
             return a;
         })).values().stream().collect(Collectors.toList());
-        Set<UserModel> users = serverDtos.stream()
+        users = serverDtos.stream()
                 .map(o -> gitLabSettingsState.api(o).getActiveUsers().stream().map(m -> {
-                        UserModel u = new UserModel();
-                        u.setServerUserIdMap(new HashMap<>(){{
-                            put(o.getApiUrl(), m.getId());
-                        }});
-                        u.setUsername(m.getUsername());
-                        u.setName(m.getName());
-                        return u;
-                    }).collect(Collectors.toList())
+                            UserModel u = new UserModel();
+                            u.setServerUserIdMap(new HashMap<>(){{
+                                put(o.getApiUrl(), m.getId());
+                            }});
+                            u.setUsername(m.getUsername());
+                            u.setName(m.getName());
+                            return u;
+                        }).collect(Collectors.toList())
                 ).flatMap(Collection::stream)
                 .collect(Collectors.toList())
                 .stream().collect(Collectors.toMap(UserModel::getUsername, Function.identity(), (a, b) -> {
@@ -225,6 +262,7 @@ public class GitLabDialog extends JDialog {
 
         mergeRequestDialog.getAssignee().setModel(new DefaultComboBoxModel(users.toArray()));
         mergeRequestDialog.getAssignee().setSelectedIndex(-1);
+        mergeRequestDialog.getMergeTitle().setText("merge");
         mergeRequestDialog.getButtonOK().addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -291,6 +329,11 @@ public class GitLabDialog extends JDialog {
         });
         mergeRequestDialog.pack();
         mergeRequestDialog.setVisible(true);
+        removeLoading();
+    }
+
+    private void removeLoading() {
+        glasspane.stop();
     }
 
     private void searchUser(KeyEvent e, Set<UserModel> users) {
@@ -316,9 +359,9 @@ public class GitLabDialog extends JDialog {
     }
 
     private void showCloneDialog() {
-        cloneDialog = new CloneDialog();
-        cloneDialog.setLocationByPlatform(true);
-        cloneDialog.setLocationRelativeTo(this);
+        cloneDialog = new CloneDialog(project, contentPane, true, IdeModalityType.IDE, false);
+//        cloneDialog.setLocationByPlatform(true);
+//        cloneDialog.setLocationRelativeTo(this);
         cloneDialog.getButtonOK().addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -339,7 +382,7 @@ public class GitLabDialog extends JDialog {
                     LOG.error("Clone Failed. Destination doesn't exist");
                     return;
                 }
-                cloneDialog.dispose();
+                cloneDialog.disposeIfNeeded();
                 dispose();
 
                 VirtualFile finalDestinationParent = destinationParent;
@@ -349,40 +392,34 @@ public class GitLabDialog extends JDialog {
                 });
             }
         });
-        cloneDialog.pack();
-        cloneDialog.setVisible(true);
+        cloneDialog.showAndGet();
     }
 
     private void initSerach() {
-        search.getDocument().addDocumentListener(new DocumentListener() {
+        search.addKeyListener(new KeyAdapter() {
             @Override
-            public void insertUpdate(DocumentEvent e) {
-                searchProject(e);
-            }
-            @Override
-            public void removeUpdate(DocumentEvent e) {
-                searchProject(e);
-            }
-            @Override
-            public void changedUpdate(DocumentEvent e) {
+            public void keyReleased(KeyEvent e) {
+                super.keyReleased(e);
                 searchProject(e);
             }
         });
     }
 
-    private void searchProject(DocumentEvent e){
-        String searchWord = null;
-        try {
-            searchWord = e.getDocument().getText(e.getDocument().getStartPosition().getOffset(), e.getDocument().getLength());
-        } catch (BadLocationException badLocationException) {
-            badLocationException.printStackTrace();
-        }
+    private void searchProject(KeyEvent e){
+        String searchWord = ((JTextField) e.getSource()).getText();
+
         if (projectNameRadioButton.isSelected()) {
             initProjectList(filterProjectsByProject(searchWord));
         }
-
         if (branchNameRadioButton.isSelected()) {
             initProjectList(filterProjectListByBranch(searchWord));
+        }
+        if (selectedProjectList.size() == projectDtoList.size()
+                || selectedProjectList.size() == projectDtoListByBranch.size()
+                || selectedProjectList.size() == filterProjectList.size()) {
+            selectAllCheckBox.setSelected(true);
+        } else {
+            selectAllCheckBox.setSelected(false);
         }
 
     }
@@ -394,17 +431,11 @@ public class GitLabDialog extends JDialog {
                 super.mouseClicked(e);
                 JCheckBox jCheckBox = (JCheckBox) e.getSource();
                 if (jCheckBox.isSelected()) {
-                    if (projectNameRadioButton.isSelected()) {
-                        selectedProjectList.addAll(projectDtoList);
-                        projectList.setSelectionInterval(0, projectDtoList.size());
-                    }
-                    if (branchNameRadioButton.isSelected()) {
-                        selectedProjectList.addAll(projectDtoListByBranch);
-                        projectList.setSelectionInterval(0, projectDtoListByBranch.size());
-                    }
+                    selectedProjectList.addAll(filterProjectList);
+                    projectJList.setSelectionInterval(0, filterProjectList.size());
                 } else {
                     selectedProjectList.clear();
-                    projectList.clearSelection();
+                    projectJList.clearSelection();
                 }
                 setSelectedCount();
                 bottomButtonState();
@@ -417,8 +448,7 @@ public class GitLabDialog extends JDialog {
     }
 
     private List<ProjectDto> filterProjectsByProject(String searchWord){
-        hideButton(searchWord);
-        return  projectDtoList
+        return filterProjectList = projectDtoList
                 .stream()
                 .filter(o ->
                         (StringUtils.isNotEmpty(searchWord)
@@ -426,44 +456,37 @@ public class GitLabDialog extends JDialog {
                                 || StringUtils.isEmpty(searchWord)
                 ).collect(Collectors.toList());
     }
-    private void initProjectList(List<ProjectDto> filterRepositories) {
+    private void initProjectList(List<ProjectDto> projectList) {
 
-        projectList.setListData(filterRepositories.toArray());
-        projectList.setCellRenderer(new LcheckBox());
-        projectList.setEnabled(true);
-        projectList.setSelectionModel(new DefaultListSelectionModel() {
+        projectJList.setListData(projectList.toArray());
+        projectJList.setCellRenderer(new LcheckBox());
+        projectJList.setEnabled(true);
+        projectJList.setSelectionModel(new DefaultListSelectionModel() {
             @Override
             public void setSelectionInterval(int index0, int index1) {
                 if (super.isSelectedIndex(index0)) {
                     super.removeSelectionInterval(index0, index1);
-                    selectedProjectList.remove(filterRepositories.get(index0));
+                    selectedProjectList.remove(projectList.get(index0));
                 } else {
                     super.addSelectionInterval(index0, index1);
-                    selectedProjectList.add(filterRepositories.get(index0));
-                    checkAll(filterRepositories);
+                    selectedProjectList.add(projectList.get(index0));
+                    checkAll(projectList);
                 }
                 setSelectedCount();
                 bottomButtonState();
             }
         });
         if (CollectionUtil.isNotEmpty(selectedProjectList)) {
-            projectList.setSelectedIndices(selectedProjectList.stream()
-                    .map(o -> filterRepositories.indexOf(o))
+            projectJList.setSelectedIndices(selectedProjectList.stream()
+                    .map(o -> projectList.indexOf(o))
                     .mapToInt(Integer::valueOf)
                     .toArray());
-            checkAll(filterRepositories);
+            checkAll(projectList);
         } else {
-            projectList.clearSelection();
+            projectJList.clearSelection();
         }
     }
 
-    private void hideButton(String searchWord) {
-        if (StringUtils.isNotEmpty(searchWord)) {
-            selectAllCheckBox.setEnabled(false);
-        } else {
-            selectAllCheckBox.setEnabled(true);
-        }
-    }
 
     private void checkAll(List<ProjectDto> filterRepositories) {
         if (projectNameRadioButton.isSelected()) {
@@ -493,6 +516,8 @@ public class GitLabDialog extends JDialog {
                 JRadioButton jRadioButton = (JRadioButton) e.getSource();
                 if (jRadioButton.isSelected()) {
                     clearSelected();
+                    createMergeRequestButton.setEnabled(false);
+                    cloneButton.setEnabled(false);
                     initProjectList(filterProjectsByProject(search.getText()));
                 }
             }
@@ -505,6 +530,8 @@ public class GitLabDialog extends JDialog {
                 JRadioButton jRadioButton = (JRadioButton) e.getSource();
                 if (jRadioButton.isSelected()) {
                     clearSelected();
+                    createMergeRequestButton.setEnabled(false);
+                    cloneButton.setEnabled(false);
                     initProjectList(filterProjectListByBranch(search.getText()));
                 }
             }
@@ -513,7 +540,7 @@ public class GitLabDialog extends JDialog {
 
     private void clearSelected() {
         selectedProjectList.clear();
-        projectList.clearSelection();
+        projectJList.clearSelection();
         selectAllCheckBox.setSelected(false);
         selectedCount.setText("(Selected 0)");
     }
@@ -537,7 +564,7 @@ public class GitLabDialog extends JDialog {
                                         .anyMatch(i -> i.getName().toLowerCase().contains(searchWord.toLowerCase())))
                                         || StringUtils.isEmpty(searchWord)
                         ).collect(Collectors.toList());
-        return projectDtoList.stream()
+        return filterProjectList = projectDtoList.stream()
                 .filter(o -> filterRepositories.stream()
                         .anyMatch(z -> z.getRoot().getName().toLowerCase().contains(o.getName())
                                 && z.getBranches().getRemoteBranches()

@@ -1,6 +1,8 @@
 package gitlab.ui;
 
+import com.intellij.openapi.ui.DialogWrapper;
 import lombok.Getter;
+import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.awt.event.*;
@@ -12,7 +14,7 @@ import java.awt.event.*;
  * @date 2022/1/8 15:42
  */
 @Getter
-public class MergeRequestDialog extends JDialog {
+public class MergeRequestDialog extends DialogWrapper {
     private JPanel contentPane;
     private JButton buttonOK;
     private JButton buttonCancel;
@@ -24,8 +26,9 @@ public class MergeRequestDialog extends JDialog {
     private JLabel assign2me;
 
     public MergeRequestDialog() {
+        super(true);
         this.setTitle("Create merge requests");
-        setContentPane(contentPane);
+//        setContentPane(contentPane);
         setModal(true);
         getRootPane().setDefaultButton(buttonOK);
 
@@ -72,5 +75,10 @@ public class MergeRequestDialog extends JDialog {
         dialog.pack();
         dialog.setVisible(true);
         System.exit(0);
+    }
+
+    @Override
+    protected @Nullable JComponent createCenterPanel() {
+        return contentPane;
     }
 }

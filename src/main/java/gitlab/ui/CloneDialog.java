@@ -1,8 +1,13 @@
 package gitlab.ui;
 
+import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.DialogWrapper;
 import lombok.Getter;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
 
@@ -13,7 +18,7 @@ import java.io.File;
  * @date 2022/1/8 10:59
  */
 @Getter
-public class CloneDialog extends JDialog {
+public class CloneDialog extends DialogWrapper {
     private JPanel contentPane;
     private JButton buttonOK;
     private JButton buttonCancel;
@@ -21,36 +26,50 @@ public class CloneDialog extends JDialog {
     private JTextField directory;
     private JButton HIHIHIButton;
 
-    public CloneDialog() {
-        this.setTitle("Clone Settings");
+//    public CloneDialog() {
+//        this.setTitle("Clone Settings");
+//        initDefaultDirectory();
+//        setModal(true);
+//        getRootPane().setDefaultButton(buttonOK);
+//
+//        buttonCancel.addActionListener(new ActionListener() {
+//            @Override
+//            public void actionPerformed(ActionEvent e) {
+//                onCancel();
+//            }
+//        });
+//
+//        // call onCancel() when cross is clicked
+////        setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+////        addWindowListener(new WindowAdapter() {
+////            @Override
+////            public void windowClosing(WindowEvent e) {
+////                onCancel();
+////            }
+////        });
+//
+//        // call onCancel() on ESCAPE
+//        contentPane.registerKeyboardAction(new ActionListener() {
+//            @Override
+//            public void actionPerformed(ActionEvent e) {
+//                onCancel();
+//            }
+//        }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+//    }
+
+    protected CloneDialog(@Nullable Project project, @Nullable Component parentComponent, boolean canBeParent, @NotNull IdeModalityType ideModalityType, boolean createSouth) {
+        super(project, parentComponent, canBeParent, ideModalityType, createSouth);
+        init();
+        setTitle("Clone Settings");
         initDefaultDirectory();
-        setContentPane(contentPane);
-        setModal(true);
-        getRootPane().setDefaultButton(buttonOK);
-
-        buttonCancel.addActionListener(new ActionListener() {
+        getRootPane().setDefaultButton(buttonCancel);
+        buttonCancel.addMouseListener(new MouseAdapter() {
             @Override
-            public void actionPerformed(ActionEvent e) {
+            public void mouseClicked(MouseEvent e) {
+                super.mouseClicked(e);
                 onCancel();
             }
         });
-
-        // call onCancel() when cross is clicked
-        setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-        addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowClosing(WindowEvent e) {
-                onCancel();
-            }
-        });
-
-        // call onCancel() on ESCAPE
-        contentPane.registerKeyboardAction(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                onCancel();
-            }
-        }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
     }
 
     private void initDefaultDirectory(){
@@ -78,10 +97,8 @@ public class CloneDialog extends JDialog {
         dispose();
     }
 
-    public static void main(String[] args) {
-        CloneDialog dialog = new CloneDialog();
-        dialog.pack();
-        dialog.setVisible(true);
-        System.exit(0);
+    @Override
+    protected @Nullable JComponent createCenterPanel() {
+        return contentPane;
     }
 }
