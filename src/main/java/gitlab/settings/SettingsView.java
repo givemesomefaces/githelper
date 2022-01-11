@@ -4,7 +4,7 @@ import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.openapi.options.SearchableConfigurable;
 import git4idea.DialogManager;
 
-import gitlab.dto.GitlabServerDto;
+import gitlab.bean.GitlabServer;
 import gitlab.bean.ReadOnlyTableModel;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
@@ -38,32 +38,32 @@ public class SettingsView implements SearchableConfigurable {
             reset();
         });
         deleteButton.addActionListener(e -> {
-            GitlabServerDto server = getSelectedServer();
+            GitlabServer server = getSelectedServer();
             if(server != null) {
                 settingsState.deleteServer(server);
                 reset();
             }
         });
         editButton.addActionListener(e -> {
-            GitlabServerDto server = getSelectedServer();
+            GitlabServer server = getSelectedServer();
             ServerConfiguration serverConfiguration = new ServerConfiguration(server);
             DialogManager.show(serverConfiguration);
             reset();
         });
     }
 
-    private GitlabServerDto getSelectedServer() {
+    private GitlabServer getSelectedServer() {
         if(serverTable.getSelectedRow() >= 0) {
-            return (GitlabServerDto) serverTable.getValueAt(serverTable.getSelectedRow(), 0);
+            return (GitlabServer) serverTable.getValueAt(serverTable.getSelectedRow(), 0);
         }
         return null;
     }
 
-    private TableModel serverModel(Collection<GitlabServerDto> servers) {
+    private TableModel serverModel(Collection<GitlabServer> servers) {
         Object[] columnNames = {"", "Server", "Token", "Checkout Method"};
         Object[][] data = new Object[servers.size()][columnNames.length];
         int i = 0;
-        for (GitlabServerDto server : servers) {
+        for (GitlabServer server : servers) {
             Object[] row = new Object[columnNames.length];
             row[0] = server;
             row[1] = server.getApiUrl();

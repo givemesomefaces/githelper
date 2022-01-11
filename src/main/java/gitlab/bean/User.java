@@ -15,12 +15,12 @@ import java.util.Map;
 
 @Getter
 @Setter
-public class UserModel extends GitlabUser {
+public class User extends GitlabUser {
 
     private Map<String, Integer> serverUserIdMap;
 
 
-    public UserModel resetId(String apiUrl) {
+    public User resetId(String apiUrl) {
         super.setId(serverUserIdMap.getOrDefault(apiUrl, null));
         return this;
     }

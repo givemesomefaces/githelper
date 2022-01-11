@@ -7,9 +7,9 @@ import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import com.intellij.util.xmlb.XmlSerializerUtil;
-import gitlab.api.ApiFacade;
-import gitlab.dto.GitlabServerDto;
-import gitlab.dto.ProjectDto;
+import gitlab.api.GitlabRestApi;
+import gitlab.bean.GitlabServer;
+import gitlab.bean.ProjectDto;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
@@ -47,7 +47,7 @@ public class GitLabSettingsState implements PersistentStateComponent<GitLabSetti
 
     public boolean defaultRemoveBranch;
 
-    public Collection<GitlabServerDto> gitlabServers = new ArrayList<>();
+    public Collection<GitlabServer> gitlabServers = new ArrayList<>();
 
     public static GitLabSettingsState getInstance() {
         return ServiceManager.getService(GitLabSettingsState.class);
@@ -64,37 +64,37 @@ public class GitLabSettingsState implements PersistentStateComponent<GitLabSetti
     }
 
     @SneakyThrows
-    public Map<GitlabServerDto, Collection<ProjectDto>> loadMapOfServersAndProjects(Collection<GitlabServerDto> servers) {
-        Map<GitlabServerDto, Collection<ProjectDto>> map = new HashMap<>();
-        for(GitlabServerDto server : servers) {
+    public Map<GitlabServer, Collection<ProjectDto>> loadMapOfServersAndProjects(Collection<GitlabServer> servers) {
+        Map<GitlabServer, Collection<ProjectDto>> map = new HashMap<>();
+        for(GitlabServer server : servers) {
             Collection<ProjectDto> projects = loadProjects(server);
             map.put(server, projects);
         }
         return map;
     }
 
-    public Collection<ProjectDto> loadProjects(GitlabServerDto server) throws Throwable {
-        ApiFacade apiFacade = api(server);
+    public Collection<ProjectDto> loadProjects(GitlabServer server) throws Throwable {
+        GitlabRestApi gitlabRestApi = api(server);
 
-        return apiFacade.getProjects().stream().map(o -> {
+        return gitlabRestApi.getProjects().stream().map(o -> {
             ProjectDto projectDto = new ProjectDto();
             BeanUtil.copyProperties(o, projectDto);
-            projectDto.setGitlabServerDto(server);
+            projectDto.setGitlabServer(server);
             return projectDto;
         }).collect(Collectors.toList());
     }
 
     public void isApiValid(String host, String key) throws IOException {
-        ApiFacade apiFacade = new ApiFacade();
-        apiFacade.reload(host, key);
-        apiFacade.getSession();
+        GitlabRestApi gitlabRestApi = new GitlabRestApi();
+        gitlabRestApi.reload(host, key);
+        gitlabRestApi.getSession();
     }
 
-    public ApiFacade api(GitlabServerDto serverDto) {
-        return new ApiFacade(serverDto.getApiUrl(), serverDto.getApiToken());
+    public GitlabRestApi api(GitlabServer serverDto) {
+        return new GitlabRestApi(serverDto.getApiUrl(), serverDto.getApiToken());
     }
 
-    public void addServer(GitlabServerDto server) {
+    public void addServer(GitlabServer server) {
         if(getGitlabServers().stream().noneMatch(s -> server.getApiUrl().equals(s.getApiUrl()))) {
             getGitlabServers().add(server);
         } else {
@@ -108,7 +108,7 @@ public class GitLabSettingsState implements PersistentStateComponent<GitLabSetti
         }
     }
 
-    public void deleteServer(GitlabServerDto server) {
+    public void deleteServer(GitlabServer server) {
         getGitlabServers().stream().filter(s -> server.getApiUrl().equals(s.getApiUrl())).forEach(removedServer -> getGitlabServers().remove(removedServer));
     }
 

@@ -1,6 +1,7 @@
 package gitlab.api;
 
-import gitlab.dto.NamespaceDto;
+import gitlab.bean.Namespace;
+import org.apache.commons.compress.utils.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.gitlab.api.AuthMethod;
 import org.gitlab.api.GitlabAPI;
@@ -9,6 +10,7 @@ import org.gitlab.api.http.GitlabHTTPRequestor;
 import org.gitlab.api.models.*;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.net.URLEncoder;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -20,14 +22,14 @@ import java.util.stream.Collectors;
  * @author Lv LiFeng
  * @date 2022/1/7 00:34
  */
-public class ApiFacade {
+public class GitlabRestApi {
 
     GitlabAPI api;
 
-    public ApiFacade() {
+    public GitlabRestApi() {
     }
 
-    public ApiFacade(String host, String key) {
+    public GitlabRestApi(String host, String key) {
         reload(host, key);
     }
 
@@ -50,22 +52,6 @@ public class ApiFacade {
         }
     }
 
-    public List<NamespaceDto> getNamespaces() throws IOException {
-        return api.retrieve().getAll("/namespaces", NamespaceDto[].class);
-    }
-
-    public List<GitlabMergeRequest> getMergeRequests(GitlabProject project) throws IOException {
-        return api.getOpenMergeRequests(project);
-    }
-
-    public List<GitlabNote> getMergeRequestComments(GitlabMergeRequest mergeRequest) throws IOException {
-        return api.getNotes(mergeRequest);
-    }
-
-    public void addComment(GitlabMergeRequest mergeRequest, String body) throws IOException {
-        api.createNote(mergeRequest, body);
-    }
-
     public GitlabMergeRequest createMergeRequest(GitlabProject project, GitlabUser assignee, String from, String to, String title, String description, boolean removeSourceBranch) throws IOException {
         String tailUrl = "/projects/" + project.getId() + "/merge_requests";
         GitlabHTTPRequestor requestor = api.dispatch()
@@ -81,30 +67,6 @@ public class ApiFacade {
         }
 
         return requestor.to(tailUrl, GitlabMergeRequest.class);
-    }
-
-    public void acceptMergeRequest(GitlabProject project, GitlabMergeRequest mergeRequest) throws IOException {
-        api.acceptMergeRequest(project, mergeRequest.getIid(), null);
-    }
-
-    public void changeAssignee(GitlabProject project, GitlabMergeRequest mergeRequest, GitlabUser user) throws IOException {
-        api.updateMergeRequest(project.getId(), mergeRequest.getIid(), null, user.getId(), null, null, null, null);
-    }
-
-    public GitlabProject createProject(String name, String visibilityLevel, boolean isPublic, NamespaceDto namespace, String description) throws IOException {
-        return api.createProject(
-                name,
-                namespace != null && namespace.getId() != 0 ? namespace.getId() : null,
-                description,
-                null,
-                null,
-                null,
-                null,
-                null,
-                isPublic,
-                visibilityLevel,
-                null
-        );
     }
 
     public GitlabProject getProject(Integer id) throws IOException {
@@ -165,7 +127,9 @@ public class ApiFacade {
     }
 
     public List<GitlabBranch> getBranchesByProject(GitlabProject project) {
-        return api.getBranches(project);
+        List<GitlabBranch> branches = api.getBranches(project);
+        System.out.println(project.getName() + " : " + branches.stream().map(GitlabBranch::getName).collect(Collectors.toList()).toString());
+        return branches;
     }
 
     public List<GitlabUser> getActiveUsers(){
@@ -173,5 +137,23 @@ public class ApiFacade {
                 .stream()
                 .filter(o -> StringUtils.equalsIgnoreCase(o.getState(), "active"))
                 .collect(Collectors.toList());
+    }
+    public List<GitlabMergeRequest> getOpenMergeRequest(Serializable projectId){
+        try {
+            return api.getOpenMergeRequests(projectId);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return Lists.newArrayList();
+    }
+    public GitlabMergeRequest updateMergeRequest(Serializable projectId, Integer mergeRequestIid, String targetBranch,
+                                    Integer assigneeId, String title, String description, String stateEvent,
+                                    String labels){
+        try {
+            return api.updateMergeRequest(projectId, mergeRequestIid, targetBranch, assigneeId, title, description, stateEvent, labels);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

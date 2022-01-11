@@ -1,4 +1,4 @@
-package gitlab.dto;
+package gitlab.bean;
 
 
 import lombok.Getter;
@@ -14,7 +14,7 @@ import lombok.experimental.Accessors;
 @Getter
 @Setter
 @Accessors(chain = true)
-public class GitlabServerDto {
+public class GitlabServer {
 
     private String apiUrl = "";
     private String apiToken = "";
