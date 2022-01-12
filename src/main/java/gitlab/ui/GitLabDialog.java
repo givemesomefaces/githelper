@@ -2,6 +2,9 @@ package gitlab.ui;
 
 import cn.hutool.core.collection.CollectionUtil;
 import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.progress.ProgressIndicator;
+import com.intellij.openapi.progress.ProgressManager;
+import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -81,39 +84,39 @@ public class GitLabDialog extends DialogWrapper {
         return contentPane;
     }
 
-    private void loading(JDialog jDialog) {
-        Dimension dimension = Toolkit.getDefaultToolkit().getScreenSize();
-        glasspane.setBounds(100, 100, (dimension.width) / 2, (dimension.height) / 2);
-        jDialog.setGlassPane(glasspane);
-        // 开始动画加载效果
-        glasspane.start();
-    }
-
     private void getProjectListAndSortByName() {
         unEnableBottomButton();
         unEnableOtherButtonWhenLoadingData();
-        executor.submit(() -> {
-            projectDtoList = gitLabSettingsState.loadMapOfServersAndProjects(gitLabSettingsState.getGitlabServers())
-                    .values()
-                    .stream()
-                    .flatMap(Collection::stream)
-                    .collect(Collectors.toList());
-            if (CollectionUtil.isEmpty(projectDtoList)) {
-                projectListDefaultText.setVisible(true);
-                projectJList.setVisible(false);
-                return;
-            }
-            enableOtherButtonAfterLoadingData();
-            bottomButtonState();
-            Collections.sort(projectDtoList, new Comparator<ProjectDto>() {
-                @Override
-                public int compare(ProjectDto o1, ProjectDto o2) {
-                    return StringUtils.compareIgnoreCase(o1.getName(), o2.getName());
+        ProgressManager.getInstance().run(new Task.Backgroundable(project, "Loading projects from GitLab server") {
+
+            @Override
+            public void run(@NotNull ProgressIndicator indicator) {
+//                indicator.setText("Test......run...");
+                projectDtoList = gitLabSettingsState.loadMapOfServersAndProjects(gitLabSettingsState.getGitlabServers())
+                        .values()
+                        .stream()
+                        .flatMap(Collection::stream)
+                        .collect(Collectors.toList());
+                if (CollectionUtil.isEmpty(projectDtoList)) {
+                    projectListDefaultText.setVisible(true);
+                    projectJList.setVisible(false);
+                    return;
                 }
-            });
-            glasspane.stop();
-            initProjectList(filterProjectsByProject(null));
+                enableOtherButtonAfterLoadingData();
+                bottomButtonState();
+                Collections.sort(projectDtoList, new Comparator<ProjectDto>() {
+                    @Override
+                    public int compare(ProjectDto o1, ProjectDto o2) {
+                        return StringUtils.compareIgnoreCase(o1.getName(), o2.getName());
+                    }
+                });
+                glasspane.stop();
+                initProjectList(filterProjectsByProject(null));
+            }
         });
+//        executor.submit(() -> {
+//
+//        });
     }
 
     private void unEnableOtherButtonWhenLoadingData() {

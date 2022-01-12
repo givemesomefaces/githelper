@@ -21,18 +21,5 @@ public class GitLabAction extends AnAction {
         Project project = e.getRequiredData(CommonDataKeys.PROJECT);
 
         boolean dialog = new GitLabDialog(project, null, true, DialogWrapper.IdeModalityType.IDE, false).showAndGet();
-//        dialog.pack();
-//        dialog.setLocationRelativeTo(null);
-//        dialog.setVisible(true);
-
-//        Map<GitlabServerDto, Collection<ProjectDto>> gitlabServerDtoCollectionMap = new GitLabSettingsState().loadMapOfServersAndProjects(list);
-//        gitlabServerDtoCollectionMap.values().stream().forEach(o -> System.out.println(o.size()));
-
-//        Project project = e.getRequiredData(CommonDataKeys.PROJECT);
-//        CheckoutProvider.Listener checkoutListener = ProjectLevelVcsManager.getInstance(project).getCompositeCheckoutListener();
-//        VcsCloneDialog dialog = new VcsCloneDialog.Builder(project).forVcs(GitCheckoutProvider.class);
-//        if (dialog.showAndGet()) {
-//            dialog.doClone(checkoutListener);
-//        }
     }
 }
