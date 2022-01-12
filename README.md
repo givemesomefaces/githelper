@@ -5,17 +5,21 @@
 [![Downloads](https://img.shields.io/jetbrains/plugin/d/PLUGIN_ID.svg)](https://plugins.jetbrains.com/plugin/PLUGIN_ID)
 
 <!-- Plugin description -->
-  Support batch checkout branches from local & remote.
-  Support batch delete branches from local & remote.
-  Support batch create merge requests for GitLab.
-  Support batch close merge requests for GitLab.
-  Support batch merge requests for GitLab.
+<![CDATA[
+    <h3>Features:</h3>
+    <ul>
+      <li>Support batch checkout branches from local & remote.</li>
+      <li>Support batch delete branches from local & remote.</li>
+      <li>Support batch create merge requests for GitLab.</li>
+      <li>Support batch close merge requests for GitLab.</li>
+      <li>Support batch merge requests for GitLab.</li>
+    </ul>
+]]>
+  <h3>Git batch operation in right toolwindow named GitHelper</h3>
   
-  Git batch operation in right toolwindow named GitHelper
-  
-  GitLab operation: 
-    step 1. Configure Gitlab server in Settings -> Version Control -> GitLab
-    step 2. Use batch operations in top menu Git -> GitLab
+  <h3>GitLab operation: </h3>
+    <p>step 1. Configure Gitlab server in Settings -> Version Control -> GitLab</p>
+    <p>step 2. Use batch operations in top menu Git -> GitLab</p>
 <!-- Plugin description end -->
 
 ## Installation
