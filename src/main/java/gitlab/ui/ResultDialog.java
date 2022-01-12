@@ -1,7 +1,7 @@
 package gitlab.ui;
 
 import com.intellij.openapi.ui.DialogWrapper;
-import gitlab.bean.MergeRequestResult;
+import gitlab.bean.Result;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
@@ -14,21 +14,22 @@ import java.util.List;
  * @author Lv LiFeng
  * @date 2022/1/11 23:24
  */
-public class MregeRequestResultDialog extends DialogWrapper {
+public class ResultDialog extends DialogWrapper {
     private JPanel contentPane;
     private JTextArea result;
-    private List<MergeRequestResult> mergeRequestResults;
+    private List<Result> results;
 
-    public MregeRequestResultDialog(List<MergeRequestResult> mergeRequestResults) {
+    public ResultDialog(List<Result> results, String title) {
         super(true);
-        this.mergeRequestResults = mergeRequestResults;
+        setTitle(title);
+        this.results = results;
         init();
         result.setBorder(null);
         result.setSelectedTextColor(Color.GREEN);
         result.setLineWrap(true);
         result.setWrapStyleWord(true);
-        result.setText(mergeRequestResults.stream()
-                .map(MergeRequestResult::toString)
+        result.setText(results.stream()
+                .map(Result::toString)
                 .reduce((a, b) -> a + "\n" + b)
                 .get()
         );

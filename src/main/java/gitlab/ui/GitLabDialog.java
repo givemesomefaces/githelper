@@ -4,13 +4,11 @@ import cn.hutool.core.collection.CollectionUtil;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
-import com.intellij.openapi.vcs.CheckoutProvider;
-import com.intellij.openapi.vcs.ProjectLevelVcsManager;
 import com.intellij.openapi.vfs.VirtualFile;
 import git4idea.GitUtil;
 import git4idea.repo.GitRepository;
-import gitlab.bean.SelectedProjectDto;
 import gitlab.bean.ProjectDto;
+import gitlab.bean.SelectedProjectDto;
 import gitlab.helper.RepositoryHelper;
 import gitlab.settings.GitLabSettingsState;
 import org.apache.commons.lang3.StringUtils;
@@ -52,7 +50,6 @@ public class GitLabDialog extends DialogWrapper {
     private List<ProjectDto> projectDtoList = new ArrayList<>();
     private List<ProjectDto> projectDtoListByBranch = new ArrayList<>();
     private Set<ProjectDto> selectedProjectList = new HashSet<>();
-    private CheckoutProvider.Listener checkoutListener;
     private Project project;
 
     private ExecutorService executor = Executors.newSingleThreadExecutor();
@@ -79,53 +76,6 @@ public class GitLabDialog extends DialogWrapper {
         initBottomButton();
     }
 
-    public GitLabDialog(Project project) {
-        super(true);
-        setTitle("Gitlab");
-        init();
-        this.createSouthPanel().setVisible(false);
-        if (gitLabSettingsState.hasSettings()) {
-            projectListDefaultText.setVisible(false);
-            //loading(this);
-            this.project = project;
-            getProjectListAndSortByName();
-            initSerach();
-            initRadioButton();
-            initProjectList(filterProjectsByProject(null));
-            initSelectAllCheckBox();
-            checkoutListener = ProjectLevelVcsManager.getInstance(project).getCompositeCheckoutListener();
-        } else {
-            projectListDefaultText.setVisible(true);
-            projectJList.setVisible(false);
-        }
-
-//        setContentPane(contentPane);
-        setModal(true);
-        getRootPane().setDefaultButton(cancelButton);
-        initBottomButton();
-        // call onCancel() when cross is clicked
-//        setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-//        addWindowListener(new WindowAdapter() {
-//            @Override
-//            public void windowClosing(WindowEvent e) {
-//                onCancel();
-//            }
-//        });
-        cancelButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                onCancel();
-            }
-        });
-        // call onCancel() on ESCAPE
-        contentPane.registerKeyboardAction(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                onCancel();
-            }
-        }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
-    }
-
     @Override
     protected @Nullable JComponent createCenterPanel() {
         return contentPane;
@@ -135,11 +85,13 @@ public class GitLabDialog extends DialogWrapper {
         Dimension dimension = Toolkit.getDefaultToolkit().getScreenSize();
         glasspane.setBounds(100, 100, (dimension.width) / 2, (dimension.height) / 2);
         jDialog.setGlassPane(glasspane);
-        glasspane.start();//开始动画加载效果
+        // 开始动画加载效果
+        glasspane.start();
     }
 
     private void getProjectListAndSortByName() {
         unEnableBottomButton();
+        unEnableOtherButtonWhenLoadingData();
         executor.submit(() -> {
             projectDtoList = gitLabSettingsState.loadMapOfServersAndProjects(gitLabSettingsState.getGitlabServers())
                     .values()
@@ -151,6 +103,7 @@ public class GitLabDialog extends DialogWrapper {
                 projectJList.setVisible(false);
                 return;
             }
+            enableOtherButtonAfterLoadingData();
             bottomButtonState();
             Collections.sort(projectDtoList, new Comparator<ProjectDto>() {
                 @Override
@@ -161,6 +114,17 @@ public class GitLabDialog extends DialogWrapper {
             glasspane.stop();
             initProjectList(filterProjectsByProject(null));
         });
+    }
+
+    private void unEnableOtherButtonWhenLoadingData() {
+        selectAllCheckBox.setEnabled(false);
+        branchNameRadioButton.setEnabled(false);
+        projectNameRadioButton.setEnabled(false);
+    }
+    private void enableOtherButtonAfterLoadingData() {
+        selectAllCheckBox.setEnabled(true);
+        branchNameRadioButton.setEnabled(true);
+        projectNameRadioButton.setEnabled(true);
     }
 
     private void unEnableBottomButton() {
@@ -182,7 +146,6 @@ public class GitLabDialog extends DialogWrapper {
         }
         if (branchNameRadioButton.isSelected()) {
             cloneButton.setEnabled(false);
-            mergeButton.setEnabled(true);
         }
     }
 
@@ -256,7 +219,7 @@ public class GitLabDialog extends DialogWrapper {
                     selectedProjectList.addAll(filterProjectList);
                     projectJList.setSelectionInterval(0, filterProjectList.size());
                 } else {
-                    selectedProjectList.clear();
+                    selectedProjectList.removeAll(filterProjectList);
                     projectJList.clearSelection();
                 }
                 setSelectedCount();

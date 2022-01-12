@@ -10,7 +10,7 @@
     <extensions defaultExtensionNs="com.intellij">
         <applicationService serviceImplementation="com.github.lvlifeng.githelper.services.MyApplicationService"/>
         <projectService serviceImplementation="com.github.lvlifeng.githelper.services.MyProjectService"/>
-        <toolWindow factoryClass="window.GitHelperWindowFactory" id="GitHelper" anchor="right" icon="Icons.ToolWindow"/>
+        <toolWindow factoryClass="window.GitHelperWindowFactory" id="GitHelper" anchor="right" icon="GitHelperIcons.ToolWindow"/>
         <applicationService serviceInterface="gitlab.settings.GitLabSettingsState" serviceImplementation="gitlab.settings.GitLabSettingsState"/>
         <projectConfigurable id="GitLabConfigurableProvider"  provider="gitlab.settings.SettingsConfigurableProvider"
                              parentId="project.propVCSSupport.Mappings" displayName="GitLab"/>
@@ -26,9 +26,6 @@
 
         <action id="GitLab" class="gitlab.actions.GitLabAction" text="GitLab">
             <add-to-group group-id="Git.MainMenu" anchor="after" relative-to-action="GitHub.MainMenu"/>
-        </action>
-        <action id="TestAction" class="gitlab.actions.TestAction" text="TestAction">
-            <add-to-group group-id="ToolsMenu" anchor="first"/>
         </action>
     </actions>
 </idea-plugin>

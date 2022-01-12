@@ -3,6 +3,8 @@ package gitlab.ui;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.map.MapUtil;
 import com.intellij.openapi.ui.DialogWrapper;
+import com.intellij.openapi.ui.ValidationInfo;
+import gitlab.OperationTypeEnum;
 import gitlab.bean.*;
 import lombok.Setter;
 import org.apache.commons.compress.utils.Lists;
@@ -38,43 +40,12 @@ public class MergeRequestDialog extends DialogWrapper {
     private JTextField mergeTitle;
     private JLabel assign2me;
     private SelectedProjectDto selectedProjectDto;
-    private List<MergeRequestResult> mergeRequestResults;
 
     public MergeRequestDialog(SelectedProjectDto selectedProjectDto) {
         super(true);
         this.setTitle("Create merge requests");
         this.selectedProjectDto = selectedProjectDto;
         init();
-//        setContentPane(contentPane);
-//        setModal(true);
-//        getRootPane().setDefaultButton(buttonOK);
-
-//        buttonOK.addActionListener(new ActionListener() {
-//            public void actionPerformed(ActionEvent e) {
-//                onOK();
-//            }
-//        });
-//
-//        buttonCancel.addActionListener(new ActionListener() {
-//            public void actionPerformed(ActionEvent e) {
-//                onCancel();
-//            }
-//        });
-//
-//        // call onCancel() when cross is clicked
-//        setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-//        addWindowListener(new WindowAdapter() {
-//            public void windowClosing(WindowEvent e) {
-//                onCancel();
-//            }
-//        });
-//
-//        // call onCancel() on ESCAPE
-//        contentPane.registerKeyboardAction(new ActionListener() {
-//            public void actionPerformed(ActionEvent e) {
-//                onCancel();
-//            }
-//        }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
     }
 
     @Override
@@ -186,22 +157,25 @@ public class MergeRequestDialog extends DialogWrapper {
         }
         dispose();
         User finalUser = user;
-        mergeRequestResults = selectedProjectDto.getSelectedProjectList().stream().map(s -> {
+        List<Result> results = selectedProjectDto.getSelectedProjectList().stream().map(s -> {
             try {
                 GitlabMergeRequest mergeRequest = selectedProjectDto.getGitLabSettingsState().api(s.getGitlabServer())
                         .createMergeRequest(s, finalUser == null ? null : finalUser.resetId(s.getGitlabServer().getApiUrl()),
                                 source, target, mergeTitle.getText(), desc, false);
-                return new MergeRequestResult()
-                        .setProjectName(s.getName())
-                        .setWebUrl(mergeRequest.getWebUrl())
-                        .setChangesCount(mergeRequest.getChangesCount());
+                Result re = new Result(mergeRequest);
+                        re.setType(OperationTypeEnum.CREATE_MERGE_REQUEST)
+                                .setProjectName(s.getName())
+                                .setChangeFilesCount(mergeRequest.getChangesCount());
+                return re;
             } catch (IOException ioException) {
-                return new MergeRequestResult()
+                Result re = new Result(new GitlabMergeRequest());
+                        re.setType(OperationTypeEnum.CREATE_MERGE_REQUEST)
                         .setProjectName(s.getName())
                         .setErrorMsg(ioException.getMessage());
+                return re;
             }
         }).collect(Collectors.toList());
-        new MregeRequestResultDialog(mergeRequestResults).showAndGet();
+        new ResultDialog(results, OperationTypeEnum.CREATE_MERGE_REQUEST.getDialogTitle()).showAndGet();
     }
 
     private List<String> searchBranch(String text, List<String> commonBranch) {
@@ -224,6 +198,25 @@ public class MergeRequestDialog extends DialogWrapper {
         assignee.setModel(new DefaultComboBoxModel(users.toArray()));
         textField.setText(text);
         assignee.showPopup();
+    }
+
+    @Override
+    protected @Nullable ValidationInfo doValidate() {
+        if (StringUtils.isBlank(mergeTitle.getText())) {
+            return new ValidationInfo("Merge title cannot be empty.", mergeTitle);
+        }
+        if (sourceBranch.getSelectedItem() == null || StringUtils.isBlank(sourceBranch.getSelectedItem().toString())) {
+            return new ValidationInfo("Source Branch cannot be empty.", sourceBranch);
+        }
+        if (targetBranch.getSelectedItem() == null || StringUtils.isBlank(targetBranch.getSelectedItem().toString())) {
+            return new ValidationInfo("Targe Branch cannot be empty.", targetBranch);
+        }
+
+        if (targetBranch.getSelectedItem() != null && sourceBranch.getSelectedItem() != null
+                &&  StringUtils.equalsIgnoreCase(targetBranch.getSelectedItem().toString(), sourceBranch.getSelectedItem().toString())) {
+            return new ValidationInfo("Target branch must be different from Source branch.", targetBranch);
+        }
+        return null;
     }
 
     @Override
