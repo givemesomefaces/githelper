@@ -1,5 +1,6 @@
 package gitlab.ui;
 
+import com.github.lvlifeng.githelper.icons.GitHelperIcons;
 import com.intellij.dvcs.ui.CloneDvcsValidationUtils;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
@@ -76,6 +77,7 @@ public class CloneDialog extends DialogWrapper {
     }
 
     private void initDefaultDirectory(){
+        HIHIHIButton.setIcon(GitHelperIcons.CloneDir);
         directory.setText(System.getProperty("user.home") + File.separator + "IdeaProjects");
         JFileChooser chooser = new JFileChooser();
         chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);

@@ -2,8 +2,10 @@ package gitlab.ui;
 
 import cn.hutool.core.bean.BeanUtil;
 import com.intellij.openapi.ui.DialogWrapper;
+import gitlab.OperationTypeEnum;
 import gitlab.api.GitlabRestApi;
 import gitlab.bean.MergeRequest;
+import gitlab.bean.Result;
 import gitlab.bean.SelectedProjectDto;
 import org.apache.commons.lang3.StringUtils;
 import org.gitlab.api.models.GitlabMergeRequest;
@@ -11,11 +13,8 @@ import org.jetbrains.annotations.Nullable;
 import window.LcheckBox;
 
 import javax.swing.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
+import java.awt.event.*;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -35,16 +34,31 @@ public class MergeDialog extends DialogWrapper {
     private JButton cancelButton;
     private JButton closeButton;
     private JButton mergeButton;
-    private Set<MergeRequest> selectedMergeRequests;
+    private Set<MergeRequest> selectedMergeRequests = new HashSet<>();
     private SelectedProjectDto selectedProjectDto;
+    private List<MergeRequest> filterMergeRequest;
+    private List<MergeRequest> gitlabMergeRequests;
+    private Set<String> allSourcebranch;
+    private Set<String> allTargebranch;
+    private Set<String> allMergeStatus;
+    private String inputSourceBranch = null;
+    private String inputTargetBranch = null;
 
     public MergeDialog(SelectedProjectDto selectedProjectDto) {
         super(null, null, true, IdeModalityType.IDE, false);
+        setTitle("Merge requests");
         this.selectedProjectDto = selectedProjectDto;
         this.createSouthPanel().setVisible(false);
         init();
+        initData();
+        initMergeRequestList(searchMergeRequest());
+        initButton();
+        initCheckAll();
         getRootPane().setDefaultButton(cancelButton);
-        List<MergeRequest> gitlabMergeRequests = selectedProjectDto.getSelectedProjectList()
+    }
+
+    private void initData() {
+        gitlabMergeRequests = selectedProjectDto.getSelectedProjectList()
                 .stream()
                 .map(o -> {
                     List<GitlabMergeRequest> openMergeRequest = selectedProjectDto.getGitLabSettingsState()
@@ -60,27 +74,138 @@ public class MergeDialog extends DialogWrapper {
                 })
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList());
-        Set<String> allSourcebranch = gitlabMergeRequests.stream().map(MergeRequest::getSourceBranch).collect(Collectors.toSet());
-        Set<String> allTargebranch = gitlabMergeRequests.stream().map(MergeRequest::getTargetBranch).collect(Collectors.toSet());
-        Set<String> allMergeStatus = gitlabMergeRequests.stream().map(MergeRequest::getMergeStatus).collect(Collectors.toSet());
+        Collections.sort(gitlabMergeRequests, new Comparator<MergeRequest>() {
+            @Override
+            public int compare(MergeRequest o1, MergeRequest o2) {
+                return StringUtils.compareIgnoreCase(o1.getProjectName(), o2.getProjectName());
+            }
+        });
+        allSourcebranch = gitlabMergeRequests.stream().map(MergeRequest::getSourceBranch).collect(Collectors.toSet());
+        allTargebranch = gitlabMergeRequests.stream().map(MergeRequest::getTargetBranch).collect(Collectors.toSet());
+        allMergeStatus = gitlabMergeRequests.stream().map(MergeRequest::getMergeStatus).collect(Collectors.toSet());
 
         sourceBranch.setModel(new DefaultComboBoxModel(allSourcebranch.toArray()));
         sourceBranch.setSelectedIndex(-1);
         targetBranch.setModel(new DefaultComboBoxModel(allTargebranch.toArray()));
         targetBranch.setSelectedIndex(-1);
         status.setModel(new DefaultComboBoxModel(allMergeStatus.toArray()));
-        status.addItem("all");
+        status.insertItemAt("all", 0);
         status.setSelectedItem("all");
+    }
+
+    private void initButton() {
+        status.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                initMergeRequestList(searchMergeRequest());
+            }
+        });
+        sourceBranch.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                inputSourceBranch = null;
+                initMergeRequestList(searchMergeRequest());
+            }
+        });
+        sourceBranch.getEditor().getEditorComponent().addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent e) {
+                super.keyReleased(e);
+                JTextField textField = (JTextField) e.getSource();
+                String text = textField.getText();
+                sourceBranch.setModel(new DefaultComboBoxModel(searchBranch(text, allSourcebranch).toArray()));
+                sourceBranch.setSelectedItem(null);
+                textField.setText(text);
+                sourceBranch.showPopup();
+                inputSourceBranch = text;
+                initMergeRequestList(searchMergeRequest());
+            }
+        });
+        targetBranch.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                inputTargetBranch = null;
+                initMergeRequestList(searchMergeRequest());
+            }
+        });
+        targetBranch.getEditor().getEditorComponent().addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent e) {
+                super.keyReleased(e);
+                JTextField textField = (JTextField) e.getSource();
+                String text = textField.getText();
+                targetBranch.setModel(new DefaultComboBoxModel(searchBranch(text, allTargebranch).toArray()));
+                targetBranch.setSelectedItem(null);
+                textField.setText(text);
+                targetBranch.showPopup();
+                inputTargetBranch = text;
+                initMergeRequestList(searchMergeRequest());
+            }
+        });
+        closeButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                super.mouseClicked(e);
+                List<Result> results = selectedMergeRequests.stream()
+                        .map(o -> {
+                            GitlabRestApi api = selectedProjectDto.getGitLabSettingsState().api(o.getGitlabServer());
+                            GitlabMergeRequest gitlabMergeRequest = api.updateMergeRequest(o.getProjectId(), o.getIid(), o.getTargetBranch(),
+                                            api.getCurrentUser().getId(), null, null, OperationTypeEnum.CLOSE_MERGE_REQUEST.getType(), null);
+                            return new Result(gitlabMergeRequest)
+                                    .setType(OperationTypeEnum.CLOSE_MERGE_REQUEST)
+                                    .setProjectName(o.getProjectName());
+                        }).collect(Collectors.toList());
+                dispose();
+                new ResultDialog(results, OperationTypeEnum.CLOSE_MERGE_REQUEST.getDialogTitle()).showAndGet();
+            }
+        });
+
+        mergeButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                super.mouseClicked(e);
+                List<Result> results = selectedMergeRequests.stream()
+                        .filter(u -> StringUtils.equalsIgnoreCase(u.getState(), "cannot_be_merged"))
+                        .map(o -> {
+                            GitlabRestApi api = selectedProjectDto.getGitLabSettingsState().api(o.getGitlabServer());
+                            GitlabMergeRequest gitlabMergeRequest = api.updateMergeRequest(o.getProjectId(), o.getIid(), o.getTargetBranch(),
+                                            api.getCurrentUser().getId(), null, null, OperationTypeEnum.MERGE.getType(), null);
+                            return new Result(gitlabMergeRequest)
+                                    .setType(OperationTypeEnum.MERGE)
+                                    .setProjectName(o.getProjectName());
+                        }).collect(Collectors.toList());
+                dispose();
+                new ResultDialog(results, OperationTypeEnum.MERGE.getDialogTitle()).showAndGet();
+            }
+        });
+        cancelButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                super.mouseClicked(e);
+                dispose();
+            }
+        });
+    }
+
+    private Collection<Object> searchBranch(String text, Set<String> allSourcebranch) {
+        return allSourcebranch.stream().filter(s-> s.toLowerCase().contains(text.toLowerCase())).collect(Collectors.toList());
+    }
+
+    private List<MergeRequest> searchMergeRequest() {
         String statusStr = status.getSelectedItem() != null ? status.getSelectedItem().toString()  == "all" ? null : status.getSelectedItem().toString() : null;
-        String sourceBranchStr = sourceBranch.getSelectedItem() != null ? sourceBranch.getSelectedItem().toString() : null;
-        String targetBranchStr = targetBranch.getSelectedItem() != null ? targetBranch.getSelectedItem().toString() : null;
-        List<MergeRequest> filterMergeRequest = gitlabMergeRequests.stream().filter(o ->
-                (StringUtils.isEmpty(statusStr) || StringUtils.equalsIgnoreCase(o.getState(), statusStr))
-                        && (StringUtils.isEmpty(sourceBranchStr) || StringUtils.equalsIgnoreCase(o.getSourceBranch(), sourceBranchStr))
-                        && (StringUtils.isEmpty(targetBranchStr) || StringUtils.equalsIgnoreCase(o.getTargetBranch(), targetBranchStr))
+        String sourceBranchStr = inputSourceBranch != null ? inputSourceBranch : sourceBranch.getSelectedItem() != null ? sourceBranch.getSelectedItem().toString() : null;
+        String targetBranchStr = inputTargetBranch != null ? inputTargetBranch : targetBranch.getSelectedItem() != null ? targetBranch.getSelectedItem().toString() : null;
+        return filterMergeRequest = gitlabMergeRequests.stream().filter(o ->
+                (StringUtils.isEmpty(statusStr) || StringUtils.equalsIgnoreCase(o.getMergeStatus(), statusStr))
+                        && (StringUtils.isEmpty(sourceBranchStr) || o.getSourceBranch().toLowerCase().contains(sourceBranchStr))
+                        && (StringUtils.isEmpty(targetBranchStr) || o.getTargetBranch().toLowerCase().contains(targetBranchStr))
         ).collect(Collectors.toList());
+    }
 
-
+    private void initMergeRequestList(List<MergeRequest> filterMergeRequest) {
+        selectAllCheckBox.setSelected(false);
+        selectedMergeRequests.clear();
+        setSelectedCount();
         mergeRequestList.setListData(filterMergeRequest.toArray());
         mergeRequestList.setCellRenderer(new LcheckBox());
         mergeRequestList.setEnabled(true);
@@ -94,44 +219,41 @@ public class MergeDialog extends DialogWrapper {
                     super.addSelectionInterval(index0, index1);
                     selectedMergeRequests.add(filterMergeRequest.get(index0));
                 }
+                setSelectedCount();
+                updateBottomButtonState();
             }
         });
+    }
 
-        closeButton.addMouseListener(new MouseAdapter() {
+    private void initCheckAll() {
+        selectAllCheckBox.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
-                List<GitlabMergeRequest> closeReusltList = selectedMergeRequests.stream()
-                        .map(o -> {
-                            GitlabRestApi api = selectedProjectDto.getGitLabSettingsState().api(o.getGitlabServer());
-                            return api.updateMergeRequest(o.getProjectId(), o.getId(), o.getTargetBranch(),
-                                    api.getCurrentUser().getId(), null, null, "close", null);
-                        }
-                ).collect(Collectors.toList());
+                JCheckBox checkAll = (JCheckBox) e.getSource();
+                if (checkAll.isSelected()) {
+                    selectedMergeRequests.addAll(filterMergeRequest);
+                    mergeRequestList.setSelectionInterval(0, filterMergeRequest.size());
+                } else {
+                    selectedMergeRequests.removeAll(filterMergeRequest);
+                    mergeRequestList.clearSelection();
+                }
+                setSelectedCount();
+                updateBottomButtonState();
             }
         });
+    }
 
-        mergeButton.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                super.mouseClicked(e);
-                List<GitlabMergeRequest> mergeReusltList = selectedMergeRequests.stream()
-                        .filter(u -> StringUtils.equalsIgnoreCase(u.getState(), "cannot_be_merged"))
-                        .map(o -> {
-                            GitlabRestApi api = selectedProjectDto.getGitLabSettingsState().api(o.getGitlabServer());
-                            return api.updateMergeRequest(o.getProjectId(), o.getId(), o.getTargetBranch(),
-                                    api.getCurrentUser().getId(), null, null, "merge", null);
-                        }
-                ).collect(Collectors.toList());
-            }
-        });
-        cancelButton.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                super.mouseClicked(e);
-                dispose();
-            }
-        });
+    private void updateBottomButtonState() {
+        if (selectedMergeRequests.stream().anyMatch(o -> StringUtils.equalsIgnoreCase(o.getMergeStatus(), "cannot_be_merged"))) {
+            mergeButton.setEnabled(false);
+        } else {
+            mergeButton.setEnabled(true);
+        }
+    }
+
+    private void setSelectedCount() {
+        selected.setText(String.format("(Selected %s)", selectedMergeRequests.size()));
     }
 
 
