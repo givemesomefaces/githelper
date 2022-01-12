@@ -87,11 +87,10 @@ public class GitLabDialog extends DialogWrapper {
     private void getProjectListAndSortByName() {
         unEnableBottomButton();
         unEnableOtherButtonWhenLoadingData();
-        ProgressManager.getInstance().run(new Task.Backgroundable(project, "Loading projects from GitLab server") {
+        ProgressManager.getInstance().run(new Task.Modal(project, "Loading projects from GitLab server", true) {
 
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
-//                indicator.setText("Test......run...");
                 projectDtoList = gitLabSettingsState.loadMapOfServersAndProjects(gitLabSettingsState.getGitlabServers())
                         .values()
                         .stream()
