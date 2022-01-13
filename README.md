@@ -11,6 +11,7 @@
       <ul>
         <li>Supports batch checkout branches from local & remote.</li>
         <li>Supports batch delete branches from local & remote.</li>
+        <li>Supports batch clone projects from GitLab.</li>
         <li>Supports batch create merge requests for GitLab.</li>
         <li>Supports batch close merge requests for GitLab.</li>
         <li>Supports batch merge requests for GitLab.</li>
@@ -21,18 +22,19 @@
         step 2. Use batch operations in top menu Git -> GitLab.
       </p>
 
-    <h3>Features:</h3>
+    <h3>功能:</h3>
       <ul>
         <li>支持从本地、远程批量checkout分支</li>
         <li>支持从本地、远程批量删除分支</li>
+        <li>支持从GitLab批量clone项目</li>
         <li>支持批量创建GitLab合并请求</li>
         <li>支持批量关闭GitLab合并请求</li>
         <li>支持批量合并GitLab合并请求</li>
       </ul>
-        <p>git批操作在右侧菜单GitHelper中<br>
+        <p>Git批操作在右侧菜单GitHelper中。<br>
         GitLab操作: <br>
         <p>1. 在Settings -> Version Control-> GitLab中配置<br>
-        2. 在顶部菜单Git -> GitLab中操作其他操作
+        2. 顶部菜单Git -> GitLab
       </p>
         
 </body>
