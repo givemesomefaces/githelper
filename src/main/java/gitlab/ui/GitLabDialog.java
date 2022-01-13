@@ -46,7 +46,6 @@ public class GitLabDialog extends DialogWrapper {
     private JCheckBox selectAllCheckBox;
     private JLabel selectedCount;
     private JButton cancelButton;
-    private JLabel projectListDefaultText;
     private JButton mergeButton;
 
     private GitLabSettingsState gitLabSettingsState = GitLabSettingsState.getInstance();
@@ -55,16 +54,14 @@ public class GitLabDialog extends DialogWrapper {
     private Set<ProjectDto> selectedProjectList = new HashSet<>();
     private Project project;
 
-    private ExecutorService executor = Executors.newSingleThreadExecutor();
     private LoadingPanel glasspane = new LoadingPanel();
     private List<ProjectDto> filterProjectList = new ArrayList<>();
 
     public GitLabDialog(@Nullable Project project, @Nullable Component parentComponent, boolean canBeParent, @NotNull IdeModalityType ideModalityType, boolean createSouth) {
         super(project, parentComponent, canBeParent, ideModalityType, createSouth);
-        setTitle("Gitlab");
+        setTitle("GitLab");
         init();
         if (gitLabSettingsState.hasSettings()) {
-            projectListDefaultText.setVisible(false);
             //loading(this);
             this.project = project;
             getProjectListAndSortByName();
@@ -73,7 +70,6 @@ public class GitLabDialog extends DialogWrapper {
             initProjectList(filterProjectsByProject(null));
             initSelectAllCheckBox();
         } else {
-            projectListDefaultText.setVisible(true);
         }
         getRootPane().setDefaultButton(cancelButton);
         initBottomButton();
@@ -87,17 +83,17 @@ public class GitLabDialog extends DialogWrapper {
     private void getProjectListAndSortByName() {
         unEnableBottomButton();
         unEnableOtherButtonWhenLoadingData();
-        ProgressManager.getInstance().run(new Task.Modal(project, "Loading projects from GitLab server", true) {
+        ProgressManager.getInstance().run(new Task.Modal(project, "GitLab", true) {
 
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
+                indicator.setText("Loading projects");
                 projectDtoList = gitLabSettingsState.loadMapOfServersAndProjects(gitLabSettingsState.getGitlabServers())
                         .values()
                         .stream()
                         .flatMap(Collection::stream)
                         .collect(Collectors.toList());
                 if (CollectionUtil.isEmpty(projectDtoList)) {
-                    projectListDefaultText.setVisible(true);
                     projectJList.setVisible(false);
                     return;
                 }
@@ -111,11 +107,9 @@ public class GitLabDialog extends DialogWrapper {
                 });
                 glasspane.stop();
                 initProjectList(filterProjectsByProject(null));
+                indicator.setText("Projects loaded");
             }
         });
-//        executor.submit(() -> {
-//
-//        });
     }
 
     private void unEnableOtherButtonWhenLoadingData() {
@@ -175,7 +169,7 @@ public class GitLabDialog extends DialogWrapper {
         createMergeRequestButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                new MergeRequestDialog(new SelectedProjectDto()
+                new MergeRequestDialog(project, new SelectedProjectDto()
                         .setGitLabSettingsState(gitLabSettingsState)
                         .setSelectedProjectList(selectedProjectList)).showAndGet();
             }

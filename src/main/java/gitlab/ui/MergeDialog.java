@@ -1,7 +1,12 @@
 package gitlab.ui;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollectionUtil;
+import com.intellij.openapi.progress.ProgressIndicator;
+import com.intellij.openapi.progress.ProgressManager;
+import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.ui.DialogWrapper;
+import com.intellij.openapi.ui.ValidationInfo;
 import gitlab.OperationTypeEnum;
 import gitlab.api.GitlabRestApi;
 import gitlab.bean.MergeRequest;
@@ -9,6 +14,7 @@ import gitlab.bean.Result;
 import gitlab.bean.SelectedProjectDto;
 import org.apache.commons.lang3.StringUtils;
 import org.gitlab.api.models.GitlabMergeRequest;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import window.LcheckBox;
 
@@ -46,7 +52,7 @@ public class MergeDialog extends DialogWrapper {
 
     public MergeDialog(SelectedProjectDto selectedProjectDto) {
         super(null, null, true, IdeModalityType.IDE, false);
-        setTitle("Merge requests");
+        setTitle("Merge Requests");
         this.selectedProjectDto = selectedProjectDto;
         this.createSouthPanel().setVisible(false);
         init();
@@ -58,39 +64,47 @@ public class MergeDialog extends DialogWrapper {
     }
 
     private void initData() {
-        gitlabMergeRequests = selectedProjectDto.getSelectedProjectList()
-                .stream()
-                .map(o -> {
-                    List<GitlabMergeRequest> openMergeRequest = selectedProjectDto.getGitLabSettingsState()
-                            .api(o.getGitlabServer())
-                            .getOpenMergeRequest(o.getId());
-                    return openMergeRequest.stream().map(u -> {
-                        MergeRequest m = new MergeRequest();
-                        BeanUtil.copyProperties(u, m);
-                        m.setProjectName(o.getName());
-                        m.setGitlabServer(o.getGitlabServer());
-                        return m;
-                    }).collect(Collectors.toList());
-                })
-                .flatMap(Collection::stream)
-                .collect(Collectors.toList());
-        Collections.sort(gitlabMergeRequests, new Comparator<MergeRequest>() {
+        ProgressManager.getInstance().run(new Task.Modal(null, "Merge Requests", true) {
+
             @Override
-            public int compare(MergeRequest o1, MergeRequest o2) {
-                return StringUtils.compareIgnoreCase(o1.getProjectName(), o2.getProjectName());
+            public void run(@NotNull ProgressIndicator indicator) {
+                indicator.setText("Loading merge requests");
+                gitlabMergeRequests = selectedProjectDto.getSelectedProjectList()
+                        .stream()
+                        .map(o -> {
+                            List<GitlabMergeRequest> openMergeRequest = selectedProjectDto.getGitLabSettingsState()
+                                    .api(o.getGitlabServer())
+                                    .getOpenMergeRequest(o.getId());
+                            return openMergeRequest.stream().map(u -> {
+                                MergeRequest m = new MergeRequest();
+                                BeanUtil.copyProperties(u, m);
+                                m.setProjectName(o.getName());
+                                m.setGitlabServer(o.getGitlabServer());
+                                return m;
+                            }).collect(Collectors.toList());
+                        })
+                        .flatMap(Collection::stream)
+                        .collect(Collectors.toList());
+                Collections.sort(gitlabMergeRequests, new Comparator<MergeRequest>() {
+                    @Override
+                    public int compare(MergeRequest o1, MergeRequest o2) {
+                        return StringUtils.compareIgnoreCase(o1.getProjectName(), o2.getProjectName());
+                    }
+                });
+                allSourcebranch = gitlabMergeRequests.stream().map(MergeRequest::getSourceBranch).collect(Collectors.toSet());
+                allTargebranch = gitlabMergeRequests.stream().map(MergeRequest::getTargetBranch).collect(Collectors.toSet());
+                allMergeStatus = gitlabMergeRequests.stream().map(MergeRequest::getMergeStatus).collect(Collectors.toSet());
+
+                sourceBranch.setModel(new DefaultComboBoxModel(allSourcebranch.toArray()));
+                sourceBranch.setSelectedIndex(-1);
+                targetBranch.setModel(new DefaultComboBoxModel(allTargebranch.toArray()));
+                targetBranch.setSelectedIndex(-1);
+                status.setModel(new DefaultComboBoxModel(allMergeStatus.toArray()));
+                status.insertItemAt("all", 0);
+                status.setSelectedItem("all");
+                indicator.setText("Merge requests loaded");
             }
         });
-        allSourcebranch = gitlabMergeRequests.stream().map(MergeRequest::getSourceBranch).collect(Collectors.toSet());
-        allTargebranch = gitlabMergeRequests.stream().map(MergeRequest::getTargetBranch).collect(Collectors.toSet());
-        allMergeStatus = gitlabMergeRequests.stream().map(MergeRequest::getMergeStatus).collect(Collectors.toSet());
-
-        sourceBranch.setModel(new DefaultComboBoxModel(allSourcebranch.toArray()));
-        sourceBranch.setSelectedIndex(-1);
-        targetBranch.setModel(new DefaultComboBoxModel(allTargebranch.toArray()));
-        targetBranch.setSelectedIndex(-1);
-        status.setModel(new DefaultComboBoxModel(allMergeStatus.toArray()));
-        status.insertItemAt("all", 0);
-        status.setSelectedItem("all");
     }
 
     private void initButton() {
@@ -146,16 +160,24 @@ public class MergeDialog extends DialogWrapper {
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
-                List<Result> results = selectedMergeRequests.stream()
-                        .map(o -> {
-                            GitlabRestApi api = selectedProjectDto.getGitLabSettingsState().api(o.getGitlabServer());
-                            GitlabMergeRequest gitlabMergeRequest = api.updateMergeRequest(o.getProjectId(), o.getIid(), o.getTargetBranch(),
+                List<Result> results = (List<Result>) ProgressManager.getInstance().run(new Task.WithResult<>(null, "Merge Requests", false) {
+                    @Override
+                    protected Object compute(@NotNull ProgressIndicator indicator) {
+                        indicator.setText("Closing");
+                        List<Result> results = selectedMergeRequests.stream()
+                                .map(o -> {
+                                    GitlabRestApi api = selectedProjectDto.getGitLabSettingsState().api(o.getGitlabServer());
+                                    GitlabMergeRequest gitlabMergeRequest = api.updateMergeRequest(o.getProjectId(), o.getIid(), o.getTargetBranch(),
                                             api.getCurrentUser().getId(), null, null, OperationTypeEnum.CLOSE_MERGE_REQUEST.getType(), null);
-                            return new Result(gitlabMergeRequest)
-                                    .setType(OperationTypeEnum.CLOSE_MERGE_REQUEST)
-                                    .setProjectName(o.getProjectName());
-                        }).collect(Collectors.toList());
-                dispose();
+                                    return new Result(gitlabMergeRequest)
+                                            .setType(OperationTypeEnum.CLOSE_MERGE_REQUEST)
+                                            .setProjectName(o.getProjectName());
+                                }).collect(Collectors.toList());
+                        dispose();
+                        indicator.setText("Closed");
+                        return results;
+                    }
+                });
                 new ResultDialog(results, OperationTypeEnum.CLOSE_MERGE_REQUEST.getDialogTitle()).showAndGet();
             }
         });
@@ -164,17 +186,25 @@ public class MergeDialog extends DialogWrapper {
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
-                List<Result> results = selectedMergeRequests.stream()
-                        .filter(u -> StringUtils.equalsIgnoreCase(u.getState(), "cannot_be_merged"))
-                        .map(o -> {
-                            GitlabRestApi api = selectedProjectDto.getGitLabSettingsState().api(o.getGitlabServer());
-                            GitlabMergeRequest gitlabMergeRequest = api.updateMergeRequest(o.getProjectId(), o.getIid(), o.getTargetBranch(),
+                List<Result> results = (List<Result>) ProgressManager.getInstance().run(new Task.WithResult(null, "Merge Requests", false) {
+                    @Override
+                    protected Object compute(@NotNull ProgressIndicator indicator) {
+                        indicator.setText("Merging");
+                        List<Result> results = selectedMergeRequests.stream()
+                                .filter(u -> StringUtils.equalsIgnoreCase(u.getState(), "cannot_be_merged"))
+                                .map(o -> {
+                                    GitlabRestApi api = selectedProjectDto.getGitLabSettingsState().api(o.getGitlabServer());
+                                    GitlabMergeRequest gitlabMergeRequest = api.updateMergeRequest(o.getProjectId(), o.getIid(), o.getTargetBranch(),
                                             api.getCurrentUser().getId(), null, null, OperationTypeEnum.MERGE.getType(), null);
-                            return new Result(gitlabMergeRequest)
-                                    .setType(OperationTypeEnum.MERGE)
-                                    .setProjectName(o.getProjectName());
-                        }).collect(Collectors.toList());
-                dispose();
+                                    return new Result(gitlabMergeRequest)
+                                            .setType(OperationTypeEnum.MERGE)
+                                            .setProjectName(o.getProjectName());
+                                }).collect(Collectors.toList());
+                        dispose();
+                        indicator.setText("Merged");
+                        return results;
+                    }
+                });
                 new ResultDialog(results, OperationTypeEnum.MERGE.getDialogTitle()).showAndGet();
             }
         });
@@ -256,6 +286,13 @@ public class MergeDialog extends DialogWrapper {
         selected.setText(String.format("(Selected %s)", selectedMergeRequests.size()));
     }
 
+    @Override
+    protected @Nullable ValidationInfo doValidate() {
+        if (CollectionUtil.isEmpty(selectedMergeRequests)) {
+            return new ValidationInfo("Please select at least one branch", mergeRequestList);
+        }
+        return null;
+    }
 
     @Override
     protected @Nullable JComponent createCenterPanel() {
