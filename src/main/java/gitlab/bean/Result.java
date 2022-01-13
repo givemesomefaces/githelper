@@ -3,7 +3,7 @@ package gitlab.bean;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
-import gitlab.OperationTypeEnum;
+import gitlab.enums.OperationTypeEnum;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;

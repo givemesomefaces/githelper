@@ -8,6 +8,17 @@ object GitHelperIcons {
     val ToolWindow = IconLoader.getIcon("/icons/pluginIcon.svg", javaClass)
 
     @JvmField
-    val CloneDir = IconLoader.getIcon("/icons/Directory(Color).svg", javaClass)
+    val DirectoryDir = IconLoader.getIcon("/icons/directory.svg", javaClass)
+
+    @JvmField
+    val Delete = IconLoader.getIcon("/icons/delete.svg", javaClass)
+
+    @JvmField
+    val Add = IconLoader.getIcon("/icons/add.svg", javaClass)
+
+    @JvmField
+    val Edit = IconLoader.getIcon("/icons/edit.svg", javaClass)
+
+
 
 }

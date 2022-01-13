@@ -36,6 +36,8 @@ public class GitlabRestApi {
         if (host != null && key != null && !host.isEmpty() && !key.isEmpty()) {
             api = GitlabAPI.connect(host, key, TokenType.PRIVATE_TOKEN, AuthMethod.URL_PARAMETER);
             api.ignoreCertificateErrors(true);
+            api.setConnectionTimeout(15 * 1000);
+            api.setResponseReadTimeout(15 * 1000);
             return true;
         }
         return false;

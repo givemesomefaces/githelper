@@ -1,11 +1,11 @@
 package gitlab.settings;
 
+import com.github.lvlifeng.githelper.icons.GitHelperIcons;
 import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.openapi.options.SearchableConfigurable;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import git4idea.DialogManager;
-
 import gitlab.bean.GitlabServer;
 import gitlab.bean.ReadOnlyTableModel;
 import org.jetbrains.annotations.Nls;
@@ -14,14 +14,14 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import javax.swing.table.TableModel;
+import java.awt.*;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.Collection;
 
-/**
- * Dialog for GitLab setting configuration
- *
- * @author ppolivka
- * @since 27.10.2015
- */
+
 public class SettingsView extends DialogWrapper implements SearchableConfigurable {
 
     public static final String DIALOG_TITLE = "GitLab Settings";
@@ -29,9 +29,9 @@ public class SettingsView extends DialogWrapper implements SearchableConfigurabl
 
     private JPanel mainPanel;
     private JTable serverTable;
-    private JButton addNewOneButton;
-    private JButton editButton;
-    private JButton deleteButton;
+    private JLabel addButton;
+    private JLabel editButton;
+    private JLabel deleteButton;
 
     public SettingsView(@Nullable Project project) {
         super(project);
@@ -43,27 +43,52 @@ public class SettingsView extends DialogWrapper implements SearchableConfigurabl
     @Override
     protected void init() {
         super.init();
+        initButton();
         reset();
     }
 
+    private void initButton() {
+        addButton.setIcon(GitHelperIcons.Add);
+        addButton.setBorder(null);
+        editButton.setIcon(GitHelperIcons.Edit);
+        editButton.setBorder(null);
+        deleteButton.setIcon(GitHelperIcons.Delete);
+        deleteButton.setBorder(null);
+    }
+
     public void setup() {
-        addNewOneButton.addActionListener(e -> {
-            ServerConfiguration serverConfiguration = new ServerConfiguration(null);
-            DialogManager.show(serverConfiguration);
-            reset();
-        });
-        deleteButton.addActionListener(e -> {
-            GitlabServer server = getSelectedServer();
-            if(server != null) {
-                settingsState.deleteServer(server);
+        addButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                super.mouseClicked(e);
+                ServerConfiguration serverConfiguration = new ServerConfiguration(null);
+                DialogManager.show(serverConfiguration);
                 reset();
             }
         });
-        editButton.addActionListener(e -> {
-            GitlabServer server = getSelectedServer();
-            ServerConfiguration serverConfiguration = new ServerConfiguration(server);
-            DialogManager.show(serverConfiguration);
-            reset();
+        deleteButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                super.mouseClicked(e);
+                GitlabServer server = getSelectedServer();
+                if (server != null) {
+                    settingsState.deleteServer(server);
+                    reset();
+                }
+            }
+        });
+        editButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                super.mouseClicked(e);
+                GitlabServer server = getSelectedServer();
+                if (server == null) {
+                    return;
+                }
+                ServerConfiguration serverConfiguration = new ServerConfiguration(server);
+                DialogManager.show(serverConfiguration);
+                reset();
+            }
         });
     }
 

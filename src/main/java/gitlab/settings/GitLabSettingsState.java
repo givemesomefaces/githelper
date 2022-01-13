@@ -14,14 +14,12 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.experimental.Accessors;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -109,7 +107,13 @@ public class GitLabSettingsState implements PersistentStateComponent<GitLabSetti
     }
 
     public void deleteServer(GitlabServer server) {
-        getGitlabServers().stream().filter(s -> server.getApiUrl().equals(s.getApiUrl())).forEach(removedServer -> getGitlabServers().remove(removedServer));
+        Iterator<GitlabServer> it = getGitlabServers().iterator();
+        while (it.hasNext()) {
+            GitlabServer next = it.next();
+            if (StringUtils.equalsIgnoreCase(server.getApiUrl(), next.getApiUrl())) {
+                it.remove();
+            }
+        }
     }
 
     public boolean hasSettings(){

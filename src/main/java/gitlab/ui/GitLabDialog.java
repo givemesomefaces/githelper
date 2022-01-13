@@ -80,7 +80,6 @@ public class GitLabDialog extends DialogWrapper {
         unEnableBottomButton();
         unEnableOtherButtonWhenLoadingData();
         ProgressManager.getInstance().run(new Task.Modal(project, "GitLab", false) {
-
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
                 indicator.setText("Loading projects...");
