@@ -8,7 +8,7 @@ import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.ValidationInfo;
-import gitlab.OperationTypeEnum;
+import gitlab.enums.OperationTypeEnum;
 import gitlab.bean.*;
 import lombok.Setter;
 import org.apache.commons.compress.utils.Lists;

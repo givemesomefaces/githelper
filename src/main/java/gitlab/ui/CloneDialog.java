@@ -33,7 +33,7 @@ public class CloneDialog extends DialogWrapper {
     private JPanel contentPane;
     private JPanel clonePane;
     private JTextField directory;
-    private JButton HIHIHIButton;
+    private JLabel directoryButton;
     private Set<ProjectDto> selectedProjectList;
     private CheckoutProvider.Listener checkoutListener;
     private Project project;
@@ -77,11 +77,12 @@ public class CloneDialog extends DialogWrapper {
     }
 
     private void initDefaultDirectory(){
-        HIHIHIButton.setIcon(GitHelperIcons.CloneDir);
+        directoryButton.setIcon(GitHelperIcons.DirectoryDir);
+        directoryButton.setBorder(null);
         directory.setText(System.getProperty("user.home") + File.separator + "IdeaProjects");
         JFileChooser chooser = new JFileChooser();
         chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-        HIHIHIButton.addMouseListener(new MouseAdapter() {
+        directoryButton.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);

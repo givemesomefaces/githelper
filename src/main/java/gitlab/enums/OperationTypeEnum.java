@@ -1,4 +1,4 @@
-package gitlab;
+package gitlab.enums;
 
 import lombok.Getter;
 

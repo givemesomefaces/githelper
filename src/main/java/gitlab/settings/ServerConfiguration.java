@@ -61,8 +61,11 @@ public class ServerConfiguration extends DialogWrapper {
     protected ValidationInfo doValidate() {
         final String apiUrl = apiURl.getText();
         final String tokenString = token.getText();
-        if(StringUtils.isBlank(apiUrl) && StringUtils.isBlank(tokenString)) {
-            return null;
+        if(StringUtils.isBlank(apiUrl)) {
+            return new ValidationInfo(SettingError.URL_NOT_NULL.message(), apiURl);
+        }
+        if(StringUtils.isBlank(tokenString)) {
+            return new ValidationInfo(SettingError.TOKEN_NOT_NULL.message(), token);
         }
         try {
             if (isNotBlank(apiUrl) && isNotBlank(tokenString)) {

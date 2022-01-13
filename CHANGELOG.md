@@ -17,3 +17,7 @@
 ## [1.1.1]
 ### Added
 - the top menu git -> gitlab supports configuration settings. 
+
+## [1.1.2]
+### Added
+- add timeout (15s) for rest api.

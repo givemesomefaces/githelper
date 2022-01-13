@@ -7,7 +7,7 @@ import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.ValidationInfo;
-import gitlab.OperationTypeEnum;
+import gitlab.enums.OperationTypeEnum;
 import gitlab.api.GitlabRestApi;
 import gitlab.bean.MergeRequest;
 import gitlab.bean.Result;
