@@ -58,11 +58,11 @@ public class MergeRequestDialog extends DialogWrapper {
     @Override
     protected void init() {
         super.init();
-        ProgressManager.getInstance().run(new Task.Modal(null, "Create Merge Request", true) {
+        ProgressManager.getInstance().run(new Task.Modal(null, "Create Merge Request", false) {
 
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
-                indicator.setText("Loading branches");
+                indicator.setText("Loading branches...");
                 List<String> commonBranch = selectedProjectDto.getSelectedProjectList().stream()
                         .map(o -> selectedProjectDto.getGitLabSettingsState().api(o.getGitlabServer())
                                 .getBranchesByProject(o)

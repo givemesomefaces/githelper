@@ -1,6 +1,5 @@
 package gitlab.api;
 
-import gitlab.bean.Namespace;
 import org.apache.commons.compress.utils.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.gitlab.api.AuthMethod;

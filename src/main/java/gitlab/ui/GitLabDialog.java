@@ -14,6 +14,7 @@ import gitlab.bean.ProjectDto;
 import gitlab.bean.SelectedProjectDto;
 import gitlab.helper.RepositoryHelper;
 import gitlab.settings.GitLabSettingsState;
+import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -54,23 +55,18 @@ public class GitLabDialog extends DialogWrapper {
     private Set<ProjectDto> selectedProjectList = new HashSet<>();
     private Project project;
 
-    private LoadingPanel glasspane = new LoadingPanel();
     private List<ProjectDto> filterProjectList = new ArrayList<>();
 
     public GitLabDialog(@Nullable Project project, @Nullable Component parentComponent, boolean canBeParent, @NotNull IdeModalityType ideModalityType, boolean createSouth) {
         super(project, parentComponent, canBeParent, ideModalityType, createSouth);
         setTitle("GitLab");
         init();
-        if (gitLabSettingsState.hasSettings()) {
-            //loading(this);
-            this.project = project;
-            getProjectListAndSortByName();
-            initSerach();
-            initRadioButton();
-            initProjectList(filterProjectsByProject(null));
-            initSelectAllCheckBox();
-        } else {
-        }
+        this.project = project;
+        getProjectListAndSortByName();
+        initSerach();
+        initRadioButton();
+        initProjectList(filterProjectsByProject(null));
+        initSelectAllCheckBox();
         getRootPane().setDefaultButton(cancelButton);
         initBottomButton();
     }
@@ -83,18 +79,17 @@ public class GitLabDialog extends DialogWrapper {
     private void getProjectListAndSortByName() {
         unEnableBottomButton();
         unEnableOtherButtonWhenLoadingData();
-        ProgressManager.getInstance().run(new Task.Modal(project, "GitLab", true) {
+        ProgressManager.getInstance().run(new Task.Modal(project, "GitLab", false) {
 
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
-                indicator.setText("Loading projects");
+                indicator.setText("Loading projects...");
                 projectDtoList = gitLabSettingsState.loadMapOfServersAndProjects(gitLabSettingsState.getGitlabServers())
                         .values()
                         .stream()
                         .flatMap(Collection::stream)
                         .collect(Collectors.toList());
                 if (CollectionUtil.isEmpty(projectDtoList)) {
-                    projectJList.setVisible(false);
                     return;
                 }
                 enableOtherButtonAfterLoadingData();
@@ -105,9 +100,13 @@ public class GitLabDialog extends DialogWrapper {
                         return StringUtils.compareIgnoreCase(o1.getName(), o2.getName());
                     }
                 });
-                glasspane.stop();
                 initProjectList(filterProjectsByProject(null));
                 indicator.setText("Projects loaded");
+            }
+
+            @Override
+            public void onCancel() {
+                super.onCancel();
             }
         });
     }

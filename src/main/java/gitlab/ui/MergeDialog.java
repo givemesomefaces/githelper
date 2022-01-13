@@ -55,16 +55,26 @@ public class MergeDialog extends DialogWrapper {
         setTitle("Merge Requests");
         this.selectedProjectDto = selectedProjectDto;
         this.createSouthPanel().setVisible(false);
+        getRootPane().setDefaultButton(cancelButton);
         init();
         initData();
+        if (CollectionUtil.isEmpty(gitlabMergeRequests)) {
+            return;
+        }
         initMergeRequestList(searchMergeRequest());
         initButton();
         initCheckAll();
-        getRootPane().setDefaultButton(cancelButton);
     }
 
     private void initData() {
-        ProgressManager.getInstance().run(new Task.Modal(null, "Merge Requests", true) {
+        cancelButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                super.mouseClicked(e);
+                dispose();
+            }
+        });
+        ProgressManager.getInstance().run(new Task.Modal(null, "Merge Requests", false) {
 
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
@@ -85,6 +95,12 @@ public class MergeDialog extends DialogWrapper {
                         })
                         .flatMap(Collection::stream)
                         .collect(Collectors.toList());
+                if (CollectionUtil.isEmpty(gitlabMergeRequests)) {
+                    mergeButton.setEnabled(false);
+                    closeButton.setEnabled(false);
+                    selectAllCheckBox.setEnabled(false);
+                    return;
+                }
                 Collections.sort(gitlabMergeRequests, new Comparator<MergeRequest>() {
                     @Override
                     public int compare(MergeRequest o1, MergeRequest o2) {
@@ -163,7 +179,7 @@ public class MergeDialog extends DialogWrapper {
                 List<Result> results = (List<Result>) ProgressManager.getInstance().run(new Task.WithResult<>(null, "Merge Requests", false) {
                     @Override
                     protected Object compute(@NotNull ProgressIndicator indicator) {
-                        indicator.setText("Closing");
+                        indicator.setText("Closing...");
                         List<Result> results = selectedMergeRequests.stream()
                                 .map(o -> {
                                     GitlabRestApi api = selectedProjectDto.getGitLabSettingsState().api(o.getGitlabServer());
@@ -173,11 +189,11 @@ public class MergeDialog extends DialogWrapper {
                                             .setType(OperationTypeEnum.CLOSE_MERGE_REQUEST)
                                             .setProjectName(o.getProjectName());
                                 }).collect(Collectors.toList());
-                        dispose();
                         indicator.setText("Closed");
                         return results;
                     }
                 });
+                dispose();
                 new ResultDialog(results, OperationTypeEnum.CLOSE_MERGE_REQUEST.getDialogTitle()).showAndGet();
             }
         });
@@ -189,7 +205,7 @@ public class MergeDialog extends DialogWrapper {
                 List<Result> results = (List<Result>) ProgressManager.getInstance().run(new Task.WithResult(null, "Merge Requests", false) {
                     @Override
                     protected Object compute(@NotNull ProgressIndicator indicator) {
-                        indicator.setText("Merging");
+                        indicator.setText("Merging...");
                         List<Result> results = selectedMergeRequests.stream()
                                 .filter(u -> StringUtils.equalsIgnoreCase(u.getState(), "cannot_be_merged"))
                                 .map(o -> {
@@ -200,19 +216,12 @@ public class MergeDialog extends DialogWrapper {
                                             .setType(OperationTypeEnum.MERGE)
                                             .setProjectName(o.getProjectName());
                                 }).collect(Collectors.toList());
-                        dispose();
                         indicator.setText("Merged");
                         return results;
                     }
                 });
-                new ResultDialog(results, OperationTypeEnum.MERGE.getDialogTitle()).showAndGet();
-            }
-        });
-        cancelButton.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                super.mouseClicked(e);
                 dispose();
+                new ResultDialog(results, OperationTypeEnum.MERGE.getDialogTitle()).showAndGet();
             }
         });
     }

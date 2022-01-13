@@ -5,21 +5,37 @@
 [![Downloads](https://img.shields.io/jetbrains/plugin/d/PLUGIN_ID.svg)](https://plugins.jetbrains.com/plugin/PLUGIN_ID)
 
 <!-- Plugin description -->
-<![CDATA[
+  <![CDATA[
+<body>
+      <h3>Features:</h3>
+      <ul>
+        <li>Supports batch checkout branches from local & remote.</li>
+        <li>Supports batch delete branches from local & remote.</li>
+        <li>Supports batch create merge requests for GitLab.</li>
+        <li>Supports batch close merge requests for GitLab.</li>
+        <li>Supports batch merge requests for GitLab.</li>
+      </ul>
+        <p>Git batch operation in right toolwindow named GitHelper.<br>
+        GitLab operation: <br>
+        <p>step 1. Configure Gitlab server in Settings -> Version Control -> GitLab.<br>
+        step 2. Use batch operations in top menu Git -> GitLab.
+      </p>
+
     <h3>Features:</h3>
-    <ul>
-      <li>Support batch checkout branches from local & remote.</li>
-      <li>Support batch delete branches from local & remote.</li>
-      <li>Support batch create merge requests for GitLab.</li>
-      <li>Support batch close merge requests for GitLab.</li>
-      <li>Support batch merge requests for GitLab.</li>
-    </ul>
-]]>
-  <h3>Git batch operation in right toolwindow named GitHelper</h3>
-  
-  <h3>GitLab operation: </h3>
-    <p>step 1. Configure Gitlab server in Settings -> Version Control -> GitLab</p>
-    <p>step 2. Use batch operations in top menu Git -> GitLab</p>
+      <ul>
+        <li>支持从本地、远程批量checkout分支</li>
+        <li>支持从本地、远程批量删除分支</li>
+        <li>支持批量创建GitLab合并请求</li>
+        <li>支持批量关闭GitLab合并请求</li>
+        <li>支持批量合并GitLab合并请求</li>
+      </ul>
+        <p>git批操作在右侧菜单GitHelper中<br>
+        GitLab操作: <br>
+        <p>1. 在Settings -> Version Control-> GitLab中配置<br>
+        2. 在顶部菜单Git -> GitLab中操作其他操作
+      </p>
+        
+</body>
 <!-- Plugin description end -->
 
 ## Installation
