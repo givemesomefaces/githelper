@@ -2,6 +2,8 @@ package gitlab.settings;
 
 import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.openapi.options.SearchableConfigurable;
+import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.DialogWrapper;
 import git4idea.DialogManager;
 
 import gitlab.bean.GitlabServer;
@@ -20,7 +22,7 @@ import java.util.Collection;
  * @author ppolivka
  * @since 27.10.2015
  */
-public class SettingsView implements SearchableConfigurable {
+public class SettingsView extends DialogWrapper implements SearchableConfigurable {
 
     public static final String DIALOG_TITLE = "GitLab Settings";
     GitLabSettingsState settingsState = GitLabSettingsState.getInstance();
@@ -30,6 +32,19 @@ public class SettingsView implements SearchableConfigurable {
     private JButton addNewOneButton;
     private JButton editButton;
     private JButton deleteButton;
+
+    public SettingsView(@Nullable Project project) {
+        super(project);
+        setTitle(DIALOG_TITLE);
+        init();
+        setup();
+    }
+
+    @Override
+    protected void init() {
+        super.init();
+        reset();
+    }
 
     public void setup() {
         addNewOneButton.addActionListener(e -> {
@@ -137,5 +152,10 @@ public class SettingsView implements SearchableConfigurable {
             deleteButton.setEnabled(true);
         });
 
+    }
+
+    @Override
+    protected @Nullable JComponent createCenterPanel() {
+        return mainPanel;
     }
 }
