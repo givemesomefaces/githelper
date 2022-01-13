@@ -63,6 +63,7 @@
             </constraints>
             <properties>
               <text value="Project name"/>
+              <toolTipText value="include all gitlab server "/>
             </properties>
           </component>
           <component id="e64d0" class="javax.swing.JRadioButton" binding="branchNameRadioButton" default-binding="true">
@@ -71,6 +72,7 @@
             </constraints>
             <properties>
               <text value="Branch name"/>
+              <toolTipText value="just include current workspace projects"/>
             </properties>
           </component>
         </children>

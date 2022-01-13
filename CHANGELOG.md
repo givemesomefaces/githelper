@@ -13,3 +13,7 @@
 ## [1.1.0]
 ### Added
 - add GitLab batch operations. create merge request，close merge request, merge request.
+
+## [1.1.1]
+### Added
+- the top menu git -> gitlab supports configuration settings. 
