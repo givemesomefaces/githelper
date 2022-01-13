@@ -78,7 +78,7 @@ public class MergeDialog extends DialogWrapper {
 
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
-                indicator.setText("Loading merge requests");
+                indicator.setText("Loading merge requests...");
                 gitlabMergeRequests = selectedProjectDto.getSelectedProjectList()
                         .stream()
                         .map(o -> {
