@@ -164,7 +164,7 @@ public class MergeRequestDialog extends DialogWrapper {
         List<Result> resultList = (List<Result>) ProgressManager.getInstance().run(new Task.WithResult(null, "Create Merge Request", false) {
             @Override
             protected Object compute(@NotNull ProgressIndicator indicator) {
-                indicator.setText("Merge request is creating");
+                indicator.setText("Merge request is creating...");
                 String source = (String) sourceBranch.getSelectedItem();
                 String target = (String) targetBranch.getSelectedItem();
                 String desc = description.getText();
