@@ -292,7 +292,7 @@ public class MergeDialog extends DialogWrapper {
     }
 
     private void setSelectedCount() {
-        selected.setText(String.format("(Selected %s)", selectedMergeRequests.size()));
+        selected.setText(String.format("(%s selected)", selectedMergeRequests.size()));
     }
 
     @Override

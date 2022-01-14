@@ -39,13 +39,13 @@ import java.util.stream.Collectors;
 )
 public class GitLabSettingsState implements PersistentStateComponent<GitLabSettingsState> {
 
-    public String host;
+    private String host;
 
-    public String token;
+    private String token;
 
-    public boolean defaultRemoveBranch;
+    private boolean defaultRemoveBranch;
 
-    public Collection<GitlabServer> gitlabServers = new ArrayList<>();
+    private Collection<GitlabServer> gitlabServers = new ArrayList<>();
 
     public static GitLabSettingsState getInstance() {
         return ServiceManager.getService(GitLabSettingsState.class);
@@ -96,7 +96,7 @@ public class GitLabSettingsState implements PersistentStateComponent<GitLabSetti
         if(getGitlabServers().stream().noneMatch(s -> server.getApiUrl().equals(s.getApiUrl()))) {
             getGitlabServers().add(server);
         } else {
-            getGitlabServers().stream().filter(s -> server.getApiUrl().equals(s.getApiUrl())).forEach(changedServer -> {
+            getGitlabServers().stream().filter(s -> Objects.nonNull(server) && server.getApiUrl().equals(s.getApiUrl())).forEach(changedServer -> {
                 changedServer.setApiUrl(server.getApiUrl());
                 changedServer.setRepositoryUrl(server.getRepositoryUrl());
                 changedServer.setApiToken(server.getApiToken());
@@ -107,10 +107,10 @@ public class GitLabSettingsState implements PersistentStateComponent<GitLabSetti
     }
 
     public void deleteServer(GitlabServer server) {
-        Iterator<GitlabServer> it = getGitlabServers().iterator();
+        Iterator<GitlabServer> it = gitlabServers.iterator();
         while (it.hasNext()) {
             GitlabServer next = it.next();
-            if (StringUtils.equalsIgnoreCase(server.getApiUrl(), next.getApiUrl())) {
+            if (Objects.isNull(next) || StringUtils.equalsIgnoreCase(server.getApiUrl(), next.getApiUrl())) {
                 it.remove();
             }
         }
@@ -118,5 +118,10 @@ public class GitLabSettingsState implements PersistentStateComponent<GitLabSetti
 
     public boolean hasSettings(){
         return CollectionUtil.isNotEmpty(getGitlabServers());
+    }
+
+    public Collection<GitlabServer> getGitlabServers() {
+        gitlabServers = gitlabServers.stream().filter(Objects::nonNull).collect(Collectors.toList());
+        return gitlabServers;
     }
 }
