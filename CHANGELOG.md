@@ -21,3 +21,7 @@
 ## [1.1.2]
 ### Added
 - add timeout (15s) for rest api.
+
+## [1.1.3]
+### Fixed
+- fix bugs.
