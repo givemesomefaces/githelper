@@ -20,6 +20,8 @@ import java.awt.event.FocusListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Collection;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 
 public class SettingsView extends DialogWrapper implements SearchableConfigurable {
@@ -104,6 +106,9 @@ public class SettingsView extends DialogWrapper implements SearchableConfigurabl
         Object[][] data = new Object[servers.size()][columnNames.length];
         int i = 0;
         for (GitlabServer server : servers) {
+            if (server == null) {
+                continue;
+            }
             Object[] row = new Object[columnNames.length];
             row[0] = server;
             row[1] = server.getApiUrl();

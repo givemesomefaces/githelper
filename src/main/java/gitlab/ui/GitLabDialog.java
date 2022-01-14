@@ -223,7 +223,7 @@ public class GitLabDialog extends DialogWrapper {
     }
 
     private void setSelectedCount() {
-        selectedCount.setText(String.format("(Selected %s)", selectedProjectList.size()));
+        selectedCount.setText(String.format("(%s selected)", selectedProjectList.size()));
     }
 
     private List<ProjectDto> filterProjectsByProject(String searchWord){
@@ -321,7 +321,7 @@ public class GitLabDialog extends DialogWrapper {
         selectedProjectList.clear();
         projectJList.clearSelection();
         selectAllCheckBox.setSelected(false);
-        selectedCount.setText("(Selected 0)");
+        selectedCount.setText("(0 selected)");
     }
 
     private List<ProjectDto> filterProjectListByBranch(String searchWord) {

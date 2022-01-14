@@ -150,6 +150,9 @@ public class ServerConfiguration extends DialogWrapper {
     }
 
     private void openWebPage(String uri) {
+        if (StringUtils.isBlank(uri)){
+            return;
+        }
         Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
         if (desktop != null && desktop.isSupported(Desktop.Action.BROWSE)) {
             try {

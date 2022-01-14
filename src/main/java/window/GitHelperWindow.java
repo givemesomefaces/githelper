@@ -218,7 +218,7 @@ public class GitHelperWindow {
     }
 
     private void setChoosedSum() {
-        choosedSum.setText(String.format("(Selected %s)", choosedRepositories.size()));
+        choosedSum.setText(String.format("(%s selected)", choosedRepositories.size()));
     }
 
     private void assembleCommonRemoteBranchDataList() {
