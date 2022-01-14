@@ -31,7 +31,7 @@ public class ResultDialog extends DialogWrapper {
         result.setText(results.stream()
                 .map(Result::toString)
                 .reduce((a, b) -> a + "\n" + b)
-                .get()
+                .orElse("None")
         );
         result.setSelectionStart(0);
         result.setSelectionEnd(result.getText().length());

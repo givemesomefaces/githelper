@@ -7,11 +7,11 @@ import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.ValidationInfo;
-import gitlab.enums.OperationTypeEnum;
 import gitlab.api.GitlabRestApi;
 import gitlab.bean.MergeRequest;
 import gitlab.bean.Result;
 import gitlab.bean.SelectedProjectDto;
+import gitlab.enums.OperationTypeEnum;
 import org.apache.commons.lang3.StringUtils;
 import org.gitlab.api.models.GitlabMergeRequest;
 import org.jetbrains.annotations.NotNull;
@@ -207,7 +207,7 @@ public class MergeDialog extends DialogWrapper {
                     protected Object compute(@NotNull ProgressIndicator indicator) {
                         indicator.setText("Merging...");
                         List<Result> results = selectedMergeRequests.stream()
-                                .filter(u -> StringUtils.equalsIgnoreCase(u.getState(), "can_be_merged"))
+                                .filter(u -> StringUtils.equalsIgnoreCase(u.getMergeStatus(), "can_be_merged"))
                                 .map(o -> {
                                     GitlabRestApi api = selectedProjectDto.getGitLabSettingsState().api(o.getGitlabServer());
                                     GitlabMergeRequest gitlabMergeRequest = api.updateMergeRequest(o.getProjectId(), o.getIid(), o.getTargetBranch(),
