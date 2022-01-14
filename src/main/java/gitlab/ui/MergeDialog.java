@@ -207,7 +207,7 @@ public class MergeDialog extends DialogWrapper {
                     protected Object compute(@NotNull ProgressIndicator indicator) {
                         indicator.setText("Merging...");
                         List<Result> results = selectedMergeRequests.stream()
-                                .filter(u -> StringUtils.equalsIgnoreCase(u.getState(), "cannot_be_merged"))
+                                .filter(u -> StringUtils.equalsIgnoreCase(u.getState(), "can_be_merged"))
                                 .map(o -> {
                                     GitlabRestApi api = selectedProjectDto.getGitLabSettingsState().api(o.getGitlabServer());
                                     GitlabMergeRequest gitlabMergeRequest = api.updateMergeRequest(o.getProjectId(), o.getIid(), o.getTargetBranch(),
