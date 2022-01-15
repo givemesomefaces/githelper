@@ -149,12 +149,11 @@ public class GitlabRestApi {
     }
     public GitlabMergeRequest updateMergeRequest(Serializable projectId, Integer mergeRequestIid, String targetBranch,
                                     Integer assigneeId, String title, String description, String stateEvent,
-                                    String labels){
-        try {
-            return api.updateMergeRequest(projectId, mergeRequestIid, targetBranch, assigneeId, title, description, stateEvent, labels);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
+                                    String labels) throws IOException {
+        return api.updateMergeRequest(projectId, mergeRequestIid, targetBranch, assigneeId, title, description, stateEvent, labels);
+    }
+
+    public GitlabMergeRequest acceptMergeRequest(Serializable projectId, Integer mergeRequestIid, String mergeCommitMessage) throws IOException {
+        return api.acceptMergeRequest(projectId, mergeRequestIid, mergeCommitMessage);
     }
 }

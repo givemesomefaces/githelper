@@ -11,6 +11,7 @@ import gitlab.api.GitlabRestApi;
 import gitlab.bean.MergeRequest;
 import gitlab.bean.Result;
 import gitlab.bean.SelectedProjectDto;
+import gitlab.enums.MergeStatusEnum;
 import gitlab.enums.OperationTypeEnum;
 import org.apache.commons.lang3.StringUtils;
 import org.gitlab.api.models.GitlabMergeRequest;
@@ -182,12 +183,20 @@ public class MergeDialog extends DialogWrapper {
                         indicator.setText("Closing...");
                         List<Result> results = selectedMergeRequests.stream()
                                 .map(o -> {
-                                    GitlabRestApi api = selectedProjectDto.getGitLabSettingsState().api(o.getGitlabServer());
-                                    GitlabMergeRequest gitlabMergeRequest = api.updateMergeRequest(o.getProjectId(), o.getIid(), o.getTargetBranch(),
-                                            api.getCurrentUser().getId(), null, null, OperationTypeEnum.CLOSE_MERGE_REQUEST.getType(), null);
-                                    return new Result(gitlabMergeRequest)
-                                            .setType(OperationTypeEnum.CLOSE_MERGE_REQUEST)
-                                            .setProjectName(o.getProjectName());
+                                    try {
+                                        GitlabRestApi api = selectedProjectDto.getGitLabSettingsState().api(o.getGitlabServer());
+                                        GitlabMergeRequest gitlabMergeRequest = api.updateMergeRequest(o.getProjectId(), o.getIid(), o.getTargetBranch(),
+                                                api.getCurrentUser().getId(), null, null, OperationTypeEnum.CLOSE_MERGE_REQUEST.getType(), null);
+                                        return new Result(gitlabMergeRequest)
+                                                .setType(OperationTypeEnum.CLOSE_MERGE_REQUEST)
+                                                .setProjectName(o.getProjectName());
+                                    } catch (Exception e) {
+                                        Result re = new Result(new GitlabMergeRequest());
+                                        re.setType(OperationTypeEnum.CLOSE_MERGE_REQUEST)
+                                                .setProjectName(o.getProjectName())
+                                                .setErrorMsg(e.getMessage());
+                                        return re;
+                                    }
                                 }).collect(Collectors.toList());
                         indicator.setText("Closed");
                         return results;
@@ -207,14 +216,21 @@ public class MergeDialog extends DialogWrapper {
                     protected Object compute(@NotNull ProgressIndicator indicator) {
                         indicator.setText("Merging...");
                         List<Result> results = selectedMergeRequests.stream()
-                                .filter(u -> StringUtils.equalsIgnoreCase(u.getMergeStatus(), "can_be_merged"))
+                                .filter(u -> StringUtils.equalsIgnoreCase(u.getMergeStatus(), MergeStatusEnum.CAN_BE_MERGED.getMergeStatus()))
                                 .map(o -> {
-                                    GitlabRestApi api = selectedProjectDto.getGitLabSettingsState().api(o.getGitlabServer());
-                                    GitlabMergeRequest gitlabMergeRequest = api.updateMergeRequest(o.getProjectId(), o.getIid(), o.getTargetBranch(),
-                                            api.getCurrentUser().getId(), null, null, OperationTypeEnum.MERGE.getType(), null);
-                                    return new Result(gitlabMergeRequest)
-                                            .setType(OperationTypeEnum.MERGE)
-                                            .setProjectName(o.getProjectName());
+                                    try {
+                                        GitlabRestApi api = selectedProjectDto.getGitLabSettingsState().api(o.getGitlabServer());
+                                        GitlabMergeRequest gitlabMergeRequest = api.acceptMergeRequest(o.getProjectId(), o.getIid(), null);
+                                        return new Result(gitlabMergeRequest)
+                                                .setType(OperationTypeEnum.MERGE)
+                                                .setProjectName(o.getProjectName());
+                                    } catch (Exception e) {
+                                        Result re = new Result(new GitlabMergeRequest());
+                                        re.setType(OperationTypeEnum.MERGE)
+                                                .setProjectName(o.getProjectName())
+                                                .setErrorMsg(e.getMessage());
+                                        return re;
+                                    }
                                 }).collect(Collectors.toList());
                         indicator.setText("Merged");
                         return results;
@@ -298,7 +314,7 @@ public class MergeDialog extends DialogWrapper {
     @Override
     protected @Nullable ValidationInfo doValidate() {
         if (CollectionUtil.isEmpty(selectedMergeRequests)) {
-            return new ValidationInfo("Please select at least one branch", mergeRequestList);
+            return new ValidationInfo("Please select one branch at least", mergeRequestList);
         }
         return null;
     }

@@ -26,3 +26,7 @@
 ### Fixed
 - Fix bugs that can save empty data. etc.
 - Can't merge will be repaired immediately.
+
+## [1.1.4]
+### Fixed
+- Cannot merge repaired.
