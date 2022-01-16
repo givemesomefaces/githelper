@@ -36,6 +36,7 @@
             </constraints>
             <properties>
               <editable value="true"/>
+              <toolTipText value="Common branches of selected projects"/>
             </properties>
           </component>
           <component id="bc028" class="javax.swing.JLabel">
@@ -54,6 +55,7 @@
             </constraints>
             <properties>
               <editable value="true"/>
+              <toolTipText value="Common branches of selected projects"/>
             </properties>
           </component>
           <component id="93656" class="javax.swing.JLabel">

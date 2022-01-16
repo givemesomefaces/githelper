@@ -27,6 +27,7 @@
             <properties>
               <enabled value="true"/>
               <text value=""/>
+              <toolTipText value="add"/>
             </properties>
           </component>
           <hspacer id="6276">
@@ -43,6 +44,7 @@
             <properties>
               <enabled value="false"/>
               <text value=""/>
+              <toolTipText value="delete"/>
             </properties>
           </component>
           <component id="5b62" class="javax.swing.JLabel" binding="editButton">
@@ -54,6 +56,7 @@
             <properties>
               <enabled value="false"/>
               <text value=""/>
+              <toolTipText value="edit"/>
             </properties>
           </component>
         </children>

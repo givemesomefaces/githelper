@@ -54,7 +54,7 @@
               </grid>
             </constraints>
             <properties>
-              <toolTipText value="Search by project name"/>
+              <toolTipText value="Search by project name or branch name"/>
             </properties>
           </component>
           <component id="60517" class="javax.swing.JRadioButton" binding="projectNameRadioButton" default-binding="true">
@@ -63,7 +63,7 @@
             </constraints>
             <properties>
               <text value="Project name"/>
-              <toolTipText value="include all gitlab server "/>
+              <toolTipText value="All projects on all gitlab server"/>
             </properties>
           </component>
           <component id="e64d0" class="javax.swing.JRadioButton" binding="branchNameRadioButton" default-binding="true">
@@ -72,7 +72,7 @@
             </constraints>
             <properties>
               <text value="Branch name"/>
-              <toolTipText value="just include current workspace projects"/>
+              <toolTipText value="All projects in the current workspace"/>
             </properties>
           </component>
         </children>
@@ -91,6 +91,7 @@
             </constraints>
             <properties>
               <text value="Clone"/>
+              <toolTipText value="Clone"/>
             </properties>
           </component>
           <hspacer id="6495f">
@@ -104,6 +105,7 @@
             </constraints>
             <properties>
               <text value="Create Merge Request"/>
+              <toolTipText value="Create Merge Request"/>
             </properties>
           </component>
           <component id="5f63a" class="javax.swing.JCheckBox" binding="selectAllCheckBox" default-binding="true">
@@ -136,6 +138,7 @@
             </constraints>
             <properties>
               <text value="Merge"/>
+              <toolTipText value="Merge Or Close Merge Requests"/>
             </properties>
           </component>
         </children>
