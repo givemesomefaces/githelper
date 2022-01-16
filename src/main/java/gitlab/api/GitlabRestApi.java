@@ -156,4 +156,8 @@ public class GitlabRestApi {
     public GitlabMergeRequest acceptMergeRequest(Serializable projectId, Integer mergeRequestIid, String mergeCommitMessage) throws IOException {
         return api.acceptMergeRequest(projectId, mergeRequestIid, mergeCommitMessage);
     }
+
+    public GitlabTag addTag(Serializable projectId, String tagName, String ref, String message, String releaseDescription) throws IOException {
+        return api.addTag(projectId, tagName, ref, message, releaseDescription);
+    }
 }
