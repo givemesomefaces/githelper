@@ -51,17 +51,6 @@ public class ResultDialog extends DialogWrapper {
             result.copy();
         }
     }
-    @Override
-    protected void doOKAction() {
-        super.doOKAction();
-        selectAll();
-    }
-
-    @Override
-    public void doCancelAction() {
-        super.doCancelAction();
-        selectAll();
-    }
 
     @Override
     protected @Nullable JComponent createCenterPanel() {
