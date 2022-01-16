@@ -4,6 +4,12 @@ import lombok.SneakyThrows;
 
 import java.net.URI;
 
+/**
+ *
+ *
+ * @author Lv LiFeng
+ * @date 2022/1/16 09:55
+ */
 public class ApiToRepoUrlConverter {
 
     @SneakyThrows

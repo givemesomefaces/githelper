@@ -2,10 +2,7 @@ package com.github.lvlifeng.githelper.icons
 
 import com.intellij.openapi.util.IconLoader
 
-object GitHelperIcons {
-
-    @JvmField
-    val ToolWindow = IconLoader.getIcon("/icons/pluginIcon.svg", javaClass)
+object Icons {
 
     @JvmField
     val DirectoryDir = IconLoader.getIcon("/icons/directory.svg", javaClass)
@@ -18,7 +15,5 @@ object GitHelperIcons {
 
     @JvmField
     val Edit = IconLoader.getIcon("/icons/edit.svg", javaClass)
-
-
 
 }

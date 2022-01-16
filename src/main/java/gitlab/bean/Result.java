@@ -44,7 +44,7 @@ public class Result extends GitlabMergeRequest {
                 return getWebUrl() + " [ChangeFiles:" + getChangeFilesCount() + "]";
             case MERGE:
             case CLOSE_MERGE_REQUEST:
-                return projectName + "..........."+ getSourceBranch() + "->" + getTargetBranch()+"............. " +  getState();
+                return projectName + "..........."+ getSourceBranch() + "->" + getTargetBranch()+"............." +  getState();
             default:
         }
         return null;

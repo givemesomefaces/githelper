@@ -1,6 +1,6 @@
 package gitlab.ui;
 
-import com.github.lvlifeng.githelper.icons.GitHelperIcons;
+import com.github.lvlifeng.githelper.icons.Icons;
 import com.intellij.dvcs.ui.CloneDvcsValidationUtils;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
@@ -70,14 +70,14 @@ public class CloneDialog extends DialogWrapper {
 
         VirtualFile finalDestinationParent = destinationParent;
         checkoutListener = ProjectLevelVcsManager.getInstance(project).getCompositeCheckoutListener();
-        selectedProjectList.stream().forEach(s -> {
+        selectedProjectList.stream().forEach(s ->
             GitCheckoutProvider.clone(project, Git.getInstance(), checkoutListener, finalDestinationParent,
-                    s.getSshUrl(), s.getName(), directory.getText());
-        });
+                    s.getSshUrl(), s.getName(), directory.getText())
+        );
     }
 
     private void initDefaultDirectory(){
-        directoryButton.setIcon(GitHelperIcons.DirectoryDir);
+        directoryButton.setIcon(Icons.DirectoryDir);
         directoryButton.setBorder(null);
         directory.setText(System.getProperty("user.home") + File.separator + "IdeaProjects");
         JFileChooser chooser = new JFileChooser();

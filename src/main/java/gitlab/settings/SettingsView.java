@@ -1,6 +1,6 @@
 package gitlab.settings;
 
-import com.github.lvlifeng.githelper.icons.GitHelperIcons;
+import com.github.lvlifeng.githelper.icons.Icons;
 import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.openapi.options.SearchableConfigurable;
 import com.intellij.openapi.project.Project;
@@ -14,14 +14,9 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import javax.swing.table.TableModel;
-import java.awt.*;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Collection;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 
 public class SettingsView extends DialogWrapper implements SearchableConfigurable {
@@ -50,11 +45,11 @@ public class SettingsView extends DialogWrapper implements SearchableConfigurabl
     }
 
     private void initButton() {
-        addButton.setIcon(GitHelperIcons.Add);
+        addButton.setIcon(Icons.Add);
         addButton.setBorder(null);
-        editButton.setIcon(GitHelperIcons.Edit);
+        editButton.setIcon(Icons.Edit);
         editButton.setBorder(null);
-        deleteButton.setIcon(GitHelperIcons.Delete);
+        deleteButton.setIcon(Icons.Delete);
         deleteButton.setBorder(null);
     }
 

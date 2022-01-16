@@ -175,6 +175,7 @@ public class GitLabDialog extends DialogWrapper {
     }
 
     private void initSerach() {
+        search.setToolTipText("Search for projects in all gitlab server by project name");
         search.addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent e) {
@@ -296,6 +297,7 @@ public class GitLabDialog extends DialogWrapper {
                 super.mouseClicked(e);
                 JRadioButton jRadioButton = (JRadioButton) e.getSource();
                 if (jRadioButton.isSelected()) {
+                    search.setToolTipText("Search for projects in all gitlab server by project name");
                     clearSelected();
                     unEnableBottomButton();
                     initProjectList(filterProjectsByProject(search.getText()));
@@ -309,6 +311,7 @@ public class GitLabDialog extends DialogWrapper {
                 super.mouseClicked(e);
                 JRadioButton jRadioButton = (JRadioButton) e.getSource();
                 if (jRadioButton.isSelected()) {
+                    search.setToolTipText("Search for projects in current workspace by branch name");
                     clearSelected();
                     unEnableBottomButton();
                     initProjectList(filterProjectListByBranch(search.getText()));

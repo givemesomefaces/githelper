@@ -10,9 +10,9 @@ import lombok.Getter;
  */
 @Getter
 public enum OperationTypeEnum {
-    CREATE_MERGE_REQUEST("create", "Create merge request result"),
-    CLOSE_MERGE_REQUEST("close", "Close merge request result"),
-    MERGE("merge", "Merge request result")
+    CREATE_MERGE_REQUEST("create", "Results Of Creating Merge Request"),
+    CLOSE_MERGE_REQUEST("close", "Results Of Closing Merge Request"),
+    MERGE("merge", "Results Of Merging Request")
     ;
 
 
