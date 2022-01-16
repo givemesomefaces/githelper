@@ -2,10 +2,13 @@ package gitlab.ui;
 
 import com.intellij.openapi.ui.DialogWrapper;
 import gitlab.bean.Result;
+import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.List;
 
 /**
@@ -33,9 +36,31 @@ public class ResultDialog extends DialogWrapper {
                 .reduce((a, b) -> a + "\n" + b)
                 .orElse("None")
         );
-        result.setSelectionStart(0);
-        result.setSelectionEnd(result.getText().length());
-        result.copy();
+        result.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                super.mouseClicked(e);
+                selectAll();
+            }
+        });
+    }
+    private void selectAll(){
+        if (StringUtils.isNotBlank(result.getText())) {
+            result.setSelectionStart(0);
+            result.setSelectionEnd(result.getText().length());
+            result.copy();
+        }
+    }
+    @Override
+    protected void doOKAction() {
+        super.doOKAction();
+        selectAll();
+    }
+
+    @Override
+    public void doCancelAction() {
+        super.doCancelAction();
+        selectAll();
     }
 
     @Override
