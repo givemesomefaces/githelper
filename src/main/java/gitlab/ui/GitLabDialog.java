@@ -48,6 +48,7 @@ public class GitLabDialog extends DialogWrapper {
     private JLabel selectedCount;
     private JButton cancelButton;
     private JButton mergeButton;
+    private JButton tagButton;
 
     private GitLabSettingsState gitLabSettingsState = GitLabSettingsState.getInstance();
     private List<ProjectDto> projectDtoList = new ArrayList<>();
@@ -125,6 +126,7 @@ public class GitLabDialog extends DialogWrapper {
         createMergeRequestButton.setEnabled(false);
         cloneButton.setEnabled(false);
         mergeButton.setEnabled(false);
+        tagButton.setEnabled(false);
     }
 
     private void bottomButtonState() {
@@ -132,11 +134,13 @@ public class GitLabDialog extends DialogWrapper {
             createMergeRequestButton.setEnabled(false);
             cloneButton.setEnabled(false);
             mergeButton.setEnabled(false);
+            tagButton.setEnabled(false);
         }
         if (CollectionUtil.isNotEmpty(selectedProjectList)) {
             createMergeRequestButton.setEnabled(true);
             cloneButton.setEnabled(true);
             mergeButton.setEnabled(true);
+            tagButton.setEnabled(true);
         }
         if (branchNameRadioButton.isSelected()) {
             cloneButton.setEnabled(false);
@@ -170,6 +174,12 @@ public class GitLabDialog extends DialogWrapper {
                 new MergeRequestDialog(project, new SelectedProjectDto()
                         .setGitLabSettingsState(gitLabSettingsState)
                         .setSelectedProjectList(selectedProjectList)).showAndGet();
+            }
+        });
+        tagButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                new TagDialog().showAndGet();
             }
         });
     }
