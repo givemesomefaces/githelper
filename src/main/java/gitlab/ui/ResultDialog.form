@@ -23,6 +23,7 @@
               <editable value="false"/>
               <lineWrap value="false"/>
               <rows value="5"/>
+              <toolTipText value="mouse click to copy all result to clipboard"/>
               <wrapStyleWord value="false"/>
             </properties>
           </component>
