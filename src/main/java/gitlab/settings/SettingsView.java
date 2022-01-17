@@ -13,7 +13,11 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.table.TableModel;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Collection;
@@ -34,22 +38,22 @@ public class SettingsView extends DialogWrapper implements SearchableConfigurabl
         super(project);
         setTitle(DIALOG_TITLE);
         init();
+        initButton();
         setup();
     }
 
     @Override
     protected void init() {
         super.init();
-        initButton();
         reset();
     }
 
     private void initButton() {
         addButton.setIcon(Icons.Add);
         addButton.setBorder(null);
-        editButton.setIcon(Icons.Edit);
+        editButton.setIcon(Icons.Edit_grey);
         editButton.setBorder(null);
-        deleteButton.setIcon(Icons.Delete);
+        deleteButton.setIcon(Icons.Delete_grey);
         deleteButton.setBorder(null);
     }
 
@@ -174,9 +178,24 @@ public class SettingsView extends DialogWrapper implements SearchableConfigurabl
         serverTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         serverTable.getSelectionModel().addListSelectionListener(event -> {
             editButton.setEnabled(true);
+            editButton.setIcon(Icons.Edit);
             deleteButton.setEnabled(true);
+            deleteButton.setIcon(Icons.Delete);
         });
+        serverTable.addFocusListener(new FocusListener() {
+            @Override
+            public void focusGained(FocusEvent e) {
 
+            }
+            @Override
+            public void focusLost(FocusEvent e) {
+                editButton.setEnabled(false);
+                editButton.setIcon(Icons.Edit_grey);
+                deleteButton.setEnabled(false);
+                deleteButton.setIcon(Icons.Delete_grey);
+            }
+        });
+        initButton();
     }
 
     @Override
