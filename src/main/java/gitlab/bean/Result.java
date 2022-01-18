@@ -24,14 +24,20 @@ public class Result extends GitlabMergeRequest {
     private String errorMsg;
     private String changeFilesCount;
     private OperationTypeEnum type;
+    private String desc;
+
+    public Result() {
+    }
 
     public Result(GitlabMergeRequest gitlabMergeRequest) {
         BeanUtil.copyProperties(gitlabMergeRequest, this);
     }
 
     public void setErrorMsg(String errorMsg) {
-        JSONObject jsonObject = JSONUtil.parseObj(errorMsg);
-        this.errorMsg = jsonObject.getStr("message");
+        if (JSONUtil.isJson(errorMsg)) {
+            JSONObject jsonObject = JSONUtil.parseObj(errorMsg);
+            this.errorMsg = jsonObject.getStr("message");
+        }
     }
 
     @Override
@@ -45,6 +51,8 @@ public class Result extends GitlabMergeRequest {
             case MERGE:
             case CLOSE_MERGE_REQUEST:
                 return projectName + "..........."+ getSourceBranch() + "->" + getTargetBranch()+"............." +  getState();
+            case CREATE_TAG:
+                return projectName + "  Tag created";
             default:
         }
         return null;
