@@ -207,7 +207,7 @@ public class GitLabDialog extends DialogWrapper {
         if (branchNameRadioButton.isSelected()) {
             initProjectList(filterProjectListByBranch(searchWord));
         }
-        if (selectedProjectList.containsAll(filterProjectList)) {
+        if (selectedProjectList.containsAll(filterProjectList) && CollectionUtil.isNotEmpty(filterProjectList)) {
             selectAllCheckBox.setSelected(true);
         } else {
             selectAllCheckBox.setSelected(false);
