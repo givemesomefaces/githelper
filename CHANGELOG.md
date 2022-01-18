@@ -30,3 +30,7 @@
 ## [1.1.4]
 ### Fixed
 - Cannot merge repaired.
+
+## [1.1.5]
+### Fixed
+- UI.
