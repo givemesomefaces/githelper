@@ -12,7 +12,8 @@ import lombok.Getter;
 public enum OperationTypeEnum {
     CREATE_MERGE_REQUEST("create", "Results Of Creating Merge Request"),
     CLOSE_MERGE_REQUEST("close", "Results Of Closing Merge Request"),
-    MERGE("merge", "Results Of Merging Request")
+    MERGE("merge", "Results Of Merging Request"),
+    CREATE_TAG("tag", "Results Of Creating Tag"),
     ;
 
 

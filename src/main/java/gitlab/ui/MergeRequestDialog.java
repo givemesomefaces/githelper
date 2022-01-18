@@ -62,7 +62,7 @@ public class MergeRequestDialog extends DialogWrapper {
 
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
-                indicator.setText("Loading branches...");
+                indicator.setText("Loading common branches...");
                 List<String> commonBranch = selectedProjectDto.getSelectedProjectList().stream()
                         .map(o -> selectedProjectDto.getGitLabSettingsState().api(o.getGitlabServer())
                                 .getBranchesByProject(o)
@@ -232,7 +232,7 @@ public class MergeRequestDialog extends DialogWrapper {
             return new ValidationInfo("Source Branch cannot be empty.", sourceBranch);
         }
         if (targetBranch.getSelectedItem() == null || StringUtils.isBlank(targetBranch.getSelectedItem().toString())) {
-            return new ValidationInfo("Targe Branch cannot be empty.", targetBranch);
+            return new ValidationInfo("Target Branch cannot be empty.", targetBranch);
         }
 
         if (targetBranch.getSelectedItem() != null && sourceBranch.getSelectedItem() != null

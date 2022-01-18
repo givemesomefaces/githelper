@@ -133,6 +133,10 @@ public class GitlabRestApi {
         return branches;
     }
 
+    public List<GitlabTag> getTagsByProject(GitlabProject project) {
+        return api.getTags(project);
+    }
+
     public List<GitlabUser> getActiveUsers(){
         return api.getUsers()
                 .stream()

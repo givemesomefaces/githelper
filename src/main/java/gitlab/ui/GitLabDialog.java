@@ -179,7 +179,9 @@ public class GitLabDialog extends DialogWrapper {
         tagButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                new TagDialog().showAndGet();
+                new TagDialog(new SelectedProjectDto()
+                        .setSelectedProjectList(selectedProjectList)
+                        .setGitLabSettingsState(gitLabSettingsState)).showAndGet();
             }
         });
     }
