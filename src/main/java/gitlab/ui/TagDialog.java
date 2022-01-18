@@ -4,10 +4,12 @@ import cn.hutool.core.collection.CollectionUtil;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.ValidationInfo;
 import gitlab.bean.Result;
 import gitlab.bean.SelectedProjectDto;
+import gitlab.common.Notifier;
 import gitlab.enums.OperationTypeEnum;
 import org.apache.commons.compress.utils.Lists;
 import org.apache.commons.lang3.StringUtils;
@@ -38,11 +40,17 @@ public class TagDialog extends DialogWrapper {
     private JTextField tagName;
     private JComboBox createFrom;
     private JTextField message;
+    private JCheckBox backgroudCheckBox;
     private SelectedProjectDto selectedProjectDto;
+    private Project project;
+    private final static String CREATING = "New tag is creating...";
+    private final static String CREATED = "New tag created";
+    private final static String TITLE = "Create Tag";
 
-    public TagDialog(SelectedProjectDto selectedProjectDto) {
+    public TagDialog(Project project, SelectedProjectDto selectedProjectDto) {
         super(true);
-        setTitle("Create Tag");
+        setTitle(TITLE);
+        this.project = project;
         this.selectedProjectDto = selectedProjectDto;
         init();
 
@@ -51,7 +59,7 @@ public class TagDialog extends DialogWrapper {
     @Override
     protected void init() {
         super.init();
-        ProgressManager.getInstance().run(new Task.Modal(null, "Create Tag", false) {
+        ProgressManager.getInstance().run(new Task.Modal(project, TITLE, false) {
 
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
@@ -126,39 +134,60 @@ public class TagDialog extends DialogWrapper {
 
     @Override
     protected void doOKAction() {
-        List<Result> resultList = (List<Result>) ProgressManager.getInstance().run(new Task.WithResult(null, "Create Tag", false) {
-            @Override
-            protected Object compute(@NotNull ProgressIndicator indicator) {
-                indicator.setText("New tag is creating...");
-                String source = (String) createFrom.getSelectedItem();
-                if (StringUtils.isEmpty(source) || StringUtils.isEmpty(tagName.getText())) {
-                    return Lists.newArrayList();
+        if (backgroudCheckBox.isSelected()) {
+            ProgressManager.getInstance().run(new Task.Backgroundable(project, TITLE, false) {
+                @Override
+                public void run(@NotNull ProgressIndicator indicator) {
+                    indicator.setText(CREATING);
+                    createTags();
+                    indicator.setText(CREATED);
                 }
-                List<Result> results = selectedProjectDto.getSelectedProjectList().stream().map(s -> {
-                    try {
-                        GitlabTag tagResult = selectedProjectDto.getGitLabSettingsState().api(s.getGitlabServer())
-                                .addTag(s.getId(), tagName.getText(), source, message.getText(), null);
-                        /*Result re = new Result();
-                        re.setType(OperationTypeEnum.CREATE_TAG)
-                                .setProjectName(s.getName())
-                                .setDesc(tagResult.getMessage());
-                        return re;*/
-                        return null;
-                    } catch (IOException ioException) {
-                        Result re = new Result(new GitlabMergeRequest());
-                        re.setType(OperationTypeEnum.CREATE_TAG)
-                                .setProjectName(s.getName())
-                                .setErrorMsg(ioException.getMessage());
-                        return re;
-                    }
-                }).filter(Objects::nonNull).collect(Collectors.toList());
-                indicator.setText("New tag created");
-                return results;
-            }
-        });
-        if (CollectionUtil.isNotEmpty(resultList)) {
+            });
+            dispose();
+        } else {
+            List<Result> resultList = (List<Result>) ProgressManager.getInstance().run(new Task.WithResult(project, TITLE, false) {
+                @Override
+                protected Object compute(@NotNull ProgressIndicator indicator) {
+                    indicator.setText(CREATING);
+                    List<Result> results = createTags();
+                    indicator.setText(CREATED);
+                    return results;
+                }
+            });
+            dispose();
             new ResultDialog(resultList, OperationTypeEnum.CREATE_TAG.getDialogTitle()).showAndGet();
         }
+    }
+
+    private List<Result> createTags() {
+
+        String source = (String) createFrom.getSelectedItem();
+        if (StringUtils.isEmpty(source) || StringUtils.isEmpty(tagName.getText())) {
+            return Lists.newArrayList();
+        }
+        StringBuilder info = new StringBuilder();
+        StringBuilder error = new StringBuilder();
+        List<Result> results = selectedProjectDto.getSelectedProjectList().stream().map(s -> {
+            try {
+                GitlabTag tagResult = selectedProjectDto.getGitLabSettingsState().api(s.getGitlabServer())
+                        .addTag(s.getId(), tagName.getText(), source, message.getText(), null);
+                Result re = new Result();
+                re.setType(OperationTypeEnum.CREATE_TAG)
+                        .setProjectName(s.getName())
+                        .setDesc(tagResult.getName());
+                info.append(re.toString()).append("\n");
+                return re;
+            } catch (IOException ioException) {
+                Result re = new Result(new GitlabMergeRequest());
+                re.setType(OperationTypeEnum.CREATE_TAG)
+                        .setProjectName(s.getName())
+                        .setErrorMsg(ioException.getMessage());
+                error.append(re.toString()).append("\n");
+                return re;
+            }
+        }).filter(Objects::nonNull).collect(Collectors.toList());
+        Notifier.notify(project, info, error, null);
+        return results;
     }
 
     @Override

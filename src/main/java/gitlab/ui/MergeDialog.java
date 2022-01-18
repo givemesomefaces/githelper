@@ -5,12 +5,14 @@ import cn.hutool.core.collection.CollectionUtil;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.ValidationInfo;
 import gitlab.api.GitlabRestApi;
 import gitlab.bean.MergeRequest;
 import gitlab.bean.Result;
 import gitlab.bean.SelectedProjectDto;
+import gitlab.common.Notifier;
 import gitlab.enums.MergeStatusEnum;
 import gitlab.enums.OperationTypeEnum;
 import org.apache.commons.lang3.StringUtils;
@@ -41,6 +43,7 @@ public class MergeDialog extends DialogWrapper {
     private JButton cancelButton;
     private JButton closeButton;
     private JButton mergeButton;
+    private JCheckBox backgroudCheckBox;
     private Set<MergeRequest> selectedMergeRequests = new HashSet<>();
     private SelectedProjectDto selectedProjectDto;
     private List<MergeRequest> filterMergeRequest;
@@ -50,10 +53,18 @@ public class MergeDialog extends DialogWrapper {
     private Set<String> allMergeStatus;
     private String inputSourceBranch = null;
     private String inputTargetBranch = null;
+    private Project project;
+    private static final String TITLE = "Merge Requests";
+    private static final String CLOSING_TITLE = "Close Requests";
+    private static final String CLOSED = "Merge requests closed";
+    private static final String CLOSING = "Closing merge requests";
+    private static final String MERGED = "Requests merged";
+    private static final String MERGING = "Merging requests";
 
-    public MergeDialog(SelectedProjectDto selectedProjectDto) {
+    public MergeDialog(Project project, SelectedProjectDto selectedProjectDto) {
         super(null, null, true, IdeModalityType.IDE, false);
-        setTitle("Merge Requests");
+        setTitle(TITLE);
+        this.project = project;
         this.selectedProjectDto = selectedProjectDto;
         this.createSouthPanel().setVisible(false);
         getRootPane().setDefaultButton(cancelButton);
@@ -75,7 +86,7 @@ public class MergeDialog extends DialogWrapper {
                 dispose();
             }
         });
-        ProgressManager.getInstance().run(new Task.Modal(null, "Merge Requests", false) {
+        ProgressManager.getInstance().run(new Task.Modal(project, TITLE, false) {
 
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
@@ -177,33 +188,29 @@ public class MergeDialog extends DialogWrapper {
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
-                List<Result> results = (List<Result>) ProgressManager.getInstance().run(new Task.WithResult<>(null, "Merge Requests", false) {
-                    @Override
-                    protected Object compute(@NotNull ProgressIndicator indicator) {
-                        indicator.setText("Closing...");
-                        List<Result> results = selectedMergeRequests.stream()
-                                .map(o -> {
-                                    try {
-                                        GitlabRestApi api = selectedProjectDto.getGitLabSettingsState().api(o.getGitlabServer());
-                                        GitlabMergeRequest gitlabMergeRequest = api.updateMergeRequest(o.getProjectId(), o.getIid(), o.getTargetBranch(),
-                                                api.getCurrentUser().getId(), null, null, OperationTypeEnum.CLOSE_MERGE_REQUEST.getType(), null);
-                                        return new Result(gitlabMergeRequest)
-                                                .setType(OperationTypeEnum.CLOSE_MERGE_REQUEST)
-                                                .setProjectName(o.getProjectName());
-                                    } catch (Exception e) {
-                                        Result re = new Result(new GitlabMergeRequest());
-                                        re.setType(OperationTypeEnum.CLOSE_MERGE_REQUEST)
-                                                .setProjectName(o.getProjectName())
-                                                .setErrorMsg(e.getMessage());
-                                        return re;
-                                    }
-                                }).collect(Collectors.toList());
-                        indicator.setText("Closed");
-                        return results;
-                    }
-                });
-                dispose();
-                new ResultDialog(results, OperationTypeEnum.CLOSE_MERGE_REQUEST.getDialogTitle()).showAndGet();
+                if (backgroudCheckBox.isSelected()) {
+                    ProgressManager.getInstance().run(new Task.Backgroundable(project, CLOSING_TITLE, false) {
+                        @Override
+                        public void run(@NotNull ProgressIndicator indicator) {
+                            indicator.setText(CLOSING);
+                            closeMergeRequest();
+                            indicator.setText(CLOSED);
+                        }
+                    });
+                    dispose();
+                } else {
+                    List<Result> resultList = (List<Result>) ProgressManager.getInstance().run(new Task.WithResult(project, CLOSING_TITLE, false) {
+                        @Override
+                        protected Object compute(@NotNull ProgressIndicator indicator) {
+                            indicator.setText(CLOSING);
+                            List<Result> results = closeMergeRequest();
+                            indicator.setText(CLOSED);
+                            return results;
+                        }
+                    });
+                    dispose();
+                    new ResultDialog(resultList, OperationTypeEnum.CLOSE_MERGE_REQUEST.getDialogTitle()).showAndGet();
+                }
             }
         });
 
@@ -211,35 +218,85 @@ public class MergeDialog extends DialogWrapper {
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
-                List<Result> results = (List<Result>) ProgressManager.getInstance().run(new Task.WithResult(null, "Merge Requests", false) {
-                    @Override
-                    protected Object compute(@NotNull ProgressIndicator indicator) {
-                        indicator.setText("Merging...");
-                        List<Result> results = selectedMergeRequests.stream()
-                                .filter(u -> StringUtils.equalsIgnoreCase(u.getMergeStatus(), MergeStatusEnum.CAN_BE_MERGED.getMergeStatus()))
-                                .map(o -> {
-                                    try {
-                                        GitlabRestApi api = selectedProjectDto.getGitLabSettingsState().api(o.getGitlabServer());
-                                        GitlabMergeRequest gitlabMergeRequest = api.acceptMergeRequest(o.getProjectId(), o.getIid(), null);
-                                        return new Result(gitlabMergeRequest)
-                                                .setType(OperationTypeEnum.MERGE)
-                                                .setProjectName(o.getProjectName());
-                                    } catch (Exception e) {
-                                        Result re = new Result(new GitlabMergeRequest());
-                                        re.setType(OperationTypeEnum.MERGE)
-                                                .setProjectName(o.getProjectName())
-                                                .setErrorMsg(e.getMessage());
-                                        return re;
-                                    }
-                                }).collect(Collectors.toList());
-                        indicator.setText("Merged");
-                        return results;
-                    }
-                });
-                dispose();
-                new ResultDialog(results, OperationTypeEnum.MERGE.getDialogTitle()).showAndGet();
+                if (backgroudCheckBox.isSelected()) {
+                    ProgressManager.getInstance().run(new Task.Backgroundable(project, TITLE, false) {
+                        @Override
+                        public void run(@NotNull ProgressIndicator indicator) {
+                            indicator.setText(MERGING);
+                            mergeRequests();
+                            indicator.setText(MERGED);
+                        }
+                    });
+                    dispose();
+                } else {
+                    List<Result> resultList = (List<Result>) ProgressManager.getInstance().run(new Task.WithResult(project, TITLE, false) {
+                        @Override
+                        protected Object compute(@NotNull ProgressIndicator indicator) {
+                            indicator.setText(MERGING);
+                            List<Result> results = mergeRequests();
+                            indicator.setText(MERGED);
+                            return results;
+                        }
+                    });
+                    dispose();
+                    new ResultDialog(resultList, OperationTypeEnum.MERGE.getDialogTitle()).showAndGet();
+                }
             }
         });
+    }
+
+    private List<Result> mergeRequests() {
+        StringBuilder info = new StringBuilder();
+        StringBuilder error = new StringBuilder();
+        List<Result> results = selectedMergeRequests.stream()
+                .filter(u -> StringUtils.equalsIgnoreCase(u.getMergeStatus(), MergeStatusEnum.CAN_BE_MERGED.getMergeStatus()))
+                .map(o -> {
+                    try {
+                        GitlabRestApi api = selectedProjectDto.getGitLabSettingsState().api(o.getGitlabServer());
+                        GitlabMergeRequest gitlabMergeRequest = api.acceptMergeRequest(o.getProjectId(), o.getIid(), null);
+                        Result rs =  new Result(gitlabMergeRequest)
+                                .setType(OperationTypeEnum.MERGE)
+                                .setProjectName(o.getProjectName());
+                        info.append(rs.toString()).append("\n");
+                        return rs;
+                    } catch (Exception e) {
+                        Result re = new Result(new GitlabMergeRequest());
+                        re.setType(OperationTypeEnum.MERGE)
+                                .setProjectName(o.getProjectName())
+                                .setErrorMsg(e.getMessage());
+                        error.append(re.toString()).append("\n");
+                        return re;
+                    }
+                }).collect(Collectors.toList());
+        Notifier.notify(project, info, error, null);
+        return results;
+    }
+
+    private List<Result> closeMergeRequest() {
+        StringBuilder info = new StringBuilder();
+        StringBuilder error = new StringBuilder();
+        List<Result> results = selectedMergeRequests.stream()
+                .map(o -> {
+                    try {
+                        GitlabRestApi api = selectedProjectDto.getGitLabSettingsState().api(o.getGitlabServer());
+                        GitlabMergeRequest gitlabMergeRequest = api.updateMergeRequest(o.getProjectId(), o.getIid(), o.getTargetBranch(),
+                                api.getCurrentUser().getId(), null, null, OperationTypeEnum.CLOSE_MERGE_REQUEST.getType(), null);
+                        Result rs =  new Result(gitlabMergeRequest)
+                                .setType(OperationTypeEnum.CLOSE_MERGE_REQUEST)
+                                .setProjectName(o.getProjectName());
+                        info.append(rs.toString()).append("\n");
+                        return rs;
+                    } catch (Exception e) {
+                        Result re = new Result(new GitlabMergeRequest());
+                        re.setType(OperationTypeEnum.CLOSE_MERGE_REQUEST)
+                                .setProjectName(o.getProjectName())
+                                .setErrorMsg(e.getMessage());
+                        error.append(re.toString()).append("\n");
+                        return re;
+                    }
+                }).collect(Collectors.toList());
+        Notifier.notify(project, info, error, null);
+        return results;
     }
 
     private Collection<Object> searchBranch(String text, Set<String> allSourcebranch) {
