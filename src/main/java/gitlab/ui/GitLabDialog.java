@@ -151,7 +151,7 @@ public class GitLabDialog extends DialogWrapper {
         mergeButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                new MergeDialog(new SelectedProjectDto()
+                new MergeDialog(project, new SelectedProjectDto()
                         .setGitLabSettingsState(gitLabSettingsState)
                         .setSelectedProjectList(selectedProjectList)).showAndGet();
             }
@@ -179,9 +179,10 @@ public class GitLabDialog extends DialogWrapper {
         tagButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                new TagDialog(new SelectedProjectDto()
+                new TagDialog(project, new SelectedProjectDto()
                         .setSelectedProjectList(selectedProjectList)
                         .setGitLabSettingsState(gitLabSettingsState)).showAndGet();
+
             }
         });
     }
