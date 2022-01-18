@@ -34,3 +34,9 @@
 ## [1.1.5]
 ### Fixed
 - UI.
+
+## [1.1.6]
+### Added
+- Supports batch create tag.
+- Add running in backgroud.
+- Output key logs to event log.
