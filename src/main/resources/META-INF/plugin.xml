@@ -28,5 +28,13 @@
         <action id="GitLab" class="gitlab.actions.GitLabAction" text="GitLab" icon="/icons/gitLab.png">
             <add-to-group group-id="Git.MainMenu" anchor="after" relative-to-action="GitHub.MainMenu"/>
         </action>
+        <action id="CreateMergeRequest" class="gitlab.actions.CreateMergeRequestAction" text="Create Merge Request"
+                description="Create Merge Request">
+            <add-to-group group-id="Git.ContextMenu" anchor="last"/>
+        </action>
+        <action id="MergeRequest" class="gitlab.actions.MergeRequestAction" text="Merge Request"
+                description="Merge Request">
+            <add-to-group group-id="Git.ContextMenu" anchor="last"/>
+        </action>
     </actions>
 </idea-plugin>

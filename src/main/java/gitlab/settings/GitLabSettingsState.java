@@ -7,6 +7,8 @@ import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import com.intellij.util.xmlb.XmlSerializerUtil;
+import git4idea.repo.GitRemote;
+import git4idea.repo.GitRepository;
 import gitlab.api.GitlabRestApi;
 import gitlab.bean.GitlabServer;
 import gitlab.bean.ProjectDto;
@@ -101,7 +103,6 @@ public class GitLabSettingsState implements PersistentStateComponent<GitLabSetti
                 changedServer.setRepositoryUrl(server.getRepositoryUrl());
                 changedServer.setApiToken(server.getApiToken());
                 changedServer.setPreferredConnection(server.getPreferredConnection());
-                changedServer.setRemoveSourceBranch(server.isRemoveSourceBranch());
             });
         }
     }
@@ -123,5 +124,18 @@ public class GitLabSettingsState implements PersistentStateComponent<GitLabSetti
     public Collection<GitlabServer> getGitlabServers() {
         gitlabServers = gitlabServers.stream().filter(Objects::nonNull).collect(Collectors.toList());
         return gitlabServers;
+    }
+
+    public GitlabServer getGitlabServer(GitRepository gitRepository) {
+        for (GitRemote gitRemote : gitRepository.getRemotes()) {
+            for (String remoteUrl : gitRemote.getUrls()) {
+                for(GitlabServer server : getGitlabServers()) {
+                    if(remoteUrl.contains(server.getRepositoryUrl())) {
+                        return server;
+                    }
+                }
+            }
+        }
+        return null;
     }
 }

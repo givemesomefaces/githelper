@@ -33,7 +33,6 @@ public class ServerConfiguration extends DialogWrapper {
     private JTextField token;
     private JButton tokenPage;
     private JComboBox checkoutMethod;
-    private JCheckBox removeOnMerge;
 
     protected ServerConfiguration(@Nullable GitlabServer gitlabServer) {
         super(false);
@@ -104,7 +103,6 @@ public class ServerConfiguration extends DialogWrapper {
         gitlabServer.setApiToken(token.getText());
         gitlabServer.setRepositoryUrl(ApiToRepoUrlConverter.convertApiUrlToRepoUrl(apiURl.getText()));
         gitlabServer.setPreferredConnection(GitlabServer.CloneType.values()[checkoutMethod.getSelectedIndex()]);
-        gitlabServer.setRemoveSourceBranch(removeOnMerge.isSelected());
         settingsState.addServer(gitlabServer);
     }
 
@@ -144,7 +142,6 @@ public class ServerConfiguration extends DialogWrapper {
 
     private void fillFormFromDto() {
         checkoutMethod.setSelectedIndex(gitlabServer.getPreferredConnection().ordinal());
-        removeOnMerge.setSelected(gitlabServer.isRemoveSourceBranch());
         apiURl.setText(gitlabServer.getApiUrl());
         token.setText(gitlabServer.getApiToken());
     }
