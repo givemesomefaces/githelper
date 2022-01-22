@@ -3,22 +3,33 @@ package gitlab.ui;
 import com.github.lvlifeng.githelper.icons.Icons;
 import com.intellij.dvcs.ui.CloneDvcsValidationUtils;
 import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.fileChooser.FileChooser;
+import com.intellij.openapi.fileChooser.FileChooserDescriptor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.ValidationInfo;
+import com.intellij.openapi.util.NlsSafe;
 import com.intellij.openapi.vcs.CheckoutProvider;
 import com.intellij.openapi.vcs.ProjectLevelVcsManager;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.openapi.vfs.VirtualFileSystem;
+import com.intellij.util.Consumer;
 import git4idea.commands.Git;
 import gitlab.common.GitCheckoutProvider;
 import gitlab.bean.ProjectDto;
 import lombok.Getter;
+import org.jetbrains.annotations.NonNls;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.awt.event.*;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -79,16 +90,25 @@ public class CloneDialog extends DialogWrapper {
     private void initDefaultDirectory(){
         directoryButton.setIcon(Icons.DirectoryDir);
         directoryButton.setBorder(null);
-        directory.setText(System.getProperty("user.home") + File.separator + "IdeaProjects");
-        JFileChooser chooser = new JFileChooser();
-        chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        directory.setText(project.getBasePath());
         directoryButton.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
-                if (chooser.showOpenDialog(null) != 1) {
-                    directory.setText(chooser.getSelectedFile().getAbsolutePath());
-                }
+                FileChooser.chooseFiles(new FileChooserDescriptor(false,
+                        true,
+                        false,
+                        false,
+                        false,
+                        false),
+                        project,
+                        null,
+                        new Consumer<List<VirtualFile>>() {
+                            @Override
+                            public void consume(List<VirtualFile> virtualFiles) {
+                                directory.setText(virtualFiles.get(0).getPath());
+                            }
+                        });
             }
         });
     }

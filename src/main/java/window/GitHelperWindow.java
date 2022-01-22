@@ -4,8 +4,10 @@ import cn.hutool.core.collection.CollectionUtil;
 import com.github.lvlifeng.githelper.Bundle;
 import com.google.common.collect.Lists;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.popup.JBPopupFactory;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.SingleSelectionModel;
+import com.intellij.ui.awt.RelativePoint;
 import git4idea.GitLocalBranch;
 import git4idea.GitRemoteBranch;
 import git4idea.GitUtil;
@@ -141,17 +143,6 @@ public class GitHelperWindow {
                                     && o.getRoot().getName().toLowerCase().contains(searchWord.toLowerCase()))
                                     || StringUtils.isEmpty(searchWord)
                     ).collect(Collectors.toList());
-//            } else {
-//                filterRepositories = gitRepositories
-//                        .stream()
-//                        .filter(o ->
-//                                (StringUtils.isNotEmpty(searchWord)
-//                                        && o.getBranches().getRemoteBranches()
-//                                        .stream()
-//                                        .anyMatch(i -> i.getName().toLowerCase().contains(searchWord.toLowerCase())))
-//                                        || StringUtils.isEmpty(searchWord)
-//                        ).collect(Collectors.toList());
-//            }
             repositoryList.setListData(filterRepositories.stream()
                     .map(GitRepository::getRoot)
                     .map(VirtualFile::getName)
@@ -277,7 +268,6 @@ public class GitHelperWindow {
         } else {
             localDefaultText.setVisible(false);
             commonLocalBranchList.setVisible(true);
-            JPopupMenu jPopupMenu = getjPopupMenu(Bundle.message("local"));
             commonLocalBranchList.setListData(commonLocalBranches.stream()
                     .map(GitLocalBranch::getName)
                     .collect(Collectors.toList())
@@ -288,9 +278,15 @@ public class GitHelperWindow {
                 @Override
                 public void setSelectionInterval(int index0, int index1) {
                     super.setSelectionInterval(index0, index1);
-                    jPopupMenu.setName(commonLocalBranches.get(index0).getName());
-                    jPopupMenu.setToolTipText(Bundle.message("local"));
-                    jPopupMenu.show(commonLocalBranchList, commonLocalBranchList.getX() - jPopupMenu.getWidth(), (int) commonLocalBranchList.getMousePosition().getY());
+                    JBPopupFactory.getInstance()
+                            .createListPopup(new Lpopup(Lists.newArrayList(Bundle.message("checkout"),
+                                    Bundle.message("newBranchFromSelected"),
+                                    Bundle.message("delete")),
+                                    commonLocalBranches.get(index0).getName()));
+
+//                    jPopupMenu.setName(commonLocalBranches.get(index0).getName());
+//                    jPopupMenu.setToolTipText(Bundle.message("local"));
+//                    jPopupMenu.show(commonLocalBranchList, commonLocalBranchList.getX() - jPopupMenu.getWidth(), (int) commonLocalBranchList.getMousePosition().getY());
                 }
             });
         }
@@ -317,97 +313,14 @@ public class GitHelperWindow {
 
     private void popupDialog(JMenuItem j) {
         if (StringUtils.equalsIgnoreCase(j.getText(), Bundle.message("newBranchFromSelected"))) {
-            getNewBranchDialog(j.getParent().getName()).show();
+            String startPoint = j.getParent().getName();
+            new CheckOutDialog("New Branch from " + startPoint,
+                    choosedRepositories,
+                    gitBrancher,
+                    startPoint).showAndGet();
+            assembleCommonLocalBranchDataList();
+            assembleCommonRemoteBranchDataList();
         }
-    }
-
-    private JDialog getNewBranchDialog(String startPoint){
-        JDialog jd = new JDialog();
-        jd.setName(startPoint);
-        jd.setTitle("New Branch from " + startPoint);
-        jd.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-        jd.setLocationByPlatform(true);
-        jd.setSize(400, 200);
-        jd.setLocationRelativeTo(null);
-
-        JPanel branchName = new JPanel();
-        branchName.setLayout(new FlowLayout(FlowLayout.LEFT));
-        JLabel jLabel = new JLabel("New branch name:");
-        branchName.add(jLabel);
-
-        JTextField newBranchName = new JTextField(20);
-        newBranchName.setLayout(new FlowLayout(FlowLayout.LEFT));
-        branchName.add(newBranchName);
-
-        JPanel checkBoxes = new JPanel();
-        JCheckBox checkOutcheckBox = new JCheckBox(Bundle.message("checkout"), true);
-        checkBoxes.setLayout(new FlowLayout(FlowLayout.LEFT));
-        checkBoxes.add(checkOutcheckBox);
-
-        JPanel button = new JPanel();
-        button.setLayout(new FlowLayout(FlowLayout.RIGHT));
-        JButton cancle = new JButton("Cancel");
-        cancle.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                super.mouseClicked(e);
-                jd.dispose();
-            }
-        });
-        cancle.addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyPressed(KeyEvent e) {
-                super.keyPressed(e);
-                if (StringUtils.equalsIgnoreCase(Character.toString(e.getKeyChar()), "\\u001b")) {
-                    jd.dispose();
-                }
-            }
-        });
-        JButton create = new JButton("Create");
-        button.add(cancle);
-        button.add(create);
-        create.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                super.mouseClicked(e);
-                JButton createBtn = (JButton) e.getSource();
-                JDialog dialog = (JDialog) createBtn.getRootPane().getParent();
-                Container contentPane = createBtn.getRootPane().getContentPane();
-                JPanel branchNameJp = (JPanel) contentPane.getComponent(0);
-                JTextField newBranchNameJt = (JTextField) branchNameJp.getComponent(1);
-                String newBranchName = newBranchNameJt.getText();
-                JPanel checkoutCheckBoxjp = (JPanel) contentPane.getComponent(1);
-                JCheckBox checkoutCheckBox = (JCheckBox) checkoutCheckBoxjp.getComponent(0);
-                boolean isCheckoutFlag = checkoutCheckBox.isSelected();
-                executNewBranchFromSelectedGit(newBranchName, dialog.getName(), isCheckoutFlag);
-                dialog.dispose();
-            }
-        });
-        create.addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyPressed(KeyEvent e) {
-                super.keyPressed(e);
-                System.out.println("keychar="+ Character.toString(e.getKeyChar()));
-                if (StringUtils.equalsIgnoreCase(Character.toString(e.getKeyChar()), "\\n")) {
-                    // TODO
-                }
-            }
-        });
-        jd.add(branchName, BorderLayout.NORTH);
-        jd.add(checkBoxes, BorderLayout.CENTER);
-        jd.add(button, BorderLayout.SOUTH);
-        jd.setVisible(true);
-        return jd;
-    }
-
-    private void executNewBranchFromSelectedGit(String branchName, String startPoint, boolean isCheckout) {
-        if (isCheckout) {
-            gitBrancher.checkoutNewBranchStartingFrom(branchName, startPoint, false, new ArrayList<>(choosedRepositories), null);
-        } else {
-            gitBrancher.createBranch(branchName, choosedRepositories.stream().collect(Collectors.toMap(Function.identity(), o -> startPoint)));
-        }
-        assembleCommonLocalBranchDataList();
-        assembleCommonRemoteBranchDataList();
     }
 
     private void executGit(String operation, String branchName, Boolean isRemote) {

@@ -1,5 +1,6 @@
 package gitlab.bean;
 
+import com.intellij.icons.AllIcons;
 import lombok.Getter;
 import lombok.Setter;
 import org.gitlab.api.models.GitlabUser;
