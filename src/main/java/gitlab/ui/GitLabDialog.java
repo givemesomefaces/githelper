@@ -462,7 +462,7 @@ public class GitLabDialog extends DialogWrapper {
                         ).collect(Collectors.toList());
         return filterProjectList = projectDtoList.stream()
                 .filter(o -> filterRepositories.stream()
-                        .anyMatch(z -> z.getRoot().getName().toLowerCase().contains(o.getName())
+                        .anyMatch(z -> z.getRoot().getName().toLowerCase().equals(o.getName())
                                 && z.getBranches().getRemoteBranches()
                                 .stream()
                                 .anyMatch(y -> y.getRemote().getUrls().stream()
