@@ -54,7 +54,7 @@ public class CheckOutDialog extends DialogWrapper {
             return new ValidationInfo("New branch name cannot be empty!", newBranchName);
         }
         if (StringUtils.isNotBlank(startPoint)) {
-            return new ValidationInfo("Startpoint is empty!", contentPane);
+            return new ValidationInfo("Startpoint cannot be empty!", contentPane);
         }
         return null;
     }

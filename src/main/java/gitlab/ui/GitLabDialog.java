@@ -1,6 +1,7 @@
 package gitlab.ui;
 
 import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.map.MapUtil;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
@@ -10,12 +11,18 @@ import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.vfs.VirtualFile;
 import git4idea.GitUtil;
 import git4idea.repo.GitRepository;
+import gitlab.bean.GitlabServer;
 import gitlab.bean.ProjectDto;
 import gitlab.bean.SelectedProjectDto;
+import gitlab.bean.User;
 import gitlab.helper.RepositoryHelper;
 import gitlab.settings.GitLabSettingsState;
 import lombok.SneakyThrows;
+import org.apache.commons.compress.utils.Lists;
 import org.apache.commons.lang3.StringUtils;
+import org.gitlab.api.models.GitlabBranch;
+import org.gitlab.api.models.GitlabTag;
+import org.gitlab.api.models.GitlabUser;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import window.LcheckBox;
@@ -27,6 +34,8 @@ import java.util.List;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.FutureTask;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -58,11 +67,12 @@ public class GitLabDialog extends DialogWrapper {
 
     private List<ProjectDto> filterProjectList = new ArrayList<>();
 
-    public GitLabDialog(@Nullable Project project, @Nullable Component parentComponent, boolean canBeParent, @NotNull IdeModalityType ideModalityType, boolean createSouth) {
-        super(project, parentComponent, canBeParent, ideModalityType, createSouth);
+    public GitLabDialog(@Nullable Project project, List<ProjectDto> projectDtoList) {
+        super(project, null, true, DialogWrapper.IdeModalityType.IDE, false);
         setTitle("GitLab");
         init();
         this.project = project;
+        this.projectDtoList = projectDtoList;
         getProjectListAndSortByName();
         initSerach();
         initRadioButton();
@@ -80,35 +90,18 @@ public class GitLabDialog extends DialogWrapper {
     private void getProjectListAndSortByName() {
         unEnableBottomButton();
         unEnableOtherButtonWhenLoadingData();
-        ProgressManager.getInstance().run(new Task.Modal(project, "GitLab", false) {
+        if (CollectionUtil.isEmpty(projectDtoList)) {
+            return;
+        }
+        enableOtherButtonAfterLoadingData();
+        bottomButtonState();
+        Collections.sort(projectDtoList, new Comparator<ProjectDto>() {
             @Override
-            public void run(@NotNull ProgressIndicator indicator) {
-                indicator.setText("Loading projects...");
-                projectDtoList = gitLabSettingsState.loadMapOfServersAndProjects(gitLabSettingsState.getGitlabServers())
-                        .values()
-                        .stream()
-                        .flatMap(Collection::stream)
-                        .collect(Collectors.toList());
-                if (CollectionUtil.isEmpty(projectDtoList)) {
-                    return;
-                }
-                enableOtherButtonAfterLoadingData();
-                bottomButtonState();
-                Collections.sort(projectDtoList, new Comparator<ProjectDto>() {
-                    @Override
-                    public int compare(ProjectDto o1, ProjectDto o2) {
-                        return StringUtils.compareIgnoreCase(o1.getName(), o2.getName());
-                    }
-                });
-                initProjectList(filterProjectsByProject(null));
-                indicator.setText("Projects loaded");
-            }
-
-            @Override
-            public void onCancel() {
-                super.onCancel();
+            public int compare(ProjectDto o1, ProjectDto o2) {
+                return StringUtils.compareIgnoreCase(o1.getName(), o2.getName());
             }
         });
+        initProjectList(filterProjectsByProject(null));
     }
 
     private void unEnableOtherButtonWhenLoadingData() {
@@ -171,18 +164,128 @@ public class GitLabDialog extends DialogWrapper {
         createMergeRequestButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                new MergeRequestDialog(project, new SelectedProjectDto()
-                        .setGitLabSettingsState(gitLabSettingsState)
-                        .setSelectedProjectList(selectedProjectList)).showAndGet();
+                ProgressManager.getInstance().run(new Task.Modal(project, "Create Merge Request", true) {
+                    List<String> commonBranch = new ArrayList<>();
+                    List<User> currentUser = new ArrayList<>();
+                    Set<User> users = new HashSet<>();
+                    @Override
+                    public void run(@NotNull ProgressIndicator indicator) {
+                        indicator.setText("Loading common branches...");
+                        commonBranch = selectedProjectList.stream()
+                                .map(o -> gitLabSettingsState.api(o.getGitlabServer())
+                                        .getBranchesByProject(o)
+                                        .stream()
+                                        .map(GitlabBranch::getName)
+                                        .collect(Collectors.toList()))
+                                .collect(Collectors.toList())
+                                .stream()
+                                .reduce((a, b) -> CollectionUtil.intersectionDistinct(a, b).stream().collect(Collectors.toList()))
+                                .orElse(Lists.newArrayList());
+                        commonBranch.stream().sorted(String::compareToIgnoreCase);
+                        Set<GitlabServer> serverDtos = selectedProjectList.stream().map(ProjectDto::getGitlabServer).collect(Collectors.toSet());
+                        currentUser = serverDtos.stream().map(o -> {
+                            GitlabUser m = gitLabSettingsState.api(o).getCurrentUser();
+                            User u = new User();
+                            u.setServerUserIdMap(new HashMap<>() {{
+                                put(o.getApiUrl(), m.getId());
+                            }});
+                            u.setUsername(m.getUsername());
+                            u.setName(m.getName());
+                            return u;
+                        }).collect(Collectors.toMap(User::getUsername, Function.identity(), (a, b) -> {
+                            if (MapUtil.isNotEmpty(b.getServerUserIdMap())) {
+                                a.getServerUserIdMap().putAll(b.getServerUserIdMap());
+                            }
+                            return a;
+                        })).values().stream().collect(Collectors.toList());
+                        users = serverDtos.stream()
+                                .map(o -> gitLabSettingsState.api(o).getActiveUsers().stream().map(m -> {
+                                            User u = new User();
+                                            u.setServerUserIdMap(new HashMap<>(){{
+                                                put(o.getApiUrl(), m.getId());
+                                            }});
+                                            u.setUsername(m.getUsername());
+                                            u.setName(m.getName());
+                                            return u;
+                                        }).collect(Collectors.toList())
+                                ).flatMap(Collection::stream)
+                                .collect(Collectors.toList())
+                                .stream().collect(Collectors.toMap(User::getUsername, Function.identity(), (a, b) -> {
+                                    if (MapUtil.isNotEmpty(b.getServerUserIdMap())) {
+                                        a.getServerUserIdMap().putAll(b.getServerUserIdMap());
+                                    }
+                                    return a;
+                                })).values().stream().collect(Collectors.toSet());
+                        indicator.setText("Common branches loaded");
+                    }
+
+                    @Override
+                    public void onSuccess() {
+                        super.onSuccess();
+                        new MergeRequestDialog(project, new SelectedProjectDto()
+                                .setGitLabSettingsState(gitLabSettingsState)
+                                .setSelectedProjectList(selectedProjectList),
+                                commonBranch,
+                                currentUser,
+                                users).showAndGet();
+                    }
+                });
             }
         });
         tagButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                new TagDialog(project, new SelectedProjectDto()
-                        .setSelectedProjectList(selectedProjectList)
-                        .setGitLabSettingsState(gitLabSettingsState)).showAndGet();
+                ProgressManager.getInstance().run(new Task.Modal(project, "Create Tag", true) {
+                    List<String> commonFrom = new ArrayList<>();
+                    @Override
+                    public void run(@NotNull ProgressIndicator indicator) {
+                        indicator.setText("Loading common branches and tags...");
+                        commonFrom = new ArrayList<>();
+                        List<String> commonBranch = selectedProjectList.stream()
+                                .map(o -> gitLabSettingsState.api(o.getGitlabServer())
+                                        .getBranchesByProject(o)
+                                        .stream()
+                                        .map(GitlabBranch::getName)
+                                        .collect(Collectors.toList()))
+                                .collect(Collectors.toList())
+                                .stream()
+                                .reduce((a, b) -> CollectionUtil.intersectionDistinct(a, b).stream().collect(Collectors.toList()))
+                                .orElse(Lists.newArrayList());
+                        commonBranch.stream().sorted(String::compareToIgnoreCase);
+                        List<String> commonTag = selectedProjectList.stream()
+                                .map(o -> gitLabSettingsState.api(o.getGitlabServer())
+                                        .getTagsByProject(o)
+                                        .stream()
+                                        .map(GitlabTag::getName)
+                                        .collect(Collectors.toList()))
+                                .collect(Collectors.toList())
+                                .stream()
+                                .reduce((a, b) -> CollectionUtil.intersectionDistinct(a, b).stream().collect(Collectors.toList()))
+                                .orElse(Lists.newArrayList());
+                        commonTag.stream().sorted(String::compareToIgnoreCase);
+                        if (CollectionUtil.isNotEmpty(commonBranch)) {
+                            commonFrom.addAll(commonBranch);
+                        }
+                        if (CollectionUtil.isNotEmpty(commonTag)) {
+                            commonFrom.addAll(commonTag);
+                        }
+                        indicator.setText("Common branches and tags loaded");
+                    }
 
+                    @Override
+                    public void onCancel() {
+                        super.onCancel();
+                    }
+
+                    @Override
+                    public void onSuccess() {
+                        super.onSuccess();
+                        new TagDialog(project, new SelectedProjectDto()
+                                .setSelectedProjectList(selectedProjectList)
+                                .setGitLabSettingsState(gitLabSettingsState),
+                                commonFrom).showAndGet();
+                    }
+                });
             }
         });
     }
