@@ -13,11 +13,10 @@ import com.intellij.openapi.vcs.CheckoutProvider;
 import com.intellij.openapi.vcs.ProjectLevelVcsManager;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.openapi.vfs.VirtualFileSystem;
 import com.intellij.util.Consumer;
 import git4idea.commands.Git;
-import gitlab.common.GitCheckoutProvider;
 import gitlab.bean.ProjectDto;
+import gitlab.common.GitCheckoutProvider;
 import gitlab.common.Notifier;
 import lombok.Getter;
 import org.jetbrains.annotations.NonNls;
@@ -25,11 +24,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
-import java.awt.event.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.List;
 import java.util.Set;
 
