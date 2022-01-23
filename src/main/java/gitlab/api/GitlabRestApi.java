@@ -129,7 +129,6 @@ public class GitlabRestApi {
 
     public List<GitlabBranch> getBranchesByProject(GitlabProject project) {
         List<GitlabBranch> branches = api.getBranches(project);
-        System.out.println(project.getName() + " : " + branches.stream().map(GitlabBranch::getName).collect(Collectors.toList()).toString());
         return branches;
     }
 
