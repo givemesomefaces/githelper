@@ -48,119 +48,70 @@ public class MergeRequestDialog extends DialogWrapper {
     private JCheckBox backgroudCheckBox;
     private SelectedProjectDto selectedProjectDto;
     private Project project;
+    private List<String> commonBranch;
+    private List<User> currentUser;
+    private Set<User> users;
     private static final String TITLE = "Create Merge Request";
     private static final String CREATING = "Merge request is creating...";
     private static final String CREATED = "Merge request created";
 
-    public MergeRequestDialog(Project project, SelectedProjectDto selectedProjectDto) {
+    public MergeRequestDialog(Project project, SelectedProjectDto selectedProjectDto, List<String> commonBranch, List<User> currentUser, Set<User> users) {
         super(true);
         this.project = project;
         this.setTitle(TITLE);
         this.selectedProjectDto = selectedProjectDto;
+        this.commonBranch = commonBranch;
+        this.currentUser = currentUser;
+        this.users = users;
         init();
     }
 
     @Override
     protected void init() {
         super.init();
-        ProgressManager.getInstance().run(new Task.Modal(null, "Create Merge Request", false) {
-
+        sourceBranch.setModel(new DefaultComboBoxModel(commonBranch.toArray()));
+        sourceBranch.setSelectedIndex(-1);
+        targetBranch.setModel(new DefaultComboBoxModel(commonBranch.toArray()));
+        targetBranch.setSelectedIndex(-1);
+        assignee.setModel(new DefaultComboBoxModel(users.toArray()));
+        assignee.setSelectedIndex(-1);
+        mergeTitle.setText("merge");
+        sourceBranch.getEditor().getEditorComponent().addKeyListener(new KeyAdapter() {
             @Override
-            public void run(@NotNull ProgressIndicator indicator) {
-                indicator.setText("Loading common branches...");
-                List<String> commonBranch = selectedProjectDto.getSelectedProjectList().stream()
-                        .map(o -> selectedProjectDto.getGitLabSettingsState().api(o.getGitlabServer())
-                                .getBranchesByProject(o)
-                                .stream()
-                                .map(GitlabBranch::getName)
-                                .collect(Collectors.toList()))
-                        .collect(Collectors.toList())
-                        .stream()
-                        .reduce((a, b) -> CollectionUtil.intersectionDistinct(a, b).stream().collect(Collectors.toList()))
-                        .orElse(Lists.newArrayList());
-                commonBranch.stream().sorted(String::compareToIgnoreCase);
-                sourceBranch.setModel(new DefaultComboBoxModel(commonBranch.toArray()));
-                sourceBranch.setSelectedIndex(-1);
-                targetBranch.setModel(new DefaultComboBoxModel(commonBranch.toArray()));
-                targetBranch.setSelectedIndex(-1);
-                Set<GitlabServer> serverDtos = selectedProjectDto.getSelectedProjectList().stream().map(ProjectDto::getGitlabServer).collect(Collectors.toSet());
-                List<User> currentUser = serverDtos.stream().map(o -> {
-                    GitlabUser m = selectedProjectDto.getGitLabSettingsState().api(o).getCurrentUser();
-                    User u = new User();
-                    u.setServerUserIdMap(new HashMap<>() {{
-                        put(o.getApiUrl(), m.getId());
-                    }});
-                    u.setUsername(m.getUsername());
-                    u.setName(m.getName());
-                    return u;
-                }).collect(Collectors.toMap(User::getUsername, Function.identity(), (a, b) -> {
-                    if (MapUtil.isNotEmpty(b.getServerUserIdMap())) {
-                        a.getServerUserIdMap().putAll(b.getServerUserIdMap());
-                    }
-                    return a;
-                })).values().stream().collect(Collectors.toList());
-                Set<User> users = serverDtos.stream()
-                        .map(o -> selectedProjectDto.getGitLabSettingsState().api(o).getActiveUsers().stream().map(m -> {
-                                    User u = new User();
-                                    u.setServerUserIdMap(new HashMap<>(){{
-                                        put(o.getApiUrl(), m.getId());
-                                    }});
-                                    u.setUsername(m.getUsername());
-                                    u.setName(m.getName());
-                                    return u;
-                                }).collect(Collectors.toList())
-                        ).flatMap(Collection::stream)
-                        .collect(Collectors.toList())
-                        .stream().collect(Collectors.toMap(User::getUsername, Function.identity(), (a, b) -> {
-                            if (MapUtil.isNotEmpty(b.getServerUserIdMap())) {
-                                a.getServerUserIdMap().putAll(b.getServerUserIdMap());
-                            }
-                            return a;
-                        })).values().stream().collect(Collectors.toSet());
-
-                assignee.setModel(new DefaultComboBoxModel(users.toArray()));
-                assignee.setSelectedIndex(-1);
-                mergeTitle.setText("merge");
-                sourceBranch.getEditor().getEditorComponent().addKeyListener(new KeyAdapter() {
-                    @Override
-                    public void keyReleased(KeyEvent e) {
-                        super.keyReleased(e);
-                        JTextField textField = (JTextField) e.getSource();
-                        String text = textField.getText();
-                        sourceBranch.setModel(new DefaultComboBoxModel(searchBranch(text, commonBranch).toArray()));
-                        textField.setText(text);
-                        sourceBranch.showPopup();
-                    }
-                });
-                targetBranch.getEditor().getEditorComponent().addKeyListener(new KeyAdapter() {
-                    @Override
-                    public void keyReleased(KeyEvent e) {
-                        super.keyReleased(e);
-                        JTextField textField = (JTextField) e.getSource();
-                        String text = textField.getText();
-                        targetBranch.setModel(new DefaultComboBoxModel(searchBranch(text, commonBranch).toArray()));
-                        textField.setText(text);
-                        targetBranch.showPopup();
-                    }
-                });
-                assignee.getEditor().getEditorComponent().addKeyListener(new KeyAdapter() {
-                    @Override
-                    public void keyReleased(KeyEvent e) {
-                        super.keyReleased(e);
-                        searchUser(e, users);
-                    }
-                });
-                assign2me.addMouseListener(new MouseAdapter() {
-                    @Override
-                    public void mouseClicked(MouseEvent e) {
-                        super.mouseClicked(e);
-                        assignee.setSelectedItem(currentUser.get(0));
-                    }
-                });
-                indicator.setText("Common branches loaded");
+            public void keyReleased(KeyEvent e) {
+                super.keyReleased(e);
+                JTextField textField = (JTextField) e.getSource();
+                String text = textField.getText();
+                sourceBranch.setModel(new DefaultComboBoxModel(searchBranch(text, commonBranch).toArray()));
+                textField.setText(text);
+                sourceBranch.showPopup();
             }
         });
-
+        targetBranch.getEditor().getEditorComponent().addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent e) {
+                super.keyReleased(e);
+                JTextField textField = (JTextField) e.getSource();
+                String text = textField.getText();
+                targetBranch.setModel(new DefaultComboBoxModel(searchBranch(text, commonBranch).toArray()));
+                textField.setText(text);
+                targetBranch.showPopup();
+            }
+        });
+        assignee.getEditor().getEditorComponent().addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent e) {
+                super.keyReleased(e);
+                searchUser(e, users);
+            }
+        });
+        assign2me.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                super.mouseClicked(e);
+                assignee.setSelectedItem(currentUser.get(0));
+            }
+        });
     }
 
     @Override

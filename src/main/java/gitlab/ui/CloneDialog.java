@@ -18,6 +18,7 @@ import com.intellij.util.Consumer;
 import git4idea.commands.Git;
 import gitlab.common.GitCheckoutProvider;
 import gitlab.bean.ProjectDto;
+import gitlab.common.Notifier;
 import lombok.Getter;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
@@ -48,6 +49,7 @@ public class CloneDialog extends DialogWrapper {
     private Set<ProjectDto> selectedProjectList;
     private CheckoutProvider.Listener checkoutListener;
     private Project project;
+    private VirtualFile destinationParent;
 
     protected CloneDialog(Project project, Set<ProjectDto> selectedProjectList) {
         super(true);
@@ -59,32 +61,36 @@ public class CloneDialog extends DialogWrapper {
     }
 
     @Override
-    protected void doOKAction() {
-        super.doOKAction();
+    protected @Nullable ValidationInfo doValidate() {
         ValidationInfo destinationValidation = CloneDvcsValidationUtils.createDestination(directory.getText());
         if (destinationValidation != null) {
-            LOG.error("Unable to create destination directory", destinationValidation.message);
-            return;
+            return destinationValidation;
         }
-
         LocalFileSystem lfs = LocalFileSystem.getInstance();
         File file = new File(directory.getText());
-        VirtualFile destinationParent = lfs.findFileByIoFile(file);
+        destinationParent = lfs.findFileByIoFile(file);
         if (destinationParent == null) {
             destinationParent = lfs.refreshAndFindFileByIoFile(file);
         }
         if (destinationParent == null) {
-            LOG.error("Clone Failed. Destination doesn't exist");
-            return;
+            return new ValidationInfo("Clone Failed. Destination doesn't exist", directory);
         }
-        dispose();
+        return null;
+    }
 
+    @Override
+    protected void doOKAction() {
+        super.doOKAction();
+        dispose();
         VirtualFile finalDestinationParent = destinationParent;
         checkoutListener = ProjectLevelVcsManager.getInstance(project).getCompositeCheckoutListener();
-        selectedProjectList.stream().forEach(s ->
+        StringBuilder info = new StringBuilder();
+        selectedProjectList.stream().forEach(s -> {
             GitCheckoutProvider.clone(project, Git.getInstance(), checkoutListener, finalDestinationParent,
-                    s.getSshUrl(), s.getName(), directory.getText())
-        );
+                    s.getSshUrl(), s.getName(), directory.getText());
+            info.append(s.getName() + " " + s.getSshUrl() + " cloned").append("\n");
+        });
+        Notifier.notify(project, info, null, null);
     }
 
     private void initDefaultDirectory(){

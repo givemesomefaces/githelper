@@ -43,15 +43,17 @@ public class TagDialog extends DialogWrapper {
     private JCheckBox backgroudCheckBox;
     private SelectedProjectDto selectedProjectDto;
     private Project project;
+    private List<String> commonFrom;
     private final static String CREATING = "New tag is creating...";
     private final static String CREATED = "New tag created";
     private final static String TITLE = "Create Tag";
 
-    public TagDialog(Project project, SelectedProjectDto selectedProjectDto) {
+    public TagDialog(Project project, SelectedProjectDto selectedProjectDto, List<String> commonFrom) {
         super(true);
         setTitle(TITLE);
         this.project = project;
         this.selectedProjectDto = selectedProjectDto;
+        this.commonFrom = commonFrom;
         init();
 
     }
@@ -59,57 +61,19 @@ public class TagDialog extends DialogWrapper {
     @Override
     protected void init() {
         super.init();
-        ProgressManager.getInstance().run(new Task.Modal(project, TITLE, false) {
-
+        createFrom.setModel(new DefaultComboBoxModel(commonFrom.toArray()));
+        createFrom.setSelectedIndex(-1);
+        createFrom.getEditor().getEditorComponent().addKeyListener(new KeyAdapter() {
             @Override
-            public void run(@NotNull ProgressIndicator indicator) {
-                indicator.setText("Loading common branches and tags...");
-                List<String> commonFrom = new ArrayList<>();
-                List<String> commonBranch = selectedProjectDto.getSelectedProjectList().stream()
-                        .map(o -> selectedProjectDto.getGitLabSettingsState().api(o.getGitlabServer())
-                                .getBranchesByProject(o)
-                                .stream()
-                                .map(GitlabBranch::getName)
-                                .collect(Collectors.toList()))
-                        .collect(Collectors.toList())
-                        .stream()
-                        .reduce((a, b) -> CollectionUtil.intersectionDistinct(a, b).stream().collect(Collectors.toList()))
-                        .orElse(Lists.newArrayList());
-                commonBranch.stream().sorted(String::compareToIgnoreCase);
-                List<String> commonTag = selectedProjectDto.getSelectedProjectList().stream()
-                        .map(o -> selectedProjectDto.getGitLabSettingsState().api(o.getGitlabServer())
-                                .getTagsByProject(o)
-                                .stream()
-                                .map(GitlabTag::getName)
-                                .collect(Collectors.toList()))
-                        .collect(Collectors.toList())
-                        .stream()
-                        .reduce((a, b) -> CollectionUtil.intersectionDistinct(a, b).stream().collect(Collectors.toList()))
-                        .orElse(Lists.newArrayList());
-                commonTag.stream().sorted(String::compareToIgnoreCase);
-                if (CollectionUtil.isNotEmpty(commonBranch)) {
-                    commonFrom.addAll(commonBranch);
-                }
-                if (CollectionUtil.isNotEmpty(commonTag)) {
-                    commonFrom.addAll(commonTag);
-                }
-                createFrom.setModel(new DefaultComboBoxModel(commonFrom.toArray()));
-                createFrom.setSelectedIndex(-1);
-                createFrom.getEditor().getEditorComponent().addKeyListener(new KeyAdapter() {
-                    @Override
-                    public void keyReleased(KeyEvent e) {
-                        super.keyReleased(e);
-                        JTextField textField = (JTextField) e.getSource();
-                        String text = textField.getText();
-                        createFrom.setModel(new DefaultComboBoxModel(searchBranchOrTag(text, commonFrom).toArray()));
-                        textField.setText(text);
-                        createFrom.showPopup();
-                    }
-                });
-                indicator.setText("Common branches and tags loaded");
+            public void keyReleased(KeyEvent e) {
+                super.keyReleased(e);
+                JTextField textField = (JTextField) e.getSource();
+                String text = textField.getText();
+                createFrom.setModel(new DefaultComboBoxModel(searchBranchOrTag(text, commonFrom).toArray()));
+                textField.setText(text);
+                createFrom.showPopup();
             }
         });
-
     }
 
     private List<String> searchBranchOrTag(String text, List<String> commonBranch) {
