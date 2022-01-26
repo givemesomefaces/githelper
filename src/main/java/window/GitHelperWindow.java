@@ -23,10 +23,7 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.BadLocationException;
 import java.awt.*;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
 import java.util.List;
 import java.util.*;
 import java.util.function.Function;
@@ -87,6 +84,12 @@ public class GitHelperWindow {
                         "Remote Branch Name"
                 ).toArray())
         );
+        searchType.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                reInitLocalAndRemoteDataList();
+            }
+        });
         searchText.addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent e) {
@@ -252,6 +255,12 @@ public class GitHelperWindow {
             remoteDefaultText.setVisible(false);
             commonRemoteBranchList.setVisible(true);
             commonRemoteBranchList.setListData(commonRemoteBranches.stream()
+                    .sorted(Comparator.comparing(GitRemoteBranch::getName))
+                    .filter(o -> (searchType.getSelectedItem().toString().contains("Remote")
+                            && StringUtils.isNotEmpty(searchText.getText()) && o.getName().contains(searchText.getText()))
+                            || !searchType.getSelectedItem().toString().contains("Remote")
+                            || (searchType.getSelectedItem().toString().contains("Remote")
+                            && StringUtils.isEmpty(searchText.getText())))
                     .map(GitRemoteBranch::getName)
                     .collect(Collectors.toList())
                     .toArray());
@@ -289,6 +298,12 @@ public class GitHelperWindow {
             localDefaultText.setVisible(false);
             commonLocalBranchList.setVisible(true);
             commonLocalBranchList.setListData(commonLocalBranches.stream()
+                    .sorted(Comparator.comparing(GitLocalBranch::getName))
+                    .filter(o -> (searchType.getSelectedItem().toString().contains("Local")
+                            && StringUtils.isNotEmpty(searchText.getText()) && o.getName().contains(searchText.getText()))
+                            || !searchType.getSelectedItem().toString().contains("Local")
+                            || (searchType.getSelectedItem().toString().contains("Local")
+                            && StringUtils.isEmpty(searchText.getText())))
                     .map(GitLocalBranch::getName)
                     .collect(Collectors.toList())
                     .toArray());
