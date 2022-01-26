@@ -23,7 +23,7 @@ public class CheckOutDialog extends DialogWrapper {
     private JPanel contentPane;
     private JCheckBox checkoutCheckBox;
     private JTextField newBranchName;
-    Set<GitRepository> choosedRepositories;
+    private Set<GitRepository> choosedRepositories;
     private GitBrancher gitBrancher;
     private String  startPoint;
 
