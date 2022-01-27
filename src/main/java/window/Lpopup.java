@@ -2,6 +2,7 @@ package window;
 
 import com.github.lvlifeng.githelper.Bundle;
 import com.google.common.collect.Lists;
+import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.ui.messages.MessageDialog;
 import com.intellij.openapi.ui.popup.JBPopupFactory;
 import com.intellij.openapi.ui.popup.PopupStep;
@@ -38,15 +39,21 @@ public class Lpopup extends BaseListPopupStep{
         this.selectedBranchName = selectedBranchName;
         this.choosedRepositories = choosedRepositories;
         this.isRemote = isRemote;
+        this.gitBrancher = gitBrancher;
     }
 
     @Override
     public @Nullable PopupStep<?> onChosen(Object selectedValue, boolean finalChoice) {
         if (StringUtils.equalsIgnoreCase(selectedValue.toString(), Bundle.message("newBranchFromSelected"))) {
-            new CheckOutDialog("New Branch from " + selectedValue.toString(),
-                    choosedRepositories,
-                    gitBrancher,
-                    selectedValue.toString()).showAndGet();
+            doFinalStep(new Runnable() {
+                @Override
+                public void run() {
+                    new CheckOutDialog("New Branch from " + selectedBranchName,
+                            choosedRepositories,
+                            gitBrancher,
+                            selectedBranchName).showAndGet();
+                }
+            });
         }
         if (StringUtils.equalsIgnoreCase(Bundle.message("checkout"), selectedValue.toString())
                 && StringUtils.isNotEmpty(selectedBranchName)) {
@@ -59,27 +66,34 @@ public class Lpopup extends BaseListPopupStep{
             }
         }
         if (StringUtils.equalsIgnoreCase("Checkout New branch", selectedValue.toString())
-                && org.apache.commons.lang3.StringUtils.isNotEmpty(selectedBranchName)) {
+                && StringUtils.isNotEmpty(selectedBranchName)) {
             //gitBrancher.checkoutNewBranch(jMenuItem.getText(), choosedRepositories);
 
         }
-        if (StringUtils.equalsIgnoreCase(Bundle.message("delete"), selectedValue.toString()) && popupConfirmDialog(isRemote, selectedBranchName)) {
-            if (isRemote){
-                gitBrancher.deleteRemoteBranch(selectedBranchName, new ArrayList<>(choosedRepositories));
-            } else {
-                gitBrancher.deleteBranch(selectedBranchName, new ArrayList<>(choosedRepositories));
-            }
+        if (StringUtils.equalsIgnoreCase(Bundle.message("delete"), selectedValue.toString())) {
+            doFinalStep(new Runnable() {
+                @Override
+                public void run() {
+                    if (popupConfirmDialog(isRemote, selectedBranchName)) {
+                        if (isRemote){
+                            gitBrancher.deleteRemoteBranch(selectedBranchName, new ArrayList<>(choosedRepositories));
+                        } else {
+                            gitBrancher.deleteBranch(selectedBranchName, new ArrayList<>(choosedRepositories));
+                        }
+                    }
+                }
+            });
         }
 
-        if (org.apache.commons.lang3.StringUtils.equalsIgnoreCase(Bundle.message("update"), selectedValue.toString())) {
+        if (StringUtils.equalsIgnoreCase(Bundle.message("update"), selectedValue.toString())) {
             // gitBrancher
         }
         return super.onChosen(selectedValue, finalChoice);
     }
 
     private boolean popupConfirmDialog(boolean isRemote, String branchName) {
-        int res = JOptionPane.showConfirmDialog(null,
-                "Continue to delete" + (isRemote ? " remote " : " local ") + "branch " + branchName, ":)", JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE);
-        return res==JOptionPane.YES_OPTION;
+        int res = Messages.showYesNoDialog("Continue to delete" + (isRemote ? " remote " : " local ") + "branch: " + branchName,
+                "Delete Branch", null);
+        return res == Messages.YES;
     }
 }

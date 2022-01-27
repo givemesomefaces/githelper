@@ -3,6 +3,7 @@ package window;
 import cn.hutool.core.collection.CollectionUtil;
 import com.github.lvlifeng.githelper.Bundle;
 import com.google.common.collect.Lists;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.popup.JBPopupFactory;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -16,17 +17,12 @@ import git4idea.branch.GitBrancher;
 import git4idea.repo.GitRepository;
 import gitlab.helper.RepositoryHelper;
 import org.apache.commons.lang3.StringUtils;
-import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
-import javax.swing.text.BadLocationException;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.List;
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -36,6 +32,8 @@ import java.util.stream.Collectors;
  * @date 2022/1/2 15:56
  */
 public class GitHelperWindow {
+
+    private static final Logger LOG = Logger.getInstance(GitHelperWindow.class);
     private JTextField searchText;
     private JList repositoryList;
     private JList commonLocalBranchList;
@@ -95,6 +93,7 @@ public class GitHelperWindow {
             public void keyReleased(KeyEvent e) {
                 super.keyReleased(e);
                 searchRepository(e);
+                reInitLocalAndRemoteDataList();
             }
         });
 
@@ -242,7 +241,7 @@ public class GitHelperWindow {
     }
 
     private void setChoosedSum() {
-        choosedSum.setText(String.format("(%s selected)", choosedRepositories.size()));
+        choosedSum.setText(String.format("(%s Selected)", choosedRepositories.size()));
     }
 
     private void assembleCommonRemoteBranchDataList() {
@@ -254,7 +253,7 @@ public class GitHelperWindow {
         } else {
             remoteDefaultText.setVisible(false);
             commonRemoteBranchList.setVisible(true);
-            commonRemoteBranchList.setListData(commonRemoteBranches.stream()
+            List<String> filterBranches = commonRemoteBranches.stream()
                     .sorted(Comparator.comparing(GitRemoteBranch::getName))
                     .filter(o -> (searchType.getSelectedItem().toString().contains("Remote")
                             && StringUtils.isNotEmpty(searchText.getText()) && o.getName().contains(searchText.getText()))
@@ -262,8 +261,8 @@ public class GitHelperWindow {
                             || (searchType.getSelectedItem().toString().contains("Remote")
                             && StringUtils.isEmpty(searchText.getText())))
                     .map(GitRemoteBranch::getName)
-                    .collect(Collectors.toList())
-                    .toArray());
+                    .collect(Collectors.toList());
+            commonRemoteBranchList.setListData(filterBranches.toArray());
             commonRemoteBranchList.setCellRenderer(new LmenuItem());
             commonRemoteBranchList.setSelectionModel(new SingleSelectionModel() {
 
@@ -275,13 +274,12 @@ public class GitHelperWindow {
                                     Bundle.message("newBranchFromSelected"),
                                     Bundle.message("delete")),
                                     gitBrancher,
-                                    commonRemoteBranches.get(index0).getName(),
+                                    filterBranches.get(index0),
                                     choosedRepositories,
                                     true))
                             .show(new RelativePoint(commonRemoteBranchList,
                                     new Point(commonRemoteBranchList.getX() - 200,
                                             (int) commonRemoteBranchList.getMousePosition().getY())));
-                    reInitLocalAndRemoteDataList();
                 }
             });
         }
@@ -297,7 +295,7 @@ public class GitHelperWindow {
         } else {
             localDefaultText.setVisible(false);
             commonLocalBranchList.setVisible(true);
-            commonLocalBranchList.setListData(commonLocalBranches.stream()
+            List<String> filterBranches = commonLocalBranches.stream()
                     .sorted(Comparator.comparing(GitLocalBranch::getName))
                     .filter(o -> (searchType.getSelectedItem().toString().contains("Local")
                             && StringUtils.isNotEmpty(searchText.getText()) && o.getName().contains(searchText.getText()))
@@ -305,8 +303,8 @@ public class GitHelperWindow {
                             || (searchType.getSelectedItem().toString().contains("Local")
                             && StringUtils.isEmpty(searchText.getText())))
                     .map(GitLocalBranch::getName)
-                    .collect(Collectors.toList())
-                    .toArray());
+                    .collect(Collectors.toList());
+            commonLocalBranchList.setListData(filterBranches.toArray());
             commonLocalBranchList.setCellRenderer(new LmenuItem());
             commonLocalBranchList.setSelectionModel(new SingleSelectionModel() {
                 @Override
@@ -317,13 +315,12 @@ public class GitHelperWindow {
                                     Bundle.message("newBranchFromSelected"),
                                     Bundle.message("delete")),
                                     gitBrancher,
-                                    commonLocalBranches.get(index0).getName(),
+                                    filterBranches.get(index0),
                                     choosedRepositories,
                                     false))
                             .show(new RelativePoint(commonLocalBranchList,
                                     new Point(commonLocalBranchList.getX() - 200,
                                             (int) commonLocalBranchList.getMousePosition().getY())));
-                    reInitLocalAndRemoteDataList();
                 }
             });
         }

@@ -44,3 +44,8 @@
 ## [1.1.7]
 ### Fixed
 - GitLab bug. search for project by branch name.
+
+## [1.1.8]
+### Added
+- Add progress bar.
+- Optimize UI.

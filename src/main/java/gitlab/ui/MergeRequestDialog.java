@@ -2,6 +2,7 @@ package gitlab.ui;
 
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.map.MapUtil;
+import com.github.lvlifeng.githelper.Bundle;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
@@ -27,6 +28,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -51,14 +53,13 @@ public class MergeRequestDialog extends DialogWrapper {
     private List<String> commonBranch;
     private List<User> currentUser;
     private Set<User> users;
-    private static final String TITLE = "Create Merge Request";
     private static final String CREATING = "Merge request is creating...";
     private static final String CREATED = "Merge request created";
 
     public MergeRequestDialog(Project project, SelectedProjectDto selectedProjectDto, List<String> commonBranch, List<User> currentUser, Set<User> users) {
         super(true);
         this.project = project;
-        this.setTitle(TITLE);
+        this.setTitle(Bundle.message("createMergeRequestDialogTitle"));
         this.selectedProjectDto = selectedProjectDto;
         this.commonBranch = commonBranch;
         this.currentUser = currentUser;
@@ -118,21 +119,21 @@ public class MergeRequestDialog extends DialogWrapper {
     protected void doOKAction() {
         super.doOKAction();
         if (backgroudCheckBox.isSelected()) {
-            ProgressManager.getInstance().run(new Task.Backgroundable(project, TITLE, false) {
+            ProgressManager.getInstance().run(new Task.Backgroundable(project, Bundle.message("createMergeRequestDialogTitle"), false) {
                 @Override
                 public void run(@NotNull ProgressIndicator indicator) {
                     indicator.setText(CREATING);
-                    createMergeRequests();
+                    createMergeRequests(indicator);
                     indicator.setText(CREATED);
                 }
             });
             dispose();
         } else {
-            List<Result> resultList = (List<Result>) ProgressManager.getInstance().run(new Task.WithResult(project, TITLE, false) {
+            List<Result> resultList = (List<Result>) ProgressManager.getInstance().run(new Task.WithResult(project, Bundle.message("createMergeRequestDialogTitle"), false) {
                 @Override
                 protected Object compute(@NotNull ProgressIndicator indicator) {
                     indicator.setText(CREATING);
-                    List<Result> results = createMergeRequests();
+                    List<Result> results = createMergeRequests(indicator);
                     indicator.setText(CREATED);
                     return results;
                 }
@@ -142,7 +143,7 @@ public class MergeRequestDialog extends DialogWrapper {
         }
     }
 
-    private List<Result> createMergeRequests() {
+    private List<Result> createMergeRequests(ProgressIndicator indicator) {
         String source = (String) sourceBranch.getSelectedItem();
         String target = (String) targetBranch.getSelectedItem();
         String desc = description.getText();
@@ -156,8 +157,10 @@ public class MergeRequestDialog extends DialogWrapper {
         User finalUser = user;
         StringBuilder info = new StringBuilder();
         StringBuilder error = new StringBuilder();
+        AtomicInteger index = new AtomicInteger(1);
         List<Result> results = selectedProjectDto.getSelectedProjectList().stream().map(s -> {
             try {
+                indicator.setText2(s.getName()+" ("+ index.getAndIncrement() +"/"+ selectedProjectDto.getSelectedProjectList()+")");
                 GitlabMergeRequest mergeRequest = selectedProjectDto.getGitLabSettingsState().api(s.getGitlabServer())
                         .createMergeRequest(s, finalUser == null ? null : finalUser.resetId(s.getGitlabServer().getApiUrl()),
                                 source, target, mergeTitle.getText(), desc, false);
@@ -210,13 +213,29 @@ public class MergeRequestDialog extends DialogWrapper {
         if (sourceBranch.getSelectedItem() == null || StringUtils.isBlank(sourceBranch.getSelectedItem().toString())) {
             return new ValidationInfo("Source Branch cannot be empty.", sourceBranch);
         }
+        if (sourceBranch.getSelectedItem() != null
+                && StringUtils.isNotBlank(sourceBranch.getSelectedItem().toString())
+                && !commonBranch.contains(sourceBranch.getSelectedItem().toString())) {
+            return new ValidationInfo("This source branch does not exist, please choose again!", sourceBranch);
+        }
         if (targetBranch.getSelectedItem() == null || StringUtils.isBlank(targetBranch.getSelectedItem().toString())) {
             return new ValidationInfo("Target Branch cannot be empty.", targetBranch);
+        }
+
+        if (targetBranch.getSelectedItem() != null
+                && StringUtils.isNotBlank(targetBranch.getSelectedItem().toString())
+                && !commonBranch.contains(targetBranch.getSelectedItem().toString())) {
+            return new ValidationInfo("This target branch does not exist, please choose again!", targetBranch);
         }
 
         if (targetBranch.getSelectedItem() != null && sourceBranch.getSelectedItem() != null
                 &&  StringUtils.equalsIgnoreCase(targetBranch.getSelectedItem().toString(), sourceBranch.getSelectedItem().toString())) {
             return new ValidationInfo("Target branch must be different from Source branch.", targetBranch);
+        }
+        if (assignee.getSelectedItem() != null
+                && StringUtils.isNotBlank(assignee.getSelectedItem().toString())
+                && !users.stream().map(User::toString).collect(Collectors.toList()).contains(assignee.getSelectedItem().toString())) {
+            return new ValidationInfo("This user does not exist, please choose again!", assignee);
         }
         return null;
     }

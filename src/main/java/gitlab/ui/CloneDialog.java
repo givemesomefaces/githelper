@@ -1,5 +1,6 @@
 package gitlab.ui;
 
+import com.github.lvlifeng.githelper.Bundle;
 import com.github.lvlifeng.githelper.icons.Icons;
 import com.intellij.dvcs.ui.CloneDvcsValidationUtils;
 import com.intellij.openapi.diagnostic.Logger;
@@ -48,7 +49,7 @@ public class CloneDialog extends DialogWrapper {
     protected CloneDialog(Project project, Set<ProjectDto> selectedProjectList) {
         super(true);
         init();
-        setTitle("Clone Settings");
+        setTitle(Bundle.message("cloneDialogTitle"));
         this.selectedProjectList = selectedProjectList;
         this.project = project;
         initDefaultDirectory();
