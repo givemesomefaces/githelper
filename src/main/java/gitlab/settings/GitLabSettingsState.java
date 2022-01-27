@@ -47,7 +47,7 @@ public class GitLabSettingsState implements PersistentStateComponent<GitLabSetti
 
     private boolean defaultRemoveBranch;
 
-    private Collection<GitlabServer> gitlabServers = new ArrayList<>();
+    private List<GitlabServer> gitlabServers = new ArrayList<>();
 
     public static GitLabSettingsState getInstance() {
         return ServiceManager.getService(GitLabSettingsState.class);
@@ -64,16 +64,16 @@ public class GitLabSettingsState implements PersistentStateComponent<GitLabSetti
     }
 
     @SneakyThrows
-    public Map<GitlabServer, Collection<ProjectDto>> loadMapOfServersAndProjects(Collection<GitlabServer> servers) {
-        Map<GitlabServer, Collection<ProjectDto>> map = new HashMap<>();
+    public Map<GitlabServer, List<ProjectDto>> loadMapOfServersAndProjects(List<GitlabServer> servers) {
+        Map<GitlabServer, List<ProjectDto>> map = new HashMap<>();
         for(GitlabServer server : servers) {
-            Collection<ProjectDto> projects = loadProjects(server);
+            List<ProjectDto> projects = loadProjects(server);
             map.put(server, projects);
         }
         return map;
     }
 
-    public Collection<ProjectDto> loadProjects(GitlabServer server) throws Throwable {
+    public List<ProjectDto> loadProjects(GitlabServer server) throws Throwable {
         GitlabRestApi gitlabRestApi = api(server);
 
         return gitlabRestApi.getProjects().stream().map(o -> {
@@ -121,7 +121,7 @@ public class GitLabSettingsState implements PersistentStateComponent<GitLabSetti
         return CollectionUtil.isNotEmpty(getGitlabServers());
     }
 
-    public Collection<GitlabServer> getGitlabServers() {
+    public List<GitlabServer> getGitlabServers() {
         gitlabServers = gitlabServers.stream().filter(Objects::nonNull).collect(Collectors.toList());
         return gitlabServers;
     }

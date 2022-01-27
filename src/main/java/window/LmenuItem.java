@@ -10,6 +10,7 @@ import java.awt.*;
  * @date 2022/1/2 16:34
  */
 public class LmenuItem extends JMenuItem implements ListCellRenderer{
+
     @Override
     public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
         this.setText(value.toString());

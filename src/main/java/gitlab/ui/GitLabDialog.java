@@ -1,26 +1,27 @@
 package gitlab.ui;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.map.MapUtil;
+import com.github.lvlifeng.githelper.Bundle;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
+import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.vfs.VirtualFile;
 import git4idea.GitUtil;
 import git4idea.repo.GitRepository;
-import gitlab.bean.GitlabServer;
-import gitlab.bean.ProjectDto;
-import gitlab.bean.SelectedProjectDto;
-import gitlab.bean.User;
+import gitlab.bean.*;
 import gitlab.helper.RepositoryHelper;
 import gitlab.settings.GitLabSettingsState;
 import lombok.SneakyThrows;
 import org.apache.commons.compress.utils.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.gitlab.api.models.GitlabBranch;
+import org.gitlab.api.models.GitlabMergeRequest;
 import org.gitlab.api.models.GitlabTag;
 import org.gitlab.api.models.GitlabUser;
 import org.jetbrains.annotations.NotNull;
@@ -35,6 +36,7 @@ import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -144,9 +146,47 @@ public class GitLabDialog extends DialogWrapper {
         mergeButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                new MergeDialog(project, new SelectedProjectDto()
-                        .setGitLabSettingsState(gitLabSettingsState)
-                        .setSelectedProjectList(selectedProjectList)).showAndGet();
+                ProgressManager.getInstance().run(new Task.Modal(project, Bundle.message("mergeRequestDialogTitle"), true) {
+                    List<MergeRequest> gitlabMergeRequests = new ArrayList<>();
+                    @Override
+                    public void run(@NotNull ProgressIndicator indicator) {
+                        indicator.setText("Loading merge requests...");
+                        AtomicInteger index = new AtomicInteger(1);
+                        gitlabMergeRequests = selectedProjectList
+                                .stream()
+                                .filter(o -> !indicator.isCanceled())
+                                .map(o -> {
+                                    indicator.setText2(o.getName()+" ("+ index.getAndIncrement() +"/"+ selectedProjectList.size()+")");
+                                    List<GitlabMergeRequest> openMergeRequest = gitLabSettingsState
+                                            .api(o.getGitlabServer())
+                                            .getOpenMergeRequest(o.getId());
+                                    return openMergeRequest.stream().map(u -> {
+                                        MergeRequest m = new MergeRequest();
+                                        BeanUtil.copyProperties(u, m);
+                                        m.setProjectName(o.getName());
+                                        m.setGitlabServer(o.getGitlabServer());
+                                        return m;
+                                    }).collect(Collectors.toList());
+                                })
+                                .flatMap(Collection::stream)
+                                .collect(Collectors.toList());
+
+                        indicator.setText("Merge requests loaded");
+                    }
+
+                    @Override
+                    public void onSuccess() {
+                        super.onSuccess();
+                        if (CollectionUtil.isEmpty(gitlabMergeRequests)) {
+                            Messages.showMessageDialog("No merge requests to merge!", Bundle.message("mergeRequestDialogTitle"), null);
+                            return;
+                        }
+                        new MergeDialog(project, new SelectedProjectDto()
+                                .setGitLabSettingsState(gitLabSettingsState)
+                                .setSelectedProjectList(selectedProjectList),
+                                gitlabMergeRequests).showAndGet();
+                    }
+                });
             }
         });
         cancelButton.addActionListener(new ActionListener() {
@@ -164,24 +204,36 @@ public class GitLabDialog extends DialogWrapper {
         createMergeRequestButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                ProgressManager.getInstance().run(new Task.Modal(project, "Create Merge Request", true) {
+                ProgressManager.getInstance().run(new Task.Modal(project, Bundle.message("createMergeRequestDialogTitle"), true) {
                     List<String> commonBranch = new ArrayList<>();
                     List<User> currentUser = new ArrayList<>();
                     Set<User> users = new HashSet<>();
                     @Override
                     public void run(@NotNull ProgressIndicator indicator) {
                         indicator.setText("Loading common branches...");
+                        AtomicInteger index = new AtomicInteger(1);
                         commonBranch = selectedProjectList.stream()
-                                .map(o -> gitLabSettingsState.api(o.getGitlabServer())
-                                        .getBranchesByProject(o)
-                                        .stream()
-                                        .map(GitlabBranch::getName)
-                                        .collect(Collectors.toList()))
+                                .filter(o -> !indicator.isCanceled())
+                                .map(o -> {
+                                    indicator.setText2(o.getName()+" ("+ index.getAndIncrement() +"/"+ selectedProjectList.size()+")");
+                                    return gitLabSettingsState.api(o.getGitlabServer())
+                                            .getBranchesByProject(o)
+                                            .stream()
+                                            .map(GitlabBranch::getName)
+                                            .collect(Collectors.toList());
+                                })
                                 .collect(Collectors.toList())
                                 .stream()
                                 .reduce((a, b) -> CollectionUtil.intersectionDistinct(a, b).stream().collect(Collectors.toList()))
                                 .orElse(Lists.newArrayList());
                         commonBranch.stream().sorted(String::compareToIgnoreCase);
+                        if (CollectionUtil.isEmpty(commonBranch)) {
+                            return;
+                        }
+                        if (indicator.isCanceled()) {
+                            return;
+                        }
+                        indicator.setText("Loading users...");
                         Set<GitlabServer> serverDtos = selectedProjectList.stream().map(ProjectDto::getGitlabServer).collect(Collectors.toSet());
                         currentUser = serverDtos.stream().map(o -> {
                             GitlabUser m = gitLabSettingsState.api(o).getCurrentUser();
@@ -198,7 +250,11 @@ public class GitLabDialog extends DialogWrapper {
                             }
                             return a;
                         })).values().stream().collect(Collectors.toList());
+                        if (indicator.isCanceled()) {
+                            return;
+                        }
                         users = serverDtos.stream()
+                                .filter(o -> !indicator.isCanceled())
                                 .map(o -> gitLabSettingsState.api(o).getActiveUsers().stream().map(m -> {
                                             User u = new User();
                                             u.setServerUserIdMap(new HashMap<>(){{
@@ -216,12 +272,16 @@ public class GitLabDialog extends DialogWrapper {
                                     }
                                     return a;
                                 })).values().stream().collect(Collectors.toSet());
-                        indicator.setText("Common branches loaded");
+//                        indicator.setText("Common branches loaded");
                     }
 
                     @Override
                     public void onSuccess() {
                         super.onSuccess();
+                        if (CollectionUtil.isEmpty(commonBranch)) {
+                            Messages.showMessageDialog("No common branches, please reselect project!", Bundle.message("createMergeRequestDialogTitle"), null);
+                            return;
+                        }
                         new MergeRequestDialog(project, new SelectedProjectDto()
                                 .setGitLabSettingsState(gitLabSettingsState)
                                 .setSelectedProjectList(selectedProjectList),
@@ -235,29 +295,43 @@ public class GitLabDialog extends DialogWrapper {
         tagButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                ProgressManager.getInstance().run(new Task.Modal(project, "Create Tag", true) {
+                ProgressManager.getInstance().run(new Task.Modal(project, Bundle.message("createTagDialogTitle"), true) {
                     List<String> commonFrom = new ArrayList<>();
                     @Override
                     public void run(@NotNull ProgressIndicator indicator) {
-                        indicator.setText("Loading common branches and tags...");
+                        indicator.setText("Loading common branches");
+                        AtomicInteger indexBranch = new AtomicInteger(1);
                         commonFrom = new ArrayList<>();
                         List<String> commonBranch = selectedProjectList.stream()
-                                .map(o -> gitLabSettingsState.api(o.getGitlabServer())
-                                        .getBranchesByProject(o)
-                                        .stream()
-                                        .map(GitlabBranch::getName)
-                                        .collect(Collectors.toList()))
+                                .filter(o -> !indicator.isCanceled())
+                                .map(o -> {
+                                    indicator.setText2(o.getName()+" ("+ indexBranch.getAndIncrement() +"/"+ selectedProjectList.size()+")");
+                                    return gitLabSettingsState.api(o.getGitlabServer())
+                                            .getBranchesByProject(o)
+                                            .stream()
+                                            .map(GitlabBranch::getName)
+                                            .collect(Collectors.toList());
+                                })
                                 .collect(Collectors.toList())
                                 .stream()
                                 .reduce((a, b) -> CollectionUtil.intersectionDistinct(a, b).stream().collect(Collectors.toList()))
                                 .orElse(Lists.newArrayList());
                         commonBranch.stream().sorted(String::compareToIgnoreCase);
+                        if (indicator.isCanceled()) {
+                            return;
+                        }
+                        indicator.setText("Loading common tags");
+                        AtomicInteger indexTag = new AtomicInteger(1);
                         List<String> commonTag = selectedProjectList.stream()
-                                .map(o -> gitLabSettingsState.api(o.getGitlabServer())
-                                        .getTagsByProject(o)
-                                        .stream()
-                                        .map(GitlabTag::getName)
-                                        .collect(Collectors.toList()))
+                                .filter(o -> !indicator.isCanceled())
+                                .map(o -> {
+                                    indicator.setText2(o.getName()+" ("+ indexTag.getAndIncrement() +"/"+ selectedProjectList.size()+")");
+                                    return gitLabSettingsState.api(o.getGitlabServer())
+                                            .getTagsByProject(o)
+                                            .stream()
+                                            .map(GitlabTag::getName)
+                                            .collect(Collectors.toList());
+                                })
                                 .collect(Collectors.toList())
                                 .stream()
                                 .reduce((a, b) -> CollectionUtil.intersectionDistinct(a, b).stream().collect(Collectors.toList()))
@@ -280,6 +354,10 @@ public class GitLabDialog extends DialogWrapper {
                     @Override
                     public void onSuccess() {
                         super.onSuccess();
+                        if (CollectionUtil.isEmpty(commonFrom)) {
+                            Messages.showMessageDialog("No common from, please reselect project!", Bundle.message("createTagDialogTitle"), null);
+                            return;
+                        }
                         new TagDialog(project, new SelectedProjectDto()
                                 .setSelectedProjectList(selectedProjectList)
                                 .setGitLabSettingsState(gitLabSettingsState),
@@ -338,7 +416,7 @@ public class GitLabDialog extends DialogWrapper {
     }
 
     private void setSelectedCount() {
-        selectedCount.setText(String.format("(%s selected)", selectedProjectList.size()));
+        selectedCount.setText(String.format("(%s Selected)", selectedProjectList.size()));
     }
 
     private List<ProjectDto> filterProjectsByProject(String searchWord){
@@ -438,7 +516,7 @@ public class GitLabDialog extends DialogWrapper {
         selectedProjectList.clear();
         projectJList.clearSelection();
         selectAllCheckBox.setSelected(false);
-        selectedCount.setText("(0 selected)");
+        selectedCount.setText("(0 Selected)");
     }
 
     private List<ProjectDto> filterProjectListByBranch(String searchWord) {

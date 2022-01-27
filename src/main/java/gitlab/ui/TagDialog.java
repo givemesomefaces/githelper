@@ -1,6 +1,7 @@
 package gitlab.ui;
 
 import cn.hutool.core.collection.CollectionUtil;
+import com.github.lvlifeng.githelper.Bundle;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
@@ -26,6 +27,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 
@@ -46,11 +48,10 @@ public class TagDialog extends DialogWrapper {
     private List<String> commonFrom;
     private final static String CREATING = "New tag is creating...";
     private final static String CREATED = "New tag created";
-    private final static String TITLE = "Create Tag";
 
     public TagDialog(Project project, SelectedProjectDto selectedProjectDto, List<String> commonFrom) {
         super(true);
-        setTitle(TITLE);
+        setTitle(Bundle.message("createTagDialogTitle"));
         this.project = project;
         this.selectedProjectDto = selectedProjectDto;
         this.commonFrom = commonFrom;
@@ -89,7 +90,11 @@ public class TagDialog extends DialogWrapper {
         if (createFrom.getSelectedItem() == null || StringUtils.isBlank(createFrom.getSelectedItem().toString())) {
             return new ValidationInfo("Create From cannot be empty.", createFrom);
         }
-
+        if (createFrom.getSelectedItem() != null
+                && StringUtils.isNotBlank(createFrom.getSelectedItem().toString())
+                && !commonFrom.contains(createFrom.getSelectedItem().toString())) {
+            return new ValidationInfo("This create from does not exist, please choose again!", createFrom);
+        }
         if (StringUtils.isBlank(tagName.getText())) {
             return new ValidationInfo("Tag Name cannot be empty.", tagName);
         }
@@ -99,21 +104,21 @@ public class TagDialog extends DialogWrapper {
     @Override
     protected void doOKAction() {
         if (backgroudCheckBox.isSelected()) {
-            ProgressManager.getInstance().run(new Task.Backgroundable(project, TITLE, false) {
+            ProgressManager.getInstance().run(new Task.Backgroundable(project, Bundle.message("createTagDialogTitle"), false) {
                 @Override
                 public void run(@NotNull ProgressIndicator indicator) {
                     indicator.setText(CREATING);
-                    createTags();
+                    createTags(indicator);
                     indicator.setText(CREATED);
                 }
             });
             dispose();
         } else {
-            List<Result> resultList = (List<Result>) ProgressManager.getInstance().run(new Task.WithResult(project, TITLE, false) {
+            List<Result> resultList = (List<Result>) ProgressManager.getInstance().run(new Task.WithResult(project, Bundle.message("createTagDialogTitle"), false) {
                 @Override
                 protected Object compute(@NotNull ProgressIndicator indicator) {
                     indicator.setText(CREATING);
-                    List<Result> results = createTags();
+                    List<Result> results = createTags(indicator);
                     indicator.setText(CREATED);
                     return results;
                 }
@@ -123,7 +128,7 @@ public class TagDialog extends DialogWrapper {
         }
     }
 
-    private List<Result> createTags() {
+    private List<Result> createTags(ProgressIndicator indicator) {
 
         String source = (String) createFrom.getSelectedItem();
         if (StringUtils.isEmpty(source) || StringUtils.isEmpty(tagName.getText())) {
@@ -131,8 +136,10 @@ public class TagDialog extends DialogWrapper {
         }
         StringBuilder info = new StringBuilder();
         StringBuilder error = new StringBuilder();
+        AtomicInteger index = new AtomicInteger(1);
         List<Result> results = selectedProjectDto.getSelectedProjectList().stream().map(s -> {
             try {
+                indicator.setText2(s.getName()+" ("+ index.getAndIncrement() +"/"+ selectedProjectDto.getSelectedProjectList()+")");
                 GitlabTag tagResult = selectedProjectDto.getGitLabSettingsState().api(s.getGitlabServer())
                         .addTag(s.getId(), tagName.getText(), source, message.getText(), null);
                 Result re = new Result();

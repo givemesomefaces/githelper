@@ -50,10 +50,10 @@ public class CheckOutDialog extends DialogWrapper {
 
     @Override
     protected @Nullable ValidationInfo doValidate() {
-        if (StringUtils.isNotBlank(newBranchName.getText())) {
+        if (StringUtils.isBlank(newBranchName.getText())) {
             return new ValidationInfo("New branch name cannot be empty!", newBranchName);
         }
-        if (StringUtils.isNotBlank(startPoint)) {
+        if (StringUtils.isBlank(startPoint)) {
             return new ValidationInfo("Startpoint cannot be empty!", contentPane);
         }
         return null;

@@ -71,7 +71,7 @@
                   <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
-                  <text value="Select all"/>
+                  <text value="Select All"/>
                 </properties>
               </component>
               <component id="30a03" class="javax.swing.JLabel" binding="repositoryDefaultText">
@@ -107,7 +107,7 @@
                   <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="4" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
-                  <text value="(0 selected)"/>
+                  <text value="(0 Selected)"/>
                 </properties>
               </component>
             </children>
