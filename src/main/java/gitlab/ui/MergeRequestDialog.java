@@ -1,5 +1,6 @@
 package gitlab.ui;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.map.MapUtil;
 import com.github.lvlifeng.githelper.Bundle;
@@ -8,6 +9,7 @@ import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
+import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.ui.ValidationInfo;
 import gitlab.common.Notifier;
 import gitlab.enums.OperationTypeEnum;
@@ -24,10 +26,7 @@ import org.jetbrains.annotations.Nullable;
 import javax.swing.*;
 import java.awt.event.*;
 import java.io.IOException;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -48,6 +47,7 @@ public class MergeRequestDialog extends DialogWrapper {
     private JTextField mergeTitle;
     private JLabel assign2me;
     private JCheckBox backgroudCheckBox;
+    private JCheckBox jumpToMergeMenuCheckBox;
     private SelectedProjectDto selectedProjectDto;
     private Project project;
     private List<String> commonBranch;
@@ -70,6 +70,7 @@ public class MergeRequestDialog extends DialogWrapper {
     @Override
     protected void init() {
         super.init();
+        sortDatas();
         sourceBranch.setModel(new DefaultComboBoxModel(commonBranch.toArray()));
         sourceBranch.setSelectedIndex(-1);
         targetBranch.setModel(new DefaultComboBoxModel(commonBranch.toArray()));
@@ -115,6 +116,21 @@ public class MergeRequestDialog extends DialogWrapper {
         });
     }
 
+    private void sortDatas() {
+        CollectionUtil.sort(commonBranch, new Comparator<String>() {
+            @Override
+            public int compare(String o1, String o2) {
+                return StringUtils.compareIgnoreCase(o1, o2);
+            }
+        });
+        CollectionUtil.sort(users, new Comparator<User>() {
+            @Override
+            public int compare(User o1, User o2) {
+                return StringUtils.compareIgnoreCase(o1.getUsername(), o2.getUsername());
+            }
+        });
+    }
+
     @Override
     protected void doOKAction() {
         super.doOKAction();
@@ -141,6 +157,61 @@ public class MergeRequestDialog extends DialogWrapper {
             dispose();
             new ResultDialog(resultList, OperationTypeEnum.CREATE_MERGE_REQUEST.getDialogTitle()).showAndGet();
         }
+        if (jumpToMergeMenuCheckBox.isSelected()) {
+            showMergeDialog();
+        }
+    }
+
+    private void showMergeDialog() {
+        ProgressManager.getInstance().run(new Task.Modal(project, Bundle.message("mergeRequestDialogTitle"), true) {
+            List<MergeRequest> gitlabMergeRequests = new ArrayList<>();
+            @Override
+            public void run(@NotNull ProgressIndicator indicator) {
+                indicator.setText("Loading merge requests...");
+                try {
+                    Thread.sleep(3000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                AtomicInteger index = new AtomicInteger(1);
+                gitlabMergeRequests = selectedProjectDto.getSelectedProjectList()
+                        .stream()
+                        .filter(o -> !indicator.isCanceled())
+                        .map(o -> {
+                            indicator.setText2(o.getName()+" ("+ index.getAndIncrement() +"/"+ selectedProjectDto.getSelectedProjectList().size()+")");
+                            List<GitlabMergeRequest> openMergeRequest = null;
+                            try {
+                                openMergeRequest = selectedProjectDto.getGitLabSettingsState()
+                                        .api(o.getGitlabServer())
+                                        .getOpenMergeRequest(o.getId());
+                            } catch (IOException ioException) {
+                                openMergeRequest = Lists.newArrayList();
+                            }
+                            return openMergeRequest.stream().map(u -> {
+                                MergeRequest m = new MergeRequest();
+                                BeanUtil.copyProperties(u, m);
+                                m.setProjectName(o.getName());
+                                m.setGitlabServer(o.getGitlabServer());
+                                return m;
+                            }).collect(Collectors.toList());
+                        })
+                        .flatMap(Collection::stream)
+                        .collect(Collectors.toList());
+
+                indicator.setText("Merge requests loaded");
+            }
+
+            @Override
+            public void onSuccess() {
+                super.onSuccess();
+                if (CollectionUtil.isEmpty(gitlabMergeRequests)) {
+                    Messages.showMessageDialog("No merge requests to merge!", Bundle.message("mergeRequestDialogTitle"), null);
+                    return;
+                }
+                new MergeDialog(project, selectedProjectDto,
+                        gitlabMergeRequests).showAndGet();
+            }
+        });
     }
 
     private List<Result> createMergeRequests(ProgressIndicator indicator) {

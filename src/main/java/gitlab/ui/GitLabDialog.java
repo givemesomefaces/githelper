@@ -16,6 +16,7 @@ import git4idea.GitUtil;
 import git4idea.repo.GitRepository;
 import gitlab.bean.*;
 import gitlab.helper.RepositoryHelper;
+import gitlab.helper.UsersHelper;
 import gitlab.settings.GitLabSettingsState;
 import lombok.SneakyThrows;
 import org.apache.commons.compress.utils.Lists;
@@ -31,6 +32,7 @@ import window.LcheckBox;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.IOException;
 import java.util.List;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
@@ -157,9 +159,14 @@ public class GitLabDialog extends DialogWrapper {
                                 .filter(o -> !indicator.isCanceled())
                                 .map(o -> {
                                     indicator.setText2(o.getName()+" ("+ index.getAndIncrement() +"/"+ selectedProjectList.size()+")");
-                                    List<GitlabMergeRequest> openMergeRequest = gitLabSettingsState
-                                            .api(o.getGitlabServer())
-                                            .getOpenMergeRequest(o.getId());
+                                    List<GitlabMergeRequest> openMergeRequest = null;
+                                    try {
+                                        openMergeRequest = gitLabSettingsState
+                                                .api(o.getGitlabServer())
+                                                .getOpenMergeRequest(o.getId());
+                                    } catch (IOException ioException) {
+                                        openMergeRequest = Lists.newArrayList();
+                                    }
                                     return openMergeRequest.stream().map(u -> {
                                         MergeRequest m = new MergeRequest();
                                         BeanUtil.copyProperties(u, m);
@@ -224,7 +231,7 @@ public class GitLabDialog extends DialogWrapper {
                                 })
                                 .collect(Collectors.toList())
                                 .stream()
-                                .reduce((a, b) -> CollectionUtil.intersectionDistinct(a, b).stream().collect(Collectors.toList()))
+                                .reduce((a, b) -> CollectionUtil.disjunction(a, b).stream().collect(Collectors.toList()))
                                 .orElse(Lists.newArrayList());
                         commonBranch.stream().sorted(String::compareToIgnoreCase);
                         if (CollectionUtil.isEmpty(commonBranch)) {
@@ -234,45 +241,11 @@ public class GitLabDialog extends DialogWrapper {
                             return;
                         }
                         indicator.setText("Loading users...");
-                        Set<GitlabServer> serverDtos = selectedProjectList.stream().map(ProjectDto::getGitlabServer).collect(Collectors.toSet());
-                        currentUser = serverDtos.stream().map(o -> {
-                            GitlabUser m = gitLabSettingsState.api(o).getCurrentUser();
-                            User u = new User();
-                            u.setServerUserIdMap(new HashMap<>() {{
-                                put(o.getApiUrl(), m.getId());
-                            }});
-                            u.setUsername(m.getUsername());
-                            u.setName(m.getName());
-                            return u;
-                        }).collect(Collectors.toMap(User::getUsername, Function.identity(), (a, b) -> {
-                            if (MapUtil.isNotEmpty(b.getServerUserIdMap())) {
-                                a.getServerUserIdMap().putAll(b.getServerUserIdMap());
-                            }
-                            return a;
-                        })).values().stream().collect(Collectors.toList());
+                        currentUser = UsersHelper.getCurrentUser(indicator, selectedProjectList, gitLabSettingsState);
                         if (indicator.isCanceled()) {
                             return;
                         }
-                        users = serverDtos.stream()
-                                .filter(o -> !indicator.isCanceled())
-                                .map(o -> gitLabSettingsState.api(o).getActiveUsers().stream().map(m -> {
-                                            User u = new User();
-                                            u.setServerUserIdMap(new HashMap<>(){{
-                                                put(o.getApiUrl(), m.getId());
-                                            }});
-                                            u.setUsername(m.getUsername());
-                                            u.setName(m.getName());
-                                            return u;
-                                        }).collect(Collectors.toList())
-                                ).flatMap(Collection::stream)
-                                .collect(Collectors.toList())
-                                .stream().collect(Collectors.toMap(User::getUsername, Function.identity(), (a, b) -> {
-                                    if (MapUtil.isNotEmpty(b.getServerUserIdMap())) {
-                                        a.getServerUserIdMap().putAll(b.getServerUserIdMap());
-                                    }
-                                    return a;
-                                })).values().stream().collect(Collectors.toSet());
-//                        indicator.setText("Common branches loaded");
+                        users = UsersHelper.getAllUsers(indicator, gitLabSettingsState);
                     }
 
                     @Override
