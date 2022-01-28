@@ -78,10 +78,10 @@ public class MergeRequestAction extends DumbAwareAction {
         if (CollectionUtil.isNotEmpty(repSets)) {
             StringBuilder sb = new StringBuilder();
             repSets.stream().forEach(s -> sb.append(s).append("\n"));
-            Messages.showMessageDialog("The following Gitlab server is not configured!  Please go to \n" +
+            Messages.showInfoMessage("The following Gitlab server is not configured!  Please go to \n" +
                             "'Settings->Version Control->GitLab' to configure.\n\n" +
                             sb.toString(),
-                    Bundle.message("gitLab"), null);
+                    Bundle.message("gitLab"));
             return;
         }
 
@@ -131,7 +131,7 @@ public class MergeRequestAction extends DumbAwareAction {
             public void onSuccess() {
                 super.onSuccess();
                 if (CollectionUtil.isEmpty(requests)) {
-                    showMessageDialog();
+                    Messages.showInfoMessage("No merge requests to merge!", Bundle.message("mergeRequestDialogTitle"));
                     return;
                 }
 
@@ -146,6 +146,6 @@ public class MergeRequestAction extends DumbAwareAction {
     }
 
     private void showMessageDialog(){
-        Messages.showMessageDialog("No merge requests to merge!", Bundle.message("mergeRequestDialogTitle"), null);
+        Messages.showInfoMessage("No projects to merge, please reselect!", Bundle.message("mergeRequestDialogTitle"));
     }
 }
