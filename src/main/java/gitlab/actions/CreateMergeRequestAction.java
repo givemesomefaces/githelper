@@ -119,6 +119,9 @@ public class CreateMergeRequestAction extends DumbAwareAction {
                     } catch (IOException ioException) {
                     }
                 });
+                if (indicator.isCanceled()) {
+                    return;
+                }
                 indicator.setText("Loading users...");
                 currentUser = UsersHelper.getCurrentUser(indicator, selectedProjectList, gitLabSettingsState);
                 if (indicator.isCanceled()) {
