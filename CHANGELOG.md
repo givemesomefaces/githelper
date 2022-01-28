@@ -49,3 +49,7 @@
 ### Added
 - Add progress bar.
 - Optimize UI.
+
+## [1.2.0]
+### Added
+- Add gitlab operation to the git menu of right mouse button.[Create Merge Request..., Merge Request...]

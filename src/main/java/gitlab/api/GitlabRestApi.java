@@ -128,8 +128,7 @@ public class GitlabRestApi {
     }
 
     public List<GitlabBranch> getBranchesByProject(GitlabProject project) {
-        List<GitlabBranch> branches = api.getBranches(project);
-        return branches;
+        return api.getBranches(project);
     }
 
     public List<GitlabTag> getTagsByProject(GitlabProject project) {
@@ -142,13 +141,8 @@ public class GitlabRestApi {
                 .filter(o -> StringUtils.equalsIgnoreCase(o.getState(), "active"))
                 .collect(Collectors.toList());
     }
-    public List<GitlabMergeRequest> getOpenMergeRequest(Serializable projectId){
-        try {
-            return api.getOpenMergeRequests(projectId);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return Lists.newArrayList();
+    public List<GitlabMergeRequest> getOpenMergeRequest(Serializable projectId) throws IOException {
+        return api.getOpenMergeRequests(projectId);
     }
     public GitlabMergeRequest updateMergeRequest(Serializable projectId, Integer mergeRequestIid, String targetBranch,
                                     Integer assigneeId, String title, String description, String stateEvent,
@@ -162,5 +156,9 @@ public class GitlabRestApi {
 
     public GitlabTag addTag(Serializable projectId, String tagName, String ref, String message, String releaseDescription) throws IOException {
         return api.addTag(projectId, tagName, ref, message, releaseDescription);
+    }
+
+    public GitlabProject getProjectByNamespaceAndName(String namespace, String projectName) throws IOException {
+        return api.getProject(namespace, projectName);
     }
 }
