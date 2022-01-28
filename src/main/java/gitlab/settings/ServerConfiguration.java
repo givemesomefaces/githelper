@@ -21,6 +21,12 @@ import java.util.concurrent.TimeUnit;
 
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
+/**
+ *
+ *
+ * @author Lv LiFeng
+ * @date 2022/1/23 10:16
+ */
 public class ServerConfiguration extends DialogWrapper {
 
     private GitlabServer gitlabServer;

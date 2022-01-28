@@ -40,3 +40,12 @@
 - Supports batch create tag.
 - Add running in backgroud.
 - Output key logs to event log.
+
+## [1.1.7]
+### Fixed
+- GitLab bug. search for project by branch name.
+
+## [1.1.8]
+### Added
+- Add progress bar.
+- Optimize UI.

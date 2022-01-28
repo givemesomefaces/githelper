@@ -22,7 +22,12 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Collection;
 
-
+/**
+ *
+ *
+ * @author Lv LiFeng
+ * @date 2022/1/23 10:16
+ */
 public class SettingsView extends DialogWrapper implements SearchableConfigurable {
 
     public static final String DIALOG_TITLE = "GitLab Settings";
