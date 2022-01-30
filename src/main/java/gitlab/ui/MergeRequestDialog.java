@@ -2,7 +2,6 @@ package gitlab.ui;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollectionUtil;
-import cn.hutool.core.map.MapUtil;
 import com.github.lvlifeng.githelper.Bundle;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
@@ -11,24 +10,29 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.ui.ValidationInfo;
+import gitlab.bean.MergeRequest;
+import gitlab.bean.Result;
+import gitlab.bean.SelectedProjectDto;
+import gitlab.bean.User;
 import gitlab.common.Notifier;
 import gitlab.enums.OperationTypeEnum;
-import gitlab.bean.*;
 import lombok.Setter;
 import org.apache.commons.compress.utils.Lists;
 import org.apache.commons.lang3.StringUtils;
-import org.gitlab.api.models.GitlabBranch;
 import org.gitlab.api.models.GitlabMergeRequest;
-import org.gitlab.api.models.GitlabUser;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
-import java.awt.event.*;
+import java.awt.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.IOException;
+import java.util.List;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -107,6 +111,7 @@ public class MergeRequestDialog extends DialogWrapper {
                 searchUser(e, users);
             }
         });
+        assign2me.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         assign2me.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
