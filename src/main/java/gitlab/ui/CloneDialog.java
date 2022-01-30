@@ -96,6 +96,9 @@ public class CloneDialog extends DialogWrapper {
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
+                File file = new File(project.getBasePath());
+                LocalFileSystem lfs = LocalFileSystem.getInstance();
+                VirtualFile preSelect = lfs.findFileByIoFile(file);
                 FileChooser.chooseFiles(new FileChooserDescriptor(false,
                         true,
                         false,
@@ -103,7 +106,7 @@ public class CloneDialog extends DialogWrapper {
                         false,
                         false),
                         project,
-                        null,
+                        preSelect,
                         new Consumer<List<VirtualFile>>() {
                             @Override
                             public void consume(List<VirtualFile> virtualFiles) {

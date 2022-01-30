@@ -240,6 +240,7 @@ public class GitLabDialog extends DialogWrapper {
                         if (indicator.isCanceled()) {
                             return;
                         }
+                        indicator.setText2(null);
                         indicator.setText("Loading users...");
                         currentUser = UsersHelper.getCurrentUser(indicator, selectedProjectList, gitLabSettingsState);
                         if (indicator.isCanceled()) {
