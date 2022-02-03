@@ -80,7 +80,7 @@
         </constraints>
         <properties>
           <selected value="true"/>
-          <text value="Running in backgroud"/>
+          <text value="Running in background"/>
         </properties>
       </component>
     </children>

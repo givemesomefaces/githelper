@@ -38,7 +38,7 @@
 ## [1.1.6]
 ### Added
 - Supports batch create tag.
-- Add running in backgroud.
+- Add running in background.
 - Output key logs to event log.
 
 ## [1.1.7]

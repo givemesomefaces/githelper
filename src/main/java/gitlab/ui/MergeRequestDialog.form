@@ -36,7 +36,7 @@
             </constraints>
             <properties>
               <editable value="true"/>
-              <toolTipText value="Common branches of selected projects"/>
+              <toolTipText value="Common branches of projects selected"/>
             </properties>
           </component>
           <component id="bc028" class="javax.swing.JLabel">
@@ -55,7 +55,7 @@
             </constraints>
             <properties>
               <editable value="true"/>
-              <toolTipText value="Common branches of selected projects"/>
+              <toolTipText value="Common branches of projects selected"/>
             </properties>
           </component>
           <component id="93656" class="javax.swing.JLabel">
@@ -131,7 +131,7 @@
         </constraints>
         <properties>
           <selected value="true"/>
-          <text value="Running in backgroud"/>
+          <text value="Running in background"/>
         </properties>
       </component>
       <component id="2a22d" class="javax.swing.JCheckBox" binding="jumpToMergeMenuCheckBox" default-binding="true">
