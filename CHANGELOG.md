@@ -53,3 +53,7 @@
 ## [1.2.0]
 ### Added
 - Add gitlab operation to the git menu of right mouse button.[Create Merge Request..., Merge Request...]
+
+## [1.2.1]
+### Fixed
+- Fix ui.
