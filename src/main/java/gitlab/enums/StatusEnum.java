@@ -11,7 +11,7 @@ import lombok.Getter;
 @Getter
 public enum StatusEnum {
 
-    SUCCESSED("GitLab Operation Successed:"),
+    SUCCESSED("GitLab Operation Successful:"),
     FAILED("GitLab Operation Failed:"),
     ;
 
