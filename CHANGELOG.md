@@ -61,3 +61,7 @@
 ## [1.2.2]
 ### Fixed
 - Fix ui.
+
+## [1.2.3]
+### Fixed
+- Fix loading users.

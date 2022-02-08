@@ -23,8 +23,7 @@ import java.util.stream.Collectors;
  */
 public class UsersHelper {
 
-    public static List<User> getCurrentUser(ProgressIndicator indicator, Set<ProjectDto> selectedProjectList, GitLabSettingsState gitLabSettingsState){
-        Set<GitlabServer> serverDtos = selectedProjectList.stream().map(ProjectDto::getGitlabServer).collect(Collectors.toSet());
+    public static List<User> getCurrentUser(ProgressIndicator indicator, Set<GitlabServer> serverDtos, GitLabSettingsState gitLabSettingsState){
         return serverDtos.stream().filter(o -> !indicator.isCanceled()).map(o -> {
             GitlabUser m = gitLabSettingsState.api(o).getCurrentUser();
             User u = new User();
@@ -42,8 +41,8 @@ public class UsersHelper {
         })).values().stream().collect(Collectors.toList());
     }
 
-    public static Set<User> getAllUsers(ProgressIndicator indicator, GitLabSettingsState gitLabSettingsState){
-        return gitLabSettingsState.getGitlabServers().stream()
+    public static Set<User> getAllUsers(ProgressIndicator indicator, Set<GitlabServer> serverDtos, GitLabSettingsState gitLabSettingsState){
+        return serverDtos.stream()
                 .filter(o -> !indicator.isCanceled())
                 .map(o -> gitLabSettingsState.api(o).getActiveUsers().stream().map(m -> {
                             User u = new User();
