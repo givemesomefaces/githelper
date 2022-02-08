@@ -242,11 +242,12 @@ public class GitLabDialog extends DialogWrapper {
                         }
                         indicator.setText2(null);
                         indicator.setText("Loading users...");
-                        currentUser = UsersHelper.getCurrentUser(indicator, selectedProjectList, gitLabSettingsState);
+                        Set<GitlabServer> gitlabServerSet = selectedProjectList.stream().map(ProjectDto::getGitlabServer).collect(Collectors.toSet());
+                        currentUser = UsersHelper.getCurrentUser(indicator, gitlabServerSet, gitLabSettingsState);
                         if (indicator.isCanceled()) {
                             return;
                         }
-                        users = UsersHelper.getAllUsers(indicator, gitLabSettingsState);
+                        users = UsersHelper.getAllUsers(indicator, gitlabServerSet, gitLabSettingsState);
                     }
 
                     @Override
