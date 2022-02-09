@@ -85,7 +85,7 @@ public class ServerConfiguration extends DialogWrapper {
                         } catch (UnknownHostException e) {
                             return new ValidationInfo(SettingError.SERVER_CANNOT_BE_REACHED.message(), apiURl);
                         } catch (IOException e) {
-                            return new ValidationInfo(SettingError.INVALID_API_TOKEN.message(), apiURl);
+                            return new ValidationInfo(SettingError.INVALID_API_TOKEN.message(), token);
                         }
                     });
                     try {

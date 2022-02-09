@@ -69,7 +69,9 @@ public class GitLabAction extends AnAction {
             @Override
             public void onSuccess() {
                 super.onSuccess();
-                new GitLabDialog(project, projectDtoList).showAndGet();
+                if (CollectionUtil.isNotEmpty(projectDtoList)) {
+                    new GitLabDialog(project, projectDtoList).showAndGet();
+                }
             }
         });
     }
