@@ -12,6 +12,7 @@ import git4idea.repo.GitRepository;
 import gitlab.api.GitlabRestApi;
 import gitlab.bean.GitlabServer;
 import gitlab.bean.ProjectDto;
+import gitlab.common.Notifier;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
@@ -21,6 +22,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
+import java.net.SocketException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -91,6 +93,11 @@ public class GitLabSettingsState implements PersistentStateComponent<GitLabSetti
     }
 
     public GitlabRestApi api(GitlabServer serverDto) {
+        try {
+            isApiValid(serverDto.getApiUrl(), serverDto.getApiToken());
+        } catch (IOException e) {
+            Notifier.notifyError(null, "The GitLab server error occurred! (" + serverDto.getApiUrl() + ")\n " + e.getMessage());
+        }
         return new GitlabRestApi(serverDto.getApiUrl(), serverDto.getApiToken());
     }
 

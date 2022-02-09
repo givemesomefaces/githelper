@@ -1,5 +1,6 @@
 package gitlab.api;
 
+import gitlab.common.Notifier;
 import org.apache.commons.compress.utils.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.gitlab.api.AuthMethod;
@@ -23,12 +24,15 @@ import java.util.stream.Collectors;
  */
 public class GitlabRestApi {
 
-    GitlabAPI api;
+    private String host;
+
+    private GitlabAPI api;
 
     public GitlabRestApi() {
     }
 
     public GitlabRestApi(String host, String key) {
+        this.host = host;
         reload(host, key);
     }
 
@@ -36,8 +40,8 @@ public class GitlabRestApi {
         if (host != null && key != null && !host.isEmpty() && !key.isEmpty()) {
             api = GitlabAPI.connect(host, key, TokenType.PRIVATE_TOKEN, AuthMethod.URL_PARAMETER);
             api.ignoreCertificateErrors(true);
-            api.setConnectionTimeout(15 * 1000);
-            api.setResponseReadTimeout(15 * 1000);
+            api.setConnectionTimeout(10 * 1000);
+            api.setResponseReadTimeout(10 * 1000);
             return true;
         }
         return false;
@@ -136,10 +140,14 @@ public class GitlabRestApi {
     }
 
     public List<GitlabUser> getActiveUsers(){
-        return api.getUsers()
-                .stream()
-                .filter(o -> StringUtils.equalsIgnoreCase(o.getState(), "active"))
-                .collect(Collectors.toList());
+        try{
+            return api.getUsers()
+                    .stream()
+                    .filter(o -> StringUtils.equalsIgnoreCase(o.getState(), "active"))
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            return Lists.newArrayList();
+        }
     }
     public List<GitlabMergeRequest> getOpenMergeRequest(Serializable projectId) throws IOException {
         return api.getOpenMergeRequests(projectId);
