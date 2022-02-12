@@ -113,7 +113,10 @@ public class CreateMergeRequestAction extends DumbAwareAction {
                             List<GitlabBranch> branchesByProject = gitLabSettingsState.api(gitlabServer).getBranchesByProject(gitlabProject);
                             if (CollectionUtil.isNotEmpty(branchesByProject)) {
                                 Set<String> currentBranchNames = branchesByProject.stream().map(GitlabBranch::getName).collect(Collectors.toSet());
-                                commonBranch = CollectionUtil.disjunction(currentBranchNames, commonBranch).stream().collect(Collectors.toList());
+                                if (CollectionUtil.isEmpty(commonBranch)) {
+                                    commonBranch = new ArrayList<>(currentBranchNames);
+                                }
+                                commonBranch = CollectionUtil.intersectionDistinct(currentBranchNames, commonBranch).stream().collect(Collectors.toList());
                             }
                         }
                     } catch (IOException ioException) {
