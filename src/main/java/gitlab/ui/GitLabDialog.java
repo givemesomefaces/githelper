@@ -231,7 +231,7 @@ public class GitLabDialog extends DialogWrapper {
                                 })
                                 .collect(Collectors.toList())
                                 .stream()
-                                .reduce((a, b) -> CollectionUtil.disjunction(a, b).stream().collect(Collectors.toList()))
+                                .reduce((a, b) -> CollectionUtil.intersectionDistinct(a, b).stream().collect(Collectors.toList()))
                                 .orElse(Lists.newArrayList());
                         commonBranch.stream().sorted(String::compareToIgnoreCase);
                         if (CollectionUtil.isEmpty(commonBranch)) {

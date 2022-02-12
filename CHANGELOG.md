@@ -65,3 +65,7 @@
 ## [1.2.3]
 ### Fixed
 - Fix loading users.
+
+## [1.2.4]
+### Fixed
+- Fix common branches.
