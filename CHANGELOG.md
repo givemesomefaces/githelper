@@ -69,3 +69,7 @@
 ## [1.2.4]
 ### Fixed
 - Fix common branches.
+
+## [1.2.5]
+### Fixed
+- Fix ui.

@@ -114,6 +114,8 @@ public class MergeDialog extends DialogWrapper {
     }
 
     private void initButton() {
+        closeButton.setEnabled(false);
+        mergeButton.setEnabled(false);
         status.addItemListener(new ItemListener() {
             @Override
             public void itemStateChanged(ItemEvent e) {
@@ -339,10 +341,16 @@ public class MergeDialog extends DialogWrapper {
     }
 
     private void updateBottomButtonState() {
-        if (selectedMergeRequests.stream().anyMatch(o -> StringUtils.equalsIgnoreCase(o.getMergeStatus(), "cannot_be_merged"))) {
+        if (selectedMergeRequests.size() == 0) {
+            closeButton.setEnabled(false);
             mergeButton.setEnabled(false);
         } else {
-            mergeButton.setEnabled(true);
+            closeButton.setEnabled(true);
+            if (selectedMergeRequests.stream().anyMatch(o -> StringUtils.equalsIgnoreCase(o.getMergeStatus(), "cannot_be_merged"))) {
+                mergeButton.setEnabled(false);
+            } else {
+                mergeButton.setEnabled(true);
+            }
         }
     }
 
