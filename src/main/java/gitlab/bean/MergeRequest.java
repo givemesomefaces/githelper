@@ -8,6 +8,7 @@ import cn.hutool.core.date.LocalDateTimeUtil;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import org.apache.commons.lang.RandomStringUtils;
 import org.gitlab.api.models.GitlabMergeRequest;
 
 import java.time.LocalDateTime;
@@ -28,7 +29,7 @@ public class MergeRequest extends GitlabMergeRequest {
 
     @Override
     public String toString() {
-        return projectName + " | " + getMergeStatus() + " | "
+        return "project_" + RandomStringUtils.randomAlphanumeric(4) + " | " + getMergeStatus() + " | "
                 + getSourceBranch() + "->" + getTargetBranch() + " | "
                 + DateUtil.format(getCreatedAt(), DatePattern.NORM_DATETIME_MINUTE_PATTERN);
     }

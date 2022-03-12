@@ -20,6 +20,7 @@ import gitlab.helper.UsersHelper;
 import gitlab.settings.GitLabSettingsState;
 import lombok.SneakyThrows;
 import org.apache.commons.compress.utils.Lists;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.gitlab.api.models.GitlabBranch;
 import org.gitlab.api.models.GitlabMergeRequest;
@@ -158,7 +159,7 @@ public class GitLabDialog extends DialogWrapper {
                                 .stream()
                                 .filter(o -> !indicator.isCanceled())
                                 .map(o -> {
-                                    indicator.setText2(o.getName()+" ("+ index.getAndIncrement() +"/"+ selectedProjectList.size()+")");
+                                    indicator.setText2("project_" + RandomStringUtils.randomAlphanumeric(4)+" ("+ index.getAndIncrement() +"/"+ selectedProjectList.size()+")");
                                     List<GitlabMergeRequest> openMergeRequest = null;
                                     try {
                                         openMergeRequest = gitLabSettingsState
@@ -222,7 +223,7 @@ public class GitLabDialog extends DialogWrapper {
                         commonBranch = selectedProjectList.stream()
                                 .filter(o -> !indicator.isCanceled())
                                 .map(o -> {
-                                    indicator.setText2(o.getName()+" ("+ index.getAndIncrement() +"/"+ selectedProjectList.size()+")");
+                                    indicator.setText2("project_" + RandomStringUtils.randomAlphanumeric(4) +" ("+ index.getAndIncrement() +"/"+ selectedProjectList.size()+")");
                                     return gitLabSettingsState.api(o.getGitlabServer())
                                             .getBranchesByProject(o)
                                             .stream()

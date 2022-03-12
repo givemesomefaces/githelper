@@ -18,6 +18,7 @@ import gitlab.common.Notifier;
 import gitlab.enums.OperationTypeEnum;
 import lombok.Setter;
 import org.apache.commons.compress.utils.Lists;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.gitlab.api.models.GitlabMergeRequest;
 import org.jetbrains.annotations.NotNull;
@@ -183,7 +184,7 @@ public class MergeRequestDialog extends DialogWrapper {
                         .stream()
                         .filter(o -> !indicator.isCanceled())
                         .map(o -> {
-                            indicator.setText2(o.getName()+" ("+ index.getAndIncrement() +"/"+ selectedProjectDto.getSelectedProjectList().size()+")");
+                            indicator.setText2("project_" + RandomStringUtils.randomAlphanumeric(4)+" ("+ index.getAndIncrement() +"/"+ selectedProjectDto.getSelectedProjectList().size()+")");
                             List<GitlabMergeRequest> openMergeRequest = null;
                             try {
                                 openMergeRequest = selectedProjectDto.getGitLabSettingsState()

@@ -7,6 +7,7 @@ import gitlab.enums.OperationTypeEnum;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.gitlab.api.models.GitlabMergeRequest;
 
@@ -43,16 +44,16 @@ public class Result extends GitlabMergeRequest {
     @Override
     public String toString() {
         if (StringUtils.isNotEmpty(errorMsg)) {
-            return projectName + " (" + errorMsg + ")";
+            return "project_" + RandomStringUtils.randomAlphanumeric(4) + " (" + errorMsg + ")";
         }
         switch (type) {
             case CREATE_MERGE_REQUEST:
-                return getWebUrl() + " [ChangeFiles:" + getChangeFilesCount() + "]";
+                return "https://www.gitlab.com/project_" + RandomStringUtils.randomAlphanumeric(4) + " [ChangeFiles:" + getChangeFilesCount() + "]";
             case MERGE:
             case CLOSE_MERGE_REQUEST:
-                return projectName + "  "+ getSourceBranch() + "->" + getTargetBranch()+"  " +  getState();
+                return "project_" + RandomStringUtils.randomAlphanumeric(4) + "  "+ getSourceBranch() + "->" + getTargetBranch()+"  " +  getState();
             case CREATE_TAG:
-                return projectName + " Tag " + desc + " created";
+                return "project_" + RandomStringUtils.randomAlphanumeric(4) + " Tag " + desc + " created";
             default:
         }
         return null;

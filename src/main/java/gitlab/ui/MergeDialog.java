@@ -16,6 +16,7 @@ import gitlab.bean.SelectedProjectDto;
 import gitlab.common.Notifier;
 import gitlab.enums.MergeStatusEnum;
 import gitlab.enums.OperationTypeEnum;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.gitlab.api.models.GitlabMergeRequest;
 import org.jetbrains.annotations.NotNull;
@@ -233,7 +234,7 @@ public class MergeDialog extends DialogWrapper {
                 .filter(u -> StringUtils.equalsIgnoreCase(u.getMergeStatus(), MergeStatusEnum.CAN_BE_MERGED.getMergeStatus()))
                 .map(o -> {
                     try {
-                        indicator.setText2(o.getProjectName()+" ("+ index.getAndIncrement() +"/"+ selectedMergeRequests.size()+")");
+                        indicator.setText2("project_" + RandomStringUtils.randomAlphanumeric(4)+" ("+ index.getAndIncrement() +"/"+ selectedMergeRequests.size()+")");
                         GitlabRestApi api = selectedProjectDto.getGitLabSettingsState().api(o.getGitlabServer());
                         GitlabMergeRequest gitlabMergeRequest = api.acceptMergeRequest(o.getProjectId(), o.getIid(), null);
                         Result rs =  new Result(gitlabMergeRequest)
@@ -261,7 +262,7 @@ public class MergeDialog extends DialogWrapper {
         List<Result> results = selectedMergeRequests.stream()
                 .map(o -> {
                     try {
-                        indicator.setText2(o.getProjectName()+" ("+ index.getAndIncrement() +"/"+ selectedMergeRequests.size()+")");
+                        indicator.setText2("project_" + RandomStringUtils.randomAlphanumeric(4)+" ("+ index.getAndIncrement() +"/"+ selectedMergeRequests.size()+")");
                         GitlabRestApi api = selectedProjectDto.getGitLabSettingsState().api(o.getGitlabServer());
                         GitlabMergeRequest gitlabMergeRequest = api.updateMergeRequest(o.getProjectId(), o.getIid(), o.getTargetBranch(),
                                 api.getCurrentUser().getId(), null, null, OperationTypeEnum.CLOSE_MERGE_REQUEST.getType(), null);

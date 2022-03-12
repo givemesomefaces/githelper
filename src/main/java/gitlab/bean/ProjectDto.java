@@ -2,6 +2,7 @@ package gitlab.bean;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.gitlab.api.models.GitlabProject;
 
@@ -22,7 +23,7 @@ public class ProjectDto extends GitlabProject {
 
     @Override
     public String toString() {
-        return this.getName() + "  (" + gitlabServer.getApiUrl() + ")";
+        return "project_" + RandomStringUtils.randomAlphanumeric(4) + " (www.gitlab.com)";
     }
 
     @Override
