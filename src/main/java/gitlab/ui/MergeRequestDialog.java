@@ -244,14 +244,15 @@ public class MergeRequestDialog extends DialogWrapper {
                 re.setType(OperationTypeEnum.CREATE_MERGE_REQUEST)
                         .setProjectName(s.getName())
                         .setChangeFilesCount(mergeRequest.getChangesCount());
-                info.append(re.toString()).append("\n");
+                info.append("<a href=\"" + re.toString().replace(" [ChangeFiles:\" + getChangeFilesCount() + \"]",
+                        "") + "\">" + re +"</a>").append("\n");
                 return re;
             } catch (IOException ioException) {
                 Result re = new Result(new GitlabMergeRequest());
                 re.setType(OperationTypeEnum.CREATE_MERGE_REQUEST)
                         .setProjectName(s.getName())
                         .setErrorMsg(ioException.getMessage());
-                error.append(re.toString()).append("\n");
+                error.append(re).append("\n");
                 return re;
             }
         }).collect(Collectors.toList());
