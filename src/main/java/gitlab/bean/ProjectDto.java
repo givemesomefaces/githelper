@@ -22,7 +22,7 @@ public class ProjectDto extends GitlabProject {
 
     @Override
     public String toString() {
-        return this.getName() + "  (" + gitlabServer.getApiUrl() + ")";
+        return this.getName() + "  (" + getWebUrl().replace(getName(), "") + ")";
     }
 
     @Override
