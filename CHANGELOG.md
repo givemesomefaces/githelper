@@ -73,3 +73,7 @@
 ## [1.2.5]
 ### Fixed
 - Fix ui.
+
+## [1.2.6]
+### Fixed
+- GitLab project list.
