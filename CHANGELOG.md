@@ -78,6 +78,6 @@
 ### Fixed
 - GitLab project list.
 
-## [1.2.6]
+## [1.2.7]
 ### Fixed
 - Supports batch search 4 project name search. e.g. [project-aaa,project-bbb]
