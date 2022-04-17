@@ -36,9 +36,9 @@
 #### Git批操作在右侧菜单GitHelper中
 #### GitLab操作:
 
-1. 在Settings -> Version Control-> GitLab中配置。
-2. 顶部菜单Git -> GitLab中使用。
-3. 或选中多个项目，在右键git菜单中(Create Merge Request...,Merge Request...)。
+1. 在Settings -> Version Control-> GitLab中配置
+2. 顶部菜单Git -> GitLab中使用
+3. 或选中多个项目，在右键git菜单中(Create Merge Request...,Merge Request...)
 <!-- Plugin description end -->
 
 ## Installation
