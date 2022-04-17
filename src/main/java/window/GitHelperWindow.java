@@ -54,6 +54,7 @@ public class GitHelperWindow {
 
     private GitBrancher gitBrancher;
 
+    private List<GitRepository> filterRepositories = new ArrayList<>();
 
     public GitHelperWindow(Project project) {
 
@@ -85,6 +86,7 @@ public class GitHelperWindow {
         searchType.addItemListener(new ItemListener() {
             @Override
             public void itemStateChanged(ItemEvent e) {
+                initRepositoryList(searchText.getText());
                 reInitLocalAndRemoteDataList();
             }
         });
@@ -92,16 +94,12 @@ public class GitHelperWindow {
             @Override
             public void keyReleased(KeyEvent e) {
                 super.keyReleased(e);
-                searchRepository(e);
+                String searchWord = ((JTextField) e.getSource()).getText();
+                initRepositoryList(searchWord);
                 reInitLocalAndRemoteDataList();
             }
         });
 
-    }
-
-    private void searchRepository(KeyEvent e) {
-        String searchWord = ((JTextField) e.getSource()).getText();
-        initRepositoryList(searchWord);
     }
 
     private void initAllCheckBox() {
@@ -125,8 +123,8 @@ public class GitHelperWindow {
 
     private void initAllCheckData(JCheckBox checkBox) {
         if (checkBox.isSelected()) {
-            choosedRepositories.addAll(gitRepositories);
-            repositoryList.addSelectionInterval(0, gitRepositories.size());
+            choosedRepositories.addAll(filterRepositories);
+            repositoryList.addSelectionInterval(0, filterRepositories.size());
         } else {
             choosedRepositories.clear();
             repositoryList.clearSelection();
@@ -143,7 +141,6 @@ public class GitHelperWindow {
             hideRepositoryRelMenu();
         } else {
             showRepositoryRelMenu(searchWord);
-            List<GitRepository> filterRepositories = new ArrayList<>();
             if (searchType.getSelectedItem().toString().contains("Project")) {
                 filterRepositories = gitRepositories.stream()
                         .filter(o ->
@@ -190,7 +187,6 @@ public class GitHelperWindow {
                     if (super.isSelectedIndex(index0)) {
                         super.removeSelectionInterval(index0, index1);
                         choosedRepositories.remove(finalFilterRepositories.get(index0));
-                        allCheckBox.setSelected(false);
                     } else {
                         super.addSelectionInterval(index0, index1);
                         choosedRepositories.add(finalFilterRepositories.get(index0));
@@ -217,6 +213,8 @@ public class GitHelperWindow {
         if (choosedRepositories.size() == gitRepositories.size()
                 && filterRepositories.size() == gitRepositories.size()) {
             allCheckBox.setSelected(true);
+        } else {
+            allCheckBox.setSelected(false);
         }
     }
 
@@ -231,12 +229,6 @@ public class GitHelperWindow {
         repositoryDefaultText.setVisible(false);
         repositoryList.setVisible(true);
         allCheckBox.setVisible(true);
-        if (StringUtils.isEmpty(searchWord)) {
-            allCheckBox.setEnabled(true);
-        } else {
-            allCheckBox.setSelected(false);
-            allCheckBox.setEnabled(false);
-        }
         choosedSum.setVisible(true);
     }
 
