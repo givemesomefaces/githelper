@@ -247,7 +247,7 @@ public class MergeDialog extends DialogWrapper {
                         re.setType(OperationTypeEnum.MERGE)
                                 .setProjectName(o.getProjectName())
                                 .setErrorMsg(e.getMessage());
-                        error.append(re.toString()).append("\n");
+                        error.append(re).append("\n");
                         return re;
                     }
                 }).collect(Collectors.toList());
@@ -276,7 +276,7 @@ public class MergeDialog extends DialogWrapper {
                         re.setType(OperationTypeEnum.CLOSE_MERGE_REQUEST)
                                 .setProjectName(o.getProjectName())
                                 .setErrorMsg(e.getMessage());
-                        error.append(re.toString()).append("\n");
+                        error.append(re).append("\n");
                         return re;
                     }
                 }).collect(Collectors.toList());

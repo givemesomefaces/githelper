@@ -72,6 +72,8 @@ public class GitLabDialog extends DialogWrapper {
 
     private List<ProjectDto> filterProjectList = new ArrayList<>();
 
+    private static final String PROJECT_SPLIT_SYMBOL = ",";
+
     public GitLabDialog(@Nullable Project project, List<ProjectDto> projectDtoList) {
         super(project, null, true, DialogWrapper.IdeModalityType.IDE, false);
         setTitle("GitLab");
@@ -398,12 +400,22 @@ public class GitLabDialog extends DialogWrapper {
     private List<ProjectDto> filterProjectsByProject(String searchWord){
         return filterProjectList = projectDtoList
                 .stream()
-                .filter(o ->
-                        (StringUtils.isNotEmpty(searchWord)
-                                && o.getName().toLowerCase().contains(searchWord.toLowerCase()))
-                                || StringUtils.isEmpty(searchWord)
-                ).collect(Collectors.toList());
+                .filter(o -> filterProject(o, searchWord))
+                .collect(Collectors.toList());
     }
+
+    private boolean filterProject(ProjectDto o, String searchWord) {
+        Set<String> searchProjectList = new HashSet<>();
+        if (StringUtils.isNotBlank(searchWord)) {
+            searchProjectList = Arrays.stream(searchWord.split(PROJECT_SPLIT_SYMBOL)).collect(Collectors.toSet());
+        }
+        return (CollectionUtil.isNotEmpty(searchProjectList)
+                        && ((searchProjectList.size() == 1 && o.getName().toLowerCase().contains(new ArrayList<>(searchProjectList).get(0)))
+                || (searchProjectList.size() != 1 && searchProjectList.stream().anyMatch(s -> StringUtils.equals(o.getName().toLowerCase(), s.toLowerCase())))))
+                || CollectionUtil.isEmpty(searchProjectList);
+
+    }
+
     private void initProjectList(List<ProjectDto> projectList) {
 
         projectJList.setListData(projectList.toArray());

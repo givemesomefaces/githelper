@@ -237,7 +237,7 @@ public class MergeRequestDialog extends DialogWrapper {
         AtomicInteger index = new AtomicInteger(1);
         List<Result> results = selectedProjectDto.getSelectedProjectList().stream().map(s -> {
             try {
-                indicator.setText2(s.getName()+" ("+ index.getAndIncrement() +"/"+ selectedProjectDto.getSelectedProjectList()+")");
+                indicator.setText2(s.getName()+" ("+ index.getAndIncrement() +"/"+ selectedProjectDto.getSelectedProjectList().size()+")");
                 GitlabMergeRequest mergeRequest = selectedProjectDto.getGitLabSettingsState().api(s.getGitlabServer())
                         .createMergeRequest(s, finalUser == null ? null : finalUser.resetId(s.getGitlabServer().getApiUrl()),
                                 source, target, mergeTitle.getText(), desc, false);
@@ -245,14 +245,15 @@ public class MergeRequestDialog extends DialogWrapper {
                 re.setType(OperationTypeEnum.CREATE_MERGE_REQUEST)
                         .setProjectName(s.getName())
                         .setChangeFilesCount(mergeRequest.getChangesCount());
-                info.append(re.toString()).append("\n");
+                info.append("<a href=\"" + re.toString().replace(" [ChangeFiles:\" + getChangeFilesCount() + \"]",
+                        "") + "\">" + re +"</a>").append("\n");
                 return re;
             } catch (IOException ioException) {
                 Result re = new Result(new GitlabMergeRequest());
                 re.setType(OperationTypeEnum.CREATE_MERGE_REQUEST)
                         .setProjectName(s.getName())
                         .setErrorMsg(ioException.getMessage());
-                error.append(re.toString()).append("\n");
+                error.append(re).append("\n");
                 return re;
             }
         }).collect(Collectors.toList());

@@ -146,14 +146,14 @@ public class TagDialog extends DialogWrapper {
                 re.setType(OperationTypeEnum.CREATE_TAG)
                         .setProjectName(s.getName())
                         .setDesc(tagResult.getName());
-                info.append(re.toString()).append("\n");
+                info.append(re).append("\n");
                 return re;
             } catch (IOException ioException) {
                 Result re = new Result(new GitlabMergeRequest());
                 re.setType(OperationTypeEnum.CREATE_TAG)
                         .setProjectName(s.getName())
                         .setErrorMsg(ioException.getMessage());
-                error.append(re.toString()).append("\n");
+                error.append(re).append("\n");
                 return re;
             }
         }).filter(Objects::nonNull).collect(Collectors.toList());
