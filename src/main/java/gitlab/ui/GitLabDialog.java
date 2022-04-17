@@ -409,8 +409,9 @@ public class GitLabDialog extends DialogWrapper {
             searchProjectList = Arrays.stream(searchWord.split(PROJECT_SPLIT_SYMBOL)).collect(Collectors.toSet());
         }
         return (CollectionUtil.isNotEmpty(searchProjectList)
-                        && searchProjectList.stream().anyMatch(s -> o.getName().toLowerCase().contains(s)))
-                        || CollectionUtil.isEmpty(searchProjectList);
+                        && ((searchProjectList.size() == 1 && o.getName().toLowerCase().contains(new ArrayList<>(searchProjectList).get(0)))
+                || (searchProjectList.size() != 1 && searchProjectList.stream().anyMatch(s -> StringUtils.equals(o.getName().toLowerCase(), s.toLowerCase())))))
+                || CollectionUtil.isEmpty(searchProjectList);
 
     }
 
