@@ -381,7 +381,7 @@ public class GitLabDialog extends DialogWrapper {
                 JCheckBox jCheckBox = (JCheckBox) e.getSource();
                 if (jCheckBox.isSelected()) {
                     selectedProjectList.addAll(filterProjectList);
-                    projectJList.setSelectionInterval(0, filterProjectList.size());
+                    projectJList.addSelectionInterval(0, filterProjectList.size());
                 } else {
                     selectedProjectList.removeAll(filterProjectList);
                     projectJList.clearSelection();

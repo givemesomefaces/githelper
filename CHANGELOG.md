@@ -81,3 +81,7 @@
 ## [1.2.7]
 ### Fixed
 - Supports batch search 4 project name search. e.g. [project-aaa,project-bbb]
+
+## [1.2.8]
+### Optimization
+- GitLab ui - select all
