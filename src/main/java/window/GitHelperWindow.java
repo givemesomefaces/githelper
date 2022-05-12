@@ -116,6 +116,9 @@ public class GitHelperWindow {
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
+                if (e.getButton() != 1) {
+                    return;
+                }
                 initAllCheckData((JCheckBox) e.getSource());
             }
         });

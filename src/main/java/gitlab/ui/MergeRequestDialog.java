@@ -116,6 +116,9 @@ public class MergeRequestDialog extends DialogWrapper {
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
+                if (e.getButton() != 1) {
+                    return;
+                }
                 assignee.setSelectedItem(currentUser.get(0));
             }
         });

@@ -378,6 +378,9 @@ public class GitLabDialog extends DialogWrapper {
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
+                if (e.getButton() != 1) {
+                    return;
+                }
                 JCheckBox jCheckBox = (JCheckBox) e.getSource();
                 if (jCheckBox.isSelected()) {
                     selectedProjectList.addAll(filterProjectList);
@@ -474,6 +477,9 @@ public class GitLabDialog extends DialogWrapper {
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
+                if (e.getButton() != 1) {
+                    return;
+                }
                 JRadioButton jRadioButton = (JRadioButton) e.getSource();
                 if (jRadioButton.isSelected()) {
                     search.setToolTipText("Search for projects in all gitlab server by project name");
@@ -488,6 +494,9 @@ public class GitLabDialog extends DialogWrapper {
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
+                if (e.getButton() != 1) {
+                    return;
+                }
                 JRadioButton jRadioButton = (JRadioButton) e.getSource();
                 if (jRadioButton.isSelected()) {
                     search.setToolTipText("Search for projects in current workspace by branch name");
