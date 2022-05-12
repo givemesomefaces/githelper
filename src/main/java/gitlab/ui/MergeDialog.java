@@ -85,6 +85,9 @@ public class MergeDialog extends DialogWrapper {
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
+                if (e.getButton() != 1) {
+                    return;
+                }
                 dispose();
             }
         });
@@ -168,6 +171,9 @@ public class MergeDialog extends DialogWrapper {
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
+                if (e.getButton() != 1) {
+                    return;
+                }
                 if (backgroudCheckBox.isSelected()) {
                     ProgressManager.getInstance().run(new Task.Backgroundable(project, CLOSING_TITLE, false) {
                         @Override
@@ -198,6 +204,9 @@ public class MergeDialog extends DialogWrapper {
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
+                if (e.getButton() != 1) {
+                    return;
+                }
                 if (backgroudCheckBox.isSelected()) {
                     ProgressManager.getInstance().run(new Task.Backgroundable(project, Bundle.message("mergeRequestDialogTitle"), false) {
                         @Override
@@ -326,6 +335,9 @@ public class MergeDialog extends DialogWrapper {
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
+                if (e.getButton() != 1) {
+                    return;
+                }
                 JCheckBox checkAll = (JCheckBox) e.getSource();
                 if (checkAll.isSelected()) {
                     selectedMergeRequests.addAll(filterMergeRequest);

@@ -67,6 +67,9 @@ public class SettingsView extends DialogWrapper implements SearchableConfigurabl
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
+                if (e.getButton() != 1) {
+                    return;
+                }
                 ServerConfiguration serverConfiguration = new ServerConfiguration(null);
                 DialogManager.show(serverConfiguration);
                 reset();
@@ -76,6 +79,9 @@ public class SettingsView extends DialogWrapper implements SearchableConfigurabl
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
+                if (e.getButton() != 1) {
+                    return;
+                }
                 GitlabServer server = getSelectedServer();
                 if (server != null) {
                     settingsState.deleteServer(server);
@@ -87,6 +93,9 @@ public class SettingsView extends DialogWrapper implements SearchableConfigurabl
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
+                if (e.getButton() != 1) {
+                    return;
+                }
                 GitlabServer server = getSelectedServer();
                 if (server == null) {
                     return;

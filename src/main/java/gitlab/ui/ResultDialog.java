@@ -40,6 +40,9 @@ public class ResultDialog extends DialogWrapper {
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
+                if (e.getButton() != 1) {
+                    return;
+                }
                 selectAll();
             }
         });

@@ -96,6 +96,9 @@ public class CloneDialog extends DialogWrapper {
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
+                if (e.getButton() != 1) {
+                    return;
+                }
                 File file = new File(project.getBasePath());
                 LocalFileSystem lfs = LocalFileSystem.getInstance();
                 VirtualFile preSelect = lfs.findFileByIoFile(file);
