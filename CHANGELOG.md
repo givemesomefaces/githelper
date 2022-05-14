@@ -85,3 +85,7 @@
 ## [1.2.8]
 ### Optimization
 - GitLab ui - select all
+
+## [1.2.9]
+### Fixed
+- ui

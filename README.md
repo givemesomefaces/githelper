@@ -39,9 +39,9 @@
 
 1. 在Settings -> Version Control-> GitLab中配置
 2. 顶部菜单Git -> GitLab中使用
-3. 或选中多个项目，在右键git菜单中(Create Merge Request...,Merge Request...)
+3. 或选中多个项目，在右键git菜单中(Create Merge Request...,Merge Request...) 
 
-![bbC7od.gif](https://s1.ax1x.com/2022/03/13/bbC7od.gif)
+[![bbC7od.md.gif](https://s1.ax1x.com/2022/03/13/bbC7od.md.gif)](https://imgtu.com/i/bbC7od)
 <!-- Plugin description end -->
 
 ## Installation
