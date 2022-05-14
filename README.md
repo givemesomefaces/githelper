@@ -1,8 +1,8 @@
 # GitHelper
 
 ![Build](https://github.com/Lv-lifeng/GitHelper/workflows/Build/badge.svg)
-[![Version](https://img.shields.io/jetbrains/plugin/v/PLUGIN_ID.svg)](https://plugins.jetbrains.com/plugin/PLUGIN_ID)
-[![Downloads](https://img.shields.io/jetbrains/plugin/d/PLUGIN_ID.svg)](https://plugins.jetbrains.com/plugin/PLUGIN_ID)
+[![Version](https://img.shields.io/jetbrains/plugin/v/PLUGIN_ID.svg)](https://plugins.jetbrains.com/plugin/18328)
+[![Downloads](https://img.shields.io/jetbrains/plugin/d/PLUGIN_ID.svg)](https://plugins.jetbrains.com/plugin/18328)
 
 <!-- Plugin description -->
 ### Features:
@@ -39,6 +39,8 @@
 1. 在Settings -> Version Control-> GitLab中配置
 2. 顶部菜单Git -> GitLab中使用
 3. 或选中多个项目，在右键git菜单中(Create Merge Request...,Merge Request...)
+
+![bbC7od.gif](https://s1.ax1x.com/2022/03/13/bbC7od.gif)
 <!-- Plugin description end -->
 
 ## Installation
