@@ -1,10 +1,3 @@
-# GitHelper
-
-![Build](https://github.com/Lv-lifeng/GitHelper/workflows/Build/badge.svg)
-[![Version](https://img.shields.io/jetbrains/plugin/v/PLUGIN_ID.svg)](https://plugins.jetbrains.com/plugin/18328)
-[![Downloads](https://img.shields.io/jetbrains/plugin/d/PLUGIN_ID.svg)](https://plugins.jetbrains.com/plugin/18328)
-
-<!-- Plugin description -->
 ### Supports selecting multiple projects at once to operate for Git and GitLab
 ### Features:
 
@@ -39,26 +32,7 @@
 
 1. 在Settings -> Version Control-> GitLab中配置
 2. 顶部菜单Git -> GitLab中使用
-3. 或选中多个项目，在右键git菜单中(Create Merge Request...,Merge Request...) 
+3. 或选中多个项目，在右键git菜单中(Create Merge Request...,Merge Request...)
 
 
-<img src="https://s1.ax1x.com/2022/03/13/bbC7od.gif">  
-<!-- Plugin description end -->
-
-## Installation
-
-- Using IDE built-in plugin system:
-  
-  <kbd>Settings/Preferences</kbd> > <kbd>Plugins</kbd> > <kbd>Marketplace</kbd> > <kbd>Search for "GitHelper"</kbd> >
-  <kbd>Install Plugin</kbd>
-  
-- Manually:
-
-  Download the [latest release](https://github.com/Lv-lifeng/GitHelper/releases/latest) and install it manually using
-  <kbd>Settings/Preferences</kbd> > <kbd>Plugins</kbd> > <kbd>⚙️</kbd> > <kbd>Install plugin from disk...</kbd>
-
-
----
-Plugin based on the [IntelliJ Platform Plugin Template][template].
-
-[template]: https://github.com/JetBrains/intellij-platform-plugin-template
+<img src="https://s1.ax1x.com/2022/03/13/bbC7od.gif" width="300">
