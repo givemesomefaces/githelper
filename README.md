@@ -5,6 +5,7 @@
 [![Downloads](https://img.shields.io/jetbrains/plugin/d/PLUGIN_ID.svg)](https://plugins.jetbrains.com/plugin/18328)
 
 <!-- Plugin description -->
+### Supports selecting multiple projects at once to operate for Git and GitLab
 ### Features:
 
 - Supports batch checkout branches from local & remote.
