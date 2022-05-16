@@ -1,6 +1,7 @@
 package gitlab.common;
 
 import cn.hutool.core.util.ObjectUtil;
+import com.github.lvlifeng.githelper.Bundle;
 import com.intellij.notification.NotificationGroupManager;
 import com.intellij.notification.NotificationType;
 import com.intellij.openapi.project.Project;
@@ -18,19 +19,19 @@ import org.apache.commons.lang3.StringUtils;
 public class Notifier {
 
     public static void notifyError(@Nullable Project project, String content) {
-        NotificationGroupManager.getInstance().getNotificationGroup("Custom Notification Group")
+        NotificationGroupManager.getInstance().getNotificationGroup(Bundle.message("notifierGroup"))
                 .createNotification(content, NotificationType.ERROR)
                 .notify(project);
     }
 
     public static void notifyInfo(@Nullable Project project, String content) {
-        NotificationGroupManager.getInstance().getNotificationGroup("Custom Notification Group")
+        NotificationGroupManager.getInstance().getNotificationGroup(Bundle.message("notifierGroup"))
                 .createNotification(content, NotificationType.INFORMATION)
                 .notify(project);
     }
 
     public static void notifyWarn(@Nullable Project project, String content) {
-        NotificationGroupManager.getInstance().getNotificationGroup("Custom Notification Group")
+        NotificationGroupManager.getInstance().getNotificationGroup(Bundle.message("notifierGroup"))
                 .createNotification(content, NotificationType.WARNING)
                 .notify(project);
     }
