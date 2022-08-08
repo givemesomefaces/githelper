@@ -2,6 +2,11 @@
 
 # GitHelper Changelog
 
+
+## [1.3.0]
+### Added
+- Nothing.
+
 ## [1.0.0]
 ### Added
 - Initial Project(batch checkout and delete branches)
