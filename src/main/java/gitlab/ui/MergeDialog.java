@@ -242,7 +242,7 @@ public class MergeDialog extends DialogWrapper {
                 .filter(u -> StringUtils.equalsIgnoreCase(u.getMergeStatus(), MergeStatusEnum.CAN_BE_MERGED.getMergeStatus()))
                 .map(o -> {
                     try {
-                        indicator.setText2(o.getProjectName()+" ("+ index.getAndIncrement() +"/"+ selectedMergeRequests.size()+")");
+                        indicator.setText2("("+ index.getAndIncrement() +"/"+ selectedMergeRequests.size()+") " + o.getProjectName());
                         GitlabRestApi api = selectedProjectDto.getGitLabSettingsState().api(o.getGitlabServer());
                         GitlabMergeRequest gitlabMergeRequest = api.acceptMergeRequest(o.getProjectId(), o.getIid(), null);
                         Result rs =  new Result(gitlabMergeRequest)
@@ -270,7 +270,7 @@ public class MergeDialog extends DialogWrapper {
         List<Result> results = selectedMergeRequests.stream()
                 .map(o -> {
                     try {
-                        indicator.setText2(o.getProjectName()+" ("+ index.getAndIncrement() +"/"+ selectedMergeRequests.size()+")");
+                        indicator.setText2("("+ index.getAndIncrement() +"/"+ selectedMergeRequests.size()+") " + o.getProjectName());
                         GitlabRestApi api = selectedProjectDto.getGitLabSettingsState().api(o.getGitlabServer());
                         GitlabMergeRequest gitlabMergeRequest = api.updateMergeRequest(o.getProjectId(), o.getIid(), o.getTargetBranch(),
                                 api.getCurrentUser().getId(), null, null, OperationTypeEnum.CLOSE_MERGE_REQUEST.getType(), null);

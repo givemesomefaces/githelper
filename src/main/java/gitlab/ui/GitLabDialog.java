@@ -2,7 +2,6 @@ package gitlab.ui;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollectionUtil;
-import cn.hutool.core.map.MapUtil;
 import com.github.lvlifeng.githelper.Bundle;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.progress.ProgressIndicator;
@@ -18,29 +17,24 @@ import gitlab.bean.*;
 import gitlab.helper.RepositoryHelper;
 import gitlab.helper.UsersHelper;
 import gitlab.settings.GitLabSettingsState;
-import lombok.SneakyThrows;
 import org.apache.commons.compress.utils.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.gitlab.api.models.GitlabBranch;
 import org.gitlab.api.models.GitlabMergeRequest;
 import org.gitlab.api.models.GitlabTag;
-import org.gitlab.api.models.GitlabUser;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import window.LcheckBox;
 
 import javax.swing.*;
-import java.awt.*;
 import java.awt.event.*;
 import java.io.IOException;
 import java.util.List;
 import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.FutureTask;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import static gitlab.common.Constants.NAME_SPLIT_SYMBOL;
 
 /**
  *
@@ -70,8 +64,6 @@ public class GitLabDialog extends DialogWrapper {
     private Project project;
 
     private List<ProjectDto> filterProjectList = new ArrayList<>();
-
-    private static final String PROJECT_SPLIT_SYMBOL = ",";
 
     public GitLabDialog(@Nullable Project project, List<ProjectDto> projectDtoList) {
         super(project, null, true, DialogWrapper.IdeModalityType.IDE, false);
@@ -160,7 +152,7 @@ public class GitLabDialog extends DialogWrapper {
                                 .stream()
                                 .filter(o -> !indicator.isCanceled())
                                 .map(o -> {
-                                    indicator.setText2(o.getName()+" ("+ index.getAndIncrement() +"/"+ selectedProjectList.size()+")");
+                                    indicator.setText2("("+ index.getAndIncrement() +"/"+ selectedProjectList.size()+") " + o.getName());
                                     List<GitlabMergeRequest> openMergeRequest = null;
                                     try {
                                         openMergeRequest = gitLabSettingsState
@@ -224,7 +216,7 @@ public class GitLabDialog extends DialogWrapper {
                         commonBranch = selectedProjectList.stream()
                                 .filter(o -> !indicator.isCanceled())
                                 .map(o -> {
-                                    indicator.setText2(o.getName()+" ("+ index.getAndIncrement() +"/"+ selectedProjectList.size()+")");
+                                    indicator.setText2("("+ index.getAndIncrement() +"/"+ selectedProjectList.size()+") " + o.getName());
                                     return gitLabSettingsState.api(o.getGitlabServer())
                                             .getBranchesByProject(o)
                                             .stream()
@@ -282,7 +274,7 @@ public class GitLabDialog extends DialogWrapper {
                         List<String> commonBranch = selectedProjectList.stream()
                                 .filter(o -> !indicator.isCanceled())
                                 .map(o -> {
-                                    indicator.setText2(o.getName()+" ("+ indexBranch.getAndIncrement() +"/"+ selectedProjectList.size()+")");
+                                    indicator.setText2("("+ indexBranch.getAndIncrement() +"/"+ selectedProjectList.size()+") " + o.getName());
                                     return gitLabSettingsState.api(o.getGitlabServer())
                                             .getBranchesByProject(o)
                                             .stream()
@@ -302,7 +294,7 @@ public class GitLabDialog extends DialogWrapper {
                         List<String> commonTag = selectedProjectList.stream()
                                 .filter(o -> !indicator.isCanceled())
                                 .map(o -> {
-                                    indicator.setText2(o.getName()+" ("+ indexTag.getAndIncrement() +"/"+ selectedProjectList.size()+")");
+                                    indicator.setText2("("+ indexTag.getAndIncrement() +"/"+ selectedProjectList.size()+") " + o.getName());
                                     return gitLabSettingsState.api(o.getGitlabServer())
                                             .getTagsByProject(o)
                                             .stream()
@@ -409,7 +401,7 @@ public class GitLabDialog extends DialogWrapper {
     private boolean filterProject(ProjectDto o, String searchWord) {
         Set<String> searchProjectList = new HashSet<>();
         if (StringUtils.isNotBlank(searchWord)) {
-            searchProjectList = Arrays.stream(searchWord.split(PROJECT_SPLIT_SYMBOL)).collect(Collectors.toSet());
+            searchProjectList = Arrays.stream(StringUtils.split(searchWord, NAME_SPLIT_SYMBOL)).collect(Collectors.toSet());
         }
         return (CollectionUtil.isNotEmpty(searchProjectList)
                         && ((searchProjectList.size() == 1 && o.getName().toLowerCase().contains(new ArrayList<>(searchProjectList).get(0)))

@@ -55,7 +55,7 @@
             </constraints>
             <properties>
               <editable value="true"/>
-              <toolTipText value="Common branches of projects selected"/>
+              <toolTipText value="Common branches of projects selected, e.g. branch-A;branch-B"/>
             </properties>
           </component>
           <component id="93656" class="javax.swing.JLabel">
