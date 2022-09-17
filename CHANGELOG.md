@@ -2,7 +2,7 @@
 
 # GitHelper Changelog
 
-## [1.3.0.3.203-222]
+## [1.3.1]
 ### FEAT
 - Multiple target branches are supported when creating merge requests. The names are divided by `;`.
 
