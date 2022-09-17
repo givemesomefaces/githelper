@@ -54,7 +54,7 @@
               </grid>
             </constraints>
             <properties>
-              <toolTipText value="Search by project name or branch name, supports batch search for project name with a comma after each project name. e.g. project-a,project-b"/>
+              <toolTipText value="Search by project name or branch name, supports batch search for project name with a seal after each project name. e.g. project-a;project-b"/>
             </properties>
           </component>
           <component id="60517" class="javax.swing.JRadioButton" binding="projectNameRadioButton" default-binding="true">

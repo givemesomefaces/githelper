@@ -139,7 +139,7 @@ public class TagDialog extends DialogWrapper {
         AtomicInteger index = new AtomicInteger(1);
         List<Result> results = selectedProjectDto.getSelectedProjectList().stream().map(s -> {
             try {
-                indicator.setText2(s.getName()+" ("+ index.getAndIncrement() +"/"+ selectedProjectDto.getSelectedProjectList()+")");
+                indicator.setText2("("+ index.getAndIncrement() +"/"+ selectedProjectDto.getSelectedProjectList()+") " + s.getName());
                 GitlabTag tagResult = selectedProjectDto.getGitLabSettingsState().api(s.getGitlabServer())
                         .addTag(s.getId(), tagName.getText(), source, message.getText(), null);
                 Result re = new Result();

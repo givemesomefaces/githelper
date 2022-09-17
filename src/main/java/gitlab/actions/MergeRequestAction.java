@@ -93,7 +93,7 @@ public class MergeRequestAction extends DumbAwareAction {
                 indicator.setText("Loading merge requests...");
                 AtomicInteger index = new AtomicInteger(1);
                 requests = gitLabProjectDtos.stream().filter(o -> !indicator.isCanceled()).map(o -> {
-                    indicator.setText2(o.getProjectName()+" ("+ index.getAndIncrement() +"/"+ gitLabProjectDtos.size()+")");
+                    indicator.setText2("("+ index.getAndIncrement() +"/"+ gitLabProjectDtos.size()+") " + o.getProjectName());
                     Set<MergeRequest> mergeRequests = new HashSet<>();
                     GitlabServer gitlabServer = gitlabServers.stream().filter(server -> StringUtils.equals(server.getRepositoryUrl(), o.getRepUrl())).findFirst().orElse(null);
                     if (gitlabServer == null) {

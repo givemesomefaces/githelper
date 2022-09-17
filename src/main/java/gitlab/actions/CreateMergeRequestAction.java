@@ -98,7 +98,7 @@ public class CreateMergeRequestAction extends DumbAwareAction {
                 indicator.setText("Loading common branches...");
                 AtomicInteger index = new AtomicInteger(1);
                 gitLabProjectDtos.stream().filter(o -> !indicator.isCanceled()).forEach(o -> {
-                    indicator.setText2(o.getProjectName()+" ("+ index.getAndIncrement() +"/"+ gitLabProjectDtos.size()+")");
+                    indicator.setText2("("+ index.getAndIncrement() +"/"+ gitLabProjectDtos.size()+") " + o.getProjectName());
                     GitlabServer gitlabServer = gitlabServers.stream().filter(server -> StringUtils.equals(server.getRepositoryUrl(), o.getRepUrl())).findFirst().orElse(null);
                     if (gitlabServer == null) {
                         return;
