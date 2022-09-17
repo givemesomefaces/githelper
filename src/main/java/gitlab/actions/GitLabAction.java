@@ -55,7 +55,7 @@ public class GitLabAction extends AnAction {
                         .stream()
                         .filter(o -> !indicator.isCanceled())
                         .map(o -> {
-                            indicator.setText2(o.getRepositoryUrl()+" ("+ index.getAndIncrement() +"/"+ gitlabServers.size()+")");
+                            indicator.setText2("("+ index.getAndIncrement() +"/"+ gitlabServers.size()+") " + o.getRepositoryUrl());
                             return gitLabSettingsState.loadMapOfServersAndProjects(Lists.newArrayList(o)).values();
                         }).flatMap(Collection::stream)
                         .flatMap(Collection::stream)

@@ -35,6 +35,8 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import static gitlab.common.Constants.NAME_SPLIT_SYMBOL;
+
 /**
  *
  *
@@ -186,7 +188,7 @@ public class MergeRequestDialog extends DialogWrapper {
                         .stream()
                         .filter(o -> !indicator.isCanceled())
                         .map(o -> {
-                            indicator.setText2(o.getName()+" ("+ index.getAndIncrement() +"/"+ selectedProjectDto.getSelectedProjectList().size()+")");
+                            indicator.setText2("("+ index.getAndIncrement() +"/"+ selectedProjectDto.getSelectedProjectList().size()+") " + o.getName());
                             List<GitlabMergeRequest> openMergeRequest = null;
                             try {
                                 openMergeRequest = selectedProjectDto.getGitLabSettingsState()
@@ -224,11 +226,12 @@ public class MergeRequestDialog extends DialogWrapper {
 
     private List<Result> createMergeRequests(ProgressIndicator indicator) {
         String source = (String) sourceBranch.getSelectedItem();
-        String target = (String) targetBranch.getSelectedItem();
+        String targetStr = (String) targetBranch.getSelectedItem();
         String desc = description.getText();
-        if (StringUtils.isEmpty(source) || StringUtils.isEmpty(target) || StringUtils.isEmpty(mergeTitle.getText())) {
+        if (StringUtils.isEmpty(source) || StringUtils.isEmpty(targetStr) || StringUtils.isEmpty(mergeTitle.getText())) {
             return Lists.newArrayList();
         }
+        Set<String> targets = Arrays.stream(StringUtils.split(targetStr, NAME_SPLIT_SYMBOL)).collect(Collectors.toSet());
         User user = null;
         if (assignee.getSelectedItem() != null) {
             user = (User) assignee.getSelectedItem();
@@ -238,27 +241,30 @@ public class MergeRequestDialog extends DialogWrapper {
         StringBuilder error = new StringBuilder();
         AtomicInteger index = new AtomicInteger(1);
         List<Result> results = selectedProjectDto.getSelectedProjectList().stream().map(s -> {
-            try {
-                indicator.setText2(s.getName()+" ("+ index.getAndIncrement() +"/"+ selectedProjectDto.getSelectedProjectList().size()+")");
-                GitlabMergeRequest mergeRequest = selectedProjectDto.getGitLabSettingsState().api(s.getGitlabServer())
-                        .createMergeRequest(s, finalUser == null ? null : finalUser.resetId(s.getGitlabServer().getApiUrl()),
-                                source, target, mergeTitle.getText(), desc, false);
-                Result re = new Result(mergeRequest);
-                re.setType(OperationTypeEnum.CREATE_MERGE_REQUEST)
-                        .setProjectName(s.getName())
-                        .setChangeFilesCount(mergeRequest.getChangesCount());
-                info.append("<a href=\"" + re.toString().replace(" [ChangeFiles:\" + getChangeFilesCount() + \"]",
-                        "") + "\">" + re +"</a>").append("\n");
-                return re;
-            } catch (IOException ioException) {
-                Result re = new Result(new GitlabMergeRequest());
-                re.setType(OperationTypeEnum.CREATE_MERGE_REQUEST)
-                        .setProjectName(s.getName())
-                        .setErrorMsg(ioException.getMessage());
-                error.append(re).append("\n");
-                return re;
-            }
-        }).collect(Collectors.toList());
+            indicator.setText2("("+ index.getAndIncrement() +"/"+ selectedProjectDto.getSelectedProjectList().size()+") " + s.getName());
+            return targets.stream().map(target -> {
+                try {
+                    GitlabMergeRequest mergeRequest = selectedProjectDto.getGitLabSettingsState().api(s.getGitlabServer())
+                            .createMergeRequest(s, finalUser == null ? null : finalUser.resetId(s.getGitlabServer().getApiUrl()),
+                                    source, target, mergeTitle.getText(), desc, false);
+                    Result re = new Result(mergeRequest);
+                    re.setType(OperationTypeEnum.CREATE_MERGE_REQUEST)
+                            .setProjectName(s.getName())
+                            .setChangeFilesCount(mergeRequest.getChangesCount());
+                    info.append("<a href=\"" + re.toString().replace(" [ChangeFiles:\" + getChangeFilesCount() + \"]",
+                            "") + "\">" + re +"</a>").append("\n");
+                    return re;
+                } catch (IOException ioException) {
+                    Result re = new Result(new GitlabMergeRequest());
+                    re.setType(OperationTypeEnum.CREATE_MERGE_REQUEST)
+                            .setProjectName(s.getName())
+                            .setErrorMsg(ioException.getMessage());
+                    error.append(re).append("\n");
+                    return re;
+                }
+            }).collect(Collectors.toList());
+        }).flatMap(Collection::stream)
+                .collect(Collectors.toList());
         Notifier.notify(project, info, error, null);
         return results;
     }
@@ -303,19 +309,28 @@ public class MergeRequestDialog extends DialogWrapper {
         }
 
         if (targetBranch.getSelectedItem() != null
-                && StringUtils.isNotBlank(targetBranch.getSelectedItem().toString())
-                && !commonBranch.contains(targetBranch.getSelectedItem().toString())) {
-            return new ValidationInfo("This target branch does not exist, please choose again!", targetBranch);
+                && StringUtils.isNotBlank(targetBranch.getSelectedItem().toString())) {
+            Set<String> targets = Arrays.stream(StringUtils.split(targetBranch.getSelectedItem().toString(), NAME_SPLIT_SYMBOL))
+                    .map(String::toLowerCase)
+                    .collect(Collectors.toSet());
+            Set<String> notExistTargets = targets.stream().filter(target -> !commonBranch.contains(target)).collect(Collectors.toSet());
+            if (CollectionUtil.isNotEmpty(notExistTargets)) {
+                return new ValidationInfo(String.format("This target branch does not exist, Please reselect! %s", notExistTargets), targetBranch);
+            }
         }
 
-        if (targetBranch.getSelectedItem() != null && sourceBranch.getSelectedItem() != null
-                &&  StringUtils.equalsIgnoreCase(targetBranch.getSelectedItem().toString(), sourceBranch.getSelectedItem().toString())) {
-            return new ValidationInfo("Target branch must be different from Source branch.", targetBranch);
+        if (targetBranch.getSelectedItem() != null && sourceBranch.getSelectedItem() != null) {
+            Set<String> targets = Arrays.stream(StringUtils.split(targetBranch.getSelectedItem().toString(), NAME_SPLIT_SYMBOL))
+                    .map(String::toLowerCase)
+                    .collect(Collectors.toSet());
+            if (targets.contains(sourceBranch.getSelectedItem().toString().toLowerCase())) {
+                return new ValidationInfo(String.format("Target branch must be different from Source branch. [%s]", sourceBranch.getSelectedItem().toString()), targetBranch);
+            }
         }
         if (assignee.getSelectedItem() != null
                 && StringUtils.isNotBlank(assignee.getSelectedItem().toString())
                 && !users.stream().map(User::toString).collect(Collectors.toList()).contains(assignee.getSelectedItem().toString())) {
-            return new ValidationInfo("This user does not exist, please choose again!", assignee);
+            return new ValidationInfo("This user does not exist, Please reselect!", assignee);
         }
         return null;
     }
