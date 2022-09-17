@@ -1,8 +1,10 @@
 # GitHelper
+<a href="https://www.jetbrains.com"><img src="https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.svg" width = "10%" /></a>
+<a href="https://www.jetbrains.com/idea"><img src="https://resources.jetbrains.com/storage/products/company/brand/logos/IntelliJ_IDEA_icon.svg" width = "10%" /></a>
 
-![Build](https://github.com/Lv-lifeng/GitHelper/workflows/Build/badge.svg)
-[![Version](https://img.shields.io/jetbrains/plugin/v/PLUGIN_ID.svg)](https://plugins.jetbrains.com/plugin/18328)
-[![Downloads](https://img.shields.io/jetbrains/plugin/d/PLUGIN_ID.svg)](https://plugins.jetbrains.com/plugin/18328)
+<!--- ![Build](https://github.com/Lv-lifeng/GitHelper/workflows/Build/badge.svg) --->
+[![Version](https://img.shields.io/jetbrains/plugin/v/18328.svg)](https://plugins.jetbrains.com/plugin/18328)
+[![Downloads](https://img.shields.io/jetbrains/plugin/d/18328.svg)](https://plugins.jetbrains.com/plugin/18328)
 
 <!-- Plugin description -->
 ### Supports selecting multiple projects at once to operate for Git and GitLab
