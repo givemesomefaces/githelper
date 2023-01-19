@@ -2,7 +2,7 @@
 <idea-plugin require-restart="false">
     <id>com.github.lvlifeng.githelper</id>
     <name>GitHelper</name>
-    <vendor url="https://github.com/lv-lifeng" email="lvlifen9@gmail.com">Lv Lifeng</vendor>
+    <vendor url="https://github.com/itisokey" email="lvlifen9@gmail.com">Lv Lifeng</vendor>
 
     <depends>com.intellij.modules.platform</depends>
     <depends>Git4Idea</depends>

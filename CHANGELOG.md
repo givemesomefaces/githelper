@@ -2,6 +2,10 @@
 
 # GitHelper Changelog
 
+## [231.1.3]
+### FEAT
+- 2023 IDEs supported.
+
 ## [1.3.1]
 ### FEAT
 - Multiple target branches are supported when creating merge requests. The names are divided by `;`.
