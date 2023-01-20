@@ -45,7 +45,7 @@ import static gitlab.common.Constants.NAME_SPLIT_SYMBOL;
 public class GitLabDialog extends DialogWrapper {
     private static final Logger LOG = Logger.getInstance(GitLabDialog.class);
     private JPanel contentPane;
-    private JList projectJList;
+    private JList projectList;
     private JTextField search;
     private JRadioButton branchNameRadioButton;
     private JRadioButton projectNameRadioButton;
@@ -56,6 +56,7 @@ public class GitLabDialog extends DialogWrapper {
     private JButton cancelButton;
     private JButton mergeButton;
     private JButton tagButton;
+    private JList gitRemoteServerList;
 
     private GitLabSettingsState gitLabSettingsState = GitLabSettingsState.getInstance();
     private List<ProjectDto> projectDtoList = new ArrayList<>();
@@ -376,10 +377,10 @@ public class GitLabDialog extends DialogWrapper {
                 JCheckBox jCheckBox = (JCheckBox) e.getSource();
                 if (jCheckBox.isSelected()) {
                     selectedProjectList.addAll(filterProjectList);
-                    projectJList.addSelectionInterval(0, filterProjectList.size());
+                    projectList.addSelectionInterval(0, filterProjectList.size());
                 } else {
                     selectedProjectList.removeAll(filterProjectList);
-                    projectJList.clearSelection();
+                    projectList.clearSelection();
                 }
                 setSelectedCount();
                 bottomButtonState();
@@ -412,10 +413,10 @@ public class GitLabDialog extends DialogWrapper {
 
     private void initProjectList(List<ProjectDto> projectList) {
 
-        projectJList.setListData(projectList.toArray());
-        projectJList.setCellRenderer(new LcheckBox());
-        projectJList.setEnabled(true);
-        projectJList.setSelectionModel(new DefaultListSelectionModel() {
+        this.projectList.setListData(projectList.toArray());
+        this.projectList.setCellRenderer(new LcheckBox());
+        this.projectList.setEnabled(true);
+        this.projectList.setSelectionModel(new DefaultListSelectionModel() {
             @Override
             public void setSelectionInterval(int index0, int index1) {
                 if (super.isSelectedIndex(index0)) {
@@ -431,13 +432,13 @@ public class GitLabDialog extends DialogWrapper {
             }
         });
         if (CollectionUtil.isNotEmpty(selectedProjectList)) {
-            projectJList.setSelectedIndices(selectedProjectList.stream()
+            this.projectList.setSelectedIndices(selectedProjectList.stream()
                     .map(o -> projectList.indexOf(o))
                     .mapToInt(Integer::valueOf)
                     .toArray());
             checkAll(projectList);
         } else {
-            projectJList.clearSelection();
+            this.projectList.clearSelection();
         }
     }
 
@@ -502,7 +503,7 @@ public class GitLabDialog extends DialogWrapper {
 
     private void clearSelected() {
         selectedProjectList.clear();
-        projectJList.clearSelection();
+        projectList.clearSelection();
         selectAllCheckBox.setSelected(false);
         selectedCount.setText("(0 Selected)");
     }
