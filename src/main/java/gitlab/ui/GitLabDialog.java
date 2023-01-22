@@ -56,7 +56,6 @@ public class GitLabDialog extends DialogWrapper {
     private JButton cancelButton;
     private JButton mergeButton;
     private JButton tagButton;
-    private JList gitRemoteServerList;
 
     private GitLabSettingsState gitLabSettingsState = GitLabSettingsState.getInstance();
     private List<ProjectDto> projectDtoList = new ArrayList<>();
