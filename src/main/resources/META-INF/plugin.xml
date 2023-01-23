@@ -25,7 +25,7 @@
     <actions>
         <!-- Add your actions here -->
 
-        <action id="GitLab" class="gitlab.actions.GitLabV2Action" text="GitLab" icon="/icons/gitLab.png">
+        <action id="GitLab" class="gitlab.actions.GitLabAction" text="GitLab" icon="/icons/gitLab.png">
             <add-to-group group-id="Git.MainMenu" anchor="after" relative-to-action="GitHub.MainMenu"/>
         </action>
         <action id="CreateMergeRequest" class="gitlab.actions.CreateMergeRequestAction" text="Create Merge Request"
