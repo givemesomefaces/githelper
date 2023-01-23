@@ -13,7 +13,7 @@ import gitlab.bean.GitlabServer;
 import gitlab.bean.ProjectDto;
 import gitlab.settings.GitLabSettingsState;
 import gitlab.settings.SettingsView;
-import gitlab.ui.GitLabDialog;
+import gitlab.ui.GitLabDialogV2;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -23,8 +23,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 /**
- *
- *
  * @author Lv LiFeng
  * @date 2022/1/6 20:10
  */
@@ -45,9 +43,11 @@ public class GitLabV2Action extends AnAction {
         }
 
     }
-    private void showGitLabDialog(Project project, GitLabSettingsState gitLabSettingsState){
+
+    private void showGitLabDialog(Project project, GitLabSettingsState gitLabSettingsState) {
         ProgressManager.getInstance().run(new Task.Modal(project, "GitLab", true) {
             List<ProjectDto> projectDtoList = new ArrayList<>();
+
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
                 indicator.setText("Loading projects...");
@@ -57,7 +57,7 @@ public class GitLabV2Action extends AnAction {
                         .stream()
                         .filter(o -> !indicator.isCanceled())
                         .map(o -> {
-                            indicator.setText2("("+ index.getAndIncrement() +"/"+ gitlabServers.size()+") " + o.getRepositoryUrl());
+                            indicator.setText2("(" + index.getAndIncrement() + "/" + gitlabServers.size() + ") " + o.getRepositoryUrl());
                             return gitLabSettingsState.loadMapOfServersAndProjects(Lists.newArrayList(o)).values();
                         }).flatMap(Collection::stream)
                         .flatMap(Collection::stream)
@@ -72,7 +72,7 @@ public class GitLabV2Action extends AnAction {
             public void onSuccess() {
                 super.onSuccess();
                 if (CollectionUtil.isNotEmpty(projectDtoList)) {
-                    new GitLabDialog(project, projectDtoList).showAndGet();
+                    new GitLabDialogV2(project, projectDtoList).showAndGet();
                 }
             }
         });

@@ -37,8 +37,6 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -47,6 +45,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -77,6 +76,8 @@ public class GitLabDialogV2 extends DialogWrapper {
 
     private List<ProjectDto> filterProjectList = new ArrayList<>();
 
+    private Map<String, List<ProjectDto>> projectMap = null;
+
     public GitLabDialogV2(@Nullable Project project, List<ProjectDto> projectDtoList) {
         super(project, null, true, DialogWrapper.IdeModalityType.IDE, false);
         setTitle("GitLab");
@@ -90,6 +91,27 @@ public class GitLabDialogV2 extends DialogWrapper {
         initSelectAllCheckBox();
         getRootPane().setDefaultButton(cancelButton);
         initBottomButton();
+        initGitLabServerList();
+    }
+
+    private void initGitLabServerList() {
+        List<GitlabServer> gitlabServerList = gitLabSettingsState.getGitlabServers();
+        if (CollectionUtil.isEmpty(gitlabServerList)) {
+            return;
+        }
+        this.gitRemoteServerList.setListData(gitlabServerList.toArray());
+        this.gitRemoteServerList.setCellRenderer(new LcheckBox());
+        this.gitRemoteServerList.setEnabled(true);
+        this.gitRemoteServerList.setSelectionModel(new DefaultListSelectionModel() {
+            @Override
+            public void setSelectionInterval(int index0, int index1) {
+                if (super.isSelectedIndex(index0)) {
+                    super.removeSelectionInterval(index0, index1);
+                } else {
+                    super.addSelectionInterval(index0, index1);
+                }
+            }
+        });
     }
 
     @Override
@@ -119,6 +141,7 @@ public class GitLabDialogV2 extends DialogWrapper {
         branchNameRadioButton.setEnabled(false);
         projectNameRadioButton.setEnabled(false);
     }
+
     private void enableOtherButtonAfterLoadingData() {
         selectAllCheckBox.setEnabled(true);
         branchNameRadioButton.setEnabled(true);
@@ -156,6 +179,7 @@ public class GitLabDialogV2 extends DialogWrapper {
             public void actionPerformed(ActionEvent e) {
                 ProgressManager.getInstance().run(new Task.Modal(project, Bundle.message("mergeRequestDialogTitle"), true) {
                     List<MergeRequest> gitlabMergeRequests = new ArrayList<>();
+
                     @Override
                     public void run(@NotNull ProgressIndicator indicator) {
                         indicator.setText("Loading merge requests...");
@@ -164,7 +188,7 @@ public class GitLabDialogV2 extends DialogWrapper {
                                 .stream()
                                 .filter(o -> !indicator.isCanceled())
                                 .map(o -> {
-                                    indicator.setText2("("+ index.getAndIncrement() +"/"+ selectedProjectList.size()+") " + o.getName());
+                                    indicator.setText2("(" + index.getAndIncrement() + "/" + selectedProjectList.size() + ") " + o.getName());
                                     List<GitlabMergeRequest> openMergeRequest = null;
                                     try {
                                         openMergeRequest = gitLabSettingsState
@@ -221,6 +245,7 @@ public class GitLabDialogV2 extends DialogWrapper {
                     List<String> commonBranch = new ArrayList<>();
                     List<User> currentUser = new ArrayList<>();
                     Set<User> users = new HashSet<>();
+
                     @Override
                     public void run(@NotNull ProgressIndicator indicator) {
                         indicator.setText("Loading common branches...");
@@ -228,7 +253,7 @@ public class GitLabDialogV2 extends DialogWrapper {
                         commonBranch = selectedProjectList.stream()
                                 .filter(o -> !indicator.isCanceled())
                                 .map(o -> {
-                                    indicator.setText2("("+ index.getAndIncrement() +"/"+ selectedProjectList.size()+") " + o.getName());
+                                    indicator.setText2("(" + index.getAndIncrement() + "/" + selectedProjectList.size() + ") " + o.getName());
                                     return gitLabSettingsState.api(o.getGitlabServer())
                                             .getBranchesByProject(o)
                                             .stream()
@@ -278,6 +303,7 @@ public class GitLabDialogV2 extends DialogWrapper {
             public void actionPerformed(ActionEvent e) {
                 ProgressManager.getInstance().run(new Task.Modal(project, Bundle.message("createTagDialogTitle"), true) {
                     List<String> commonFrom = new ArrayList<>();
+
                     @Override
                     public void run(@NotNull ProgressIndicator indicator) {
                         indicator.setText("Loading common branches");
@@ -286,7 +312,7 @@ public class GitLabDialogV2 extends DialogWrapper {
                         List<String> commonBranch = selectedProjectList.stream()
                                 .filter(o -> !indicator.isCanceled())
                                 .map(o -> {
-                                    indicator.setText2("("+ indexBranch.getAndIncrement() +"/"+ selectedProjectList.size()+") " + o.getName());
+                                    indicator.setText2("(" + indexBranch.getAndIncrement() + "/" + selectedProjectList.size() + ") " + o.getName());
                                     return gitLabSettingsState.api(o.getGitlabServer())
                                             .getBranchesByProject(o)
                                             .stream()
@@ -306,7 +332,7 @@ public class GitLabDialogV2 extends DialogWrapper {
                         List<String> commonTag = selectedProjectList.stream()
                                 .filter(o -> !indicator.isCanceled())
                                 .map(o -> {
-                                    indicator.setText2("("+ indexTag.getAndIncrement() +"/"+ selectedProjectList.size()+") " + o.getName());
+                                    indicator.setText2("(" + indexTag.getAndIncrement() + "/" + selectedProjectList.size() + ") " + o.getName());
                                     return gitLabSettingsState.api(o.getGitlabServer())
                                             .getTagsByProject(o)
                                             .stream()
@@ -360,7 +386,7 @@ public class GitLabDialogV2 extends DialogWrapper {
         });
     }
 
-    private void searchProject(KeyEvent e){
+    private void searchProject(KeyEvent e) {
         String searchWord = ((JTextField) e.getSource()).getText();
 
         if (projectNameRadioButton.isSelected()) {
@@ -403,7 +429,7 @@ public class GitLabDialogV2 extends DialogWrapper {
         selectedCount.setText(String.format("(%s Selected)", selectedProjectList.size()));
     }
 
-    private List<ProjectDto> filterProjectsByProject(String searchWord){
+    private List<ProjectDto> filterProjectsByProject(String searchWord) {
         return filterProjectList = projectDtoList
                 .stream()
                 .filter(o -> filterProject(o, searchWord))
@@ -522,7 +548,7 @@ public class GitLabDialogV2 extends DialogWrapper {
     private List<ProjectDto> filterProjectListByBranch(String searchWord) {
         List<GitRepository> repositories = GitUtil.getRepositories(project).stream().collect(Collectors.toList());
         RepositoryHelper.sortRepositoriesByName(repositories);
-        projectDtoListByBranch  = projectDtoList.stream()
+        projectDtoListByBranch = projectDtoList.stream()
                 .filter(o -> repositories.stream()
                         .map(GitRepository::getRoot)
                         .map(VirtualFile::getName)
