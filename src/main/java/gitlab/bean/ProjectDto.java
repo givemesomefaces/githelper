@@ -34,4 +34,8 @@ public class ProjectDto extends GitlabProject {
     public int hashCode() {
         return Objects.hash(super.hashCode(), gitlabServer);
     }
+
+    public String getGitlabServerName() {
+        return this.getGitlabServer().getRepositoryUrl();
+    }
 }
