@@ -120,7 +120,7 @@ public class GitLabDialogV2 extends DialogWrapper {
                     super.addSelectionInterval(index0, index1);
                     selectedGitRemoteServerList.add(gitlabServer.getRepositoryUrl());
                 }
-                filterProjectList = selectedGitRemoteServerList.stream()
+                projectDtoList = selectedGitRemoteServerList.stream()
                         .flatMap(server -> serverProjectsMap.get(server).stream())
                         .collect(Collectors.toList());
                 initAll();
