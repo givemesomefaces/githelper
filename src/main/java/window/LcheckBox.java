@@ -15,10 +15,6 @@ public class LcheckBox extends JCheckBox implements ListCellRenderer {
         super();
     }
 
-    public LcheckBox(boolean isSelected) {
-        super("", isSelected);
-    }
-
     @Override
     public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected,
                                                   boolean cellHasFocus) {

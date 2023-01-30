@@ -53,7 +53,7 @@ import java.util.stream.Collectors;
 import static gitlab.common.Constants.NAME_SPLIT_SYMBOL;
 
 public class GitLabDialogV2 extends DialogWrapper {
-    private static final Logger LOG = Logger.getInstance(GitLabDialog.class);
+    private static final Logger log = Logger.getInstance(GitLabDialog.class);
     private JPanel contentPane;
     private JList projectList;
     private JTextField search;
@@ -107,7 +107,7 @@ public class GitLabDialogV2 extends DialogWrapper {
             return;
         }
         this.gitRemoteServerList.setListData(gitlabServerList.toArray());
-        this.gitRemoteServerList.setCellRenderer(new LcheckBox(true));
+        this.gitRemoteServerList.setCellRenderer(new LcheckBox());
         this.gitRemoteServerList.setEnabled(true);
         this.gitRemoteServerList.setSelectionModel(new DefaultListSelectionModel() {
             @Override
@@ -126,6 +126,7 @@ public class GitLabDialogV2 extends DialogWrapper {
                 initAll();
             }
         });
+        this.gitRemoteServerList.addSelectionInterval(0, gitlabServerList.size());
     }
 
     @Override
