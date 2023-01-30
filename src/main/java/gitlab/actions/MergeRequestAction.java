@@ -44,7 +44,7 @@ public class MergeRequestAction extends DumbAwareAction {
 
 
     public MergeRequestAction() {
-        super("_Merge Request...", "Merge request for projects all selected for GitLab", null);
+        super("_Merge Request...", "GitLab merge request for all selected projects", null);
     }
 
     @Override
