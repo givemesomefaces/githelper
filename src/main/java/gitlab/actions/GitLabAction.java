@@ -16,13 +16,13 @@ import gitlab.settings.SettingsView;
 import gitlab.ui.GitLabDialog;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 /**
- *
- *
  * @author Lv LiFeng
  * @date 2022/1/6 20:10
  */
@@ -43,9 +43,11 @@ public class GitLabAction extends AnAction {
         }
 
     }
-    private void showGitLabDialog(Project project, GitLabSettingsState gitLabSettingsState){
+
+    private void showGitLabDialog(Project project, GitLabSettingsState gitLabSettingsState) {
         ProgressManager.getInstance().run(new Task.Modal(project, "GitLab", true) {
             List<ProjectDto> projectDtoList = new ArrayList<>();
+
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
                 indicator.setText("Loading projects...");
@@ -55,7 +57,7 @@ public class GitLabAction extends AnAction {
                         .stream()
                         .filter(o -> !indicator.isCanceled())
                         .map(o -> {
-                            indicator.setText2("("+ index.getAndIncrement() +"/"+ gitlabServers.size()+") " + o.getRepositoryUrl());
+                            indicator.setText2("(" + index.getAndIncrement() + "/" + gitlabServers.size() + ") " + o.getRepositoryUrl());
                             return gitLabSettingsState.loadMapOfServersAndProjects(Lists.newArrayList(o)).values();
                         }).flatMap(Collection::stream)
                         .flatMap(Collection::stream)

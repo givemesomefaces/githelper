@@ -1,6 +1,5 @@
 package gitlab.ui;
 
-import cn.hutool.core.collection.CollectionUtil;
 import com.github.lvlifeng.githelper.Bundle;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
@@ -14,7 +13,6 @@ import gitlab.common.Notifier;
 import gitlab.enums.OperationTypeEnum;
 import org.apache.commons.compress.utils.Lists;
 import org.apache.commons.lang3.StringUtils;
-import org.gitlab.api.models.GitlabBranch;
 import org.gitlab.api.models.GitlabMergeRequest;
 import org.gitlab.api.models.GitlabTag;
 import org.jetbrains.annotations.NotNull;
@@ -24,7 +22,6 @@ import javax.swing.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -32,12 +29,12 @@ import java.util.stream.Collectors;
 
 
 /**
- *
- *
  * @author Lv LiFeng
  * @date 2022/1/16 18:12
  */
 public class TagDialog extends DialogWrapper {
+    private final static String CREATING = "New tag is creating...";
+    private final static String CREATED = "New tag created";
     private JPanel contentPane;
     private JTextField tagName;
     private JComboBox createFrom;
@@ -46,8 +43,6 @@ public class TagDialog extends DialogWrapper {
     private SelectedProjectDto selectedProjectDto;
     private Project project;
     private List<String> commonFrom;
-    private final static String CREATING = "New tag is creating...";
-    private final static String CREATED = "New tag created";
 
     public TagDialog(Project project, SelectedProjectDto selectedProjectDto, List<String> commonFrom) {
         super(true);
@@ -79,9 +74,9 @@ public class TagDialog extends DialogWrapper {
 
     private List<String> searchBranchOrTag(String text, List<String> commonBranch) {
         return commonBranch.stream().filter(o ->
-                (StringUtils.isNotEmpty(text)
-                        && o.toLowerCase().contains(text.toLowerCase()))
-                        || StringUtils.isEmpty(text))
+                        (StringUtils.isNotEmpty(text)
+                                && o.toLowerCase().contains(text.toLowerCase()))
+                                || StringUtils.isEmpty(text))
                 .collect(Collectors.toList());
     }
 
@@ -139,7 +134,7 @@ public class TagDialog extends DialogWrapper {
         AtomicInteger index = new AtomicInteger(1);
         List<Result> results = selectedProjectDto.getSelectedProjectList().stream().map(s -> {
             try {
-                indicator.setText2("("+ index.getAndIncrement() +"/"+ selectedProjectDto.getSelectedProjectList()+") " + s.getName());
+                indicator.setText2("(" + index.getAndIncrement() + "/" + selectedProjectDto.getSelectedProjectList() + ") " + s.getName());
                 GitlabTag tagResult = selectedProjectDto.getGitLabSettingsState().api(s.getGitlabServer())
                         .addTag(s.getId(), tagName.getText(), source, message.getText(), null);
                 Result re = new Result();

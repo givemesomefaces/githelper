@@ -11,8 +11,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- *
- *
  * @author Lv LiFeng
  * @date 2022/1/28 10:35
  */
@@ -20,7 +18,7 @@ import java.util.stream.Collectors;
 public class GitLabProjectHelper {
 
 
-    public static GitLabProjectDto getGitLabProjectDtoByGitUrl(String url){
+    public static GitLabProjectDto getGitLabProjectDtoByGitUrl(String url) {
         if (StringUtils.isEmpty(url)) {
             return null;
         }
@@ -29,7 +27,7 @@ public class GitLabProjectHelper {
         int slashIndex = url.lastIndexOf("/");
         int lastPointIndex = url.indexOf(".git");
         String repUrl = null;
-        if (atIndex != -1 && colonIndex != -1){
+        if (atIndex != -1 && colonIndex != -1) {
             repUrl = url.substring(atIndex + 4, colonIndex);
         }
         if (atIndex != -1 && colonIndex == -1 && slashIndex != -1) {

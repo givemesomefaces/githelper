@@ -2,7 +2,6 @@ package gitlab.actions;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollectionUtil;
-import cn.hutool.core.map.MapUtil;
 import com.github.lvlifeng.githelper.Bundle;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
@@ -16,30 +15,31 @@ import com.intellij.openapi.vfs.VirtualFile;
 import git4idea.GitUtil;
 import git4idea.repo.GitRepository;
 import git4idea.repo.GitRepositoryManager;
-import gitlab.bean.*;
+import gitlab.bean.GitLabProjectDto;
+import gitlab.bean.GitlabServer;
+import gitlab.bean.ProjectDto;
+import gitlab.bean.SelectedProjectDto;
+import gitlab.bean.User;
 import gitlab.helper.GitLabProjectHelper;
 import gitlab.helper.UsersHelper;
 import gitlab.settings.GitLabSettingsState;
 import gitlab.settings.SettingsView;
-import gitlab.ui.MergeDialog;
 import gitlab.ui.MergeRequestDialog;
-import org.apache.commons.compress.utils.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.gitlab.api.models.GitlabBranch;
-import org.gitlab.api.models.GitlabMergeRequest;
 import org.gitlab.api.models.GitlabProject;
-import org.gitlab.api.models.GitlabUser;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
- *
- *
  * @author Lv LiFeng
  * @date 2022/1/19 22:12
  */
@@ -93,12 +93,13 @@ public class CreateMergeRequestAction extends DumbAwareAction {
             List<String> commonBranch = new ArrayList<>();
             List<User> currentUser = new ArrayList<>();
             Set<User> users = new HashSet<>();
+
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
                 indicator.setText("Loading common branches...");
                 AtomicInteger index = new AtomicInteger(1);
                 gitLabProjectDtos.stream().filter(o -> !indicator.isCanceled()).forEach(o -> {
-                    indicator.setText2("("+ index.getAndIncrement() +"/"+ gitLabProjectDtos.size()+") " + o.getProjectName());
+                    indicator.setText2("(" + index.getAndIncrement() + "/" + gitLabProjectDtos.size() + ") " + o.getProjectName());
                     GitlabServer gitlabServer = gitlabServers.stream().filter(server -> StringUtils.equals(server.getRepositoryUrl(), o.getRepUrl())).findFirst().orElse(null);
                     if (gitlabServer == null) {
                         return;
@@ -154,7 +155,7 @@ public class CreateMergeRequestAction extends DumbAwareAction {
         });
     }
 
-    private void showMessageDialog(){
+    private void showMessageDialog() {
         Messages.showInfoMessage("No projects to create, please reselect!", Bundle.message("mergeRequestDialogTitle"));
     }
 }

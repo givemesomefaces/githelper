@@ -1,7 +1,7 @@
 package com.github.lvlifeng.githelper.services
 
-import com.intellij.openapi.project.Project
 import com.github.lvlifeng.githelper.Bundle
+import com.intellij.openapi.project.Project
 
 class GitHelperProjectService(project: Project) {
 

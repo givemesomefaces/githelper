@@ -2,8 +2,6 @@ package gitlab.settings;
 
 
 /**
- *
- *
  * @author Lv LiFeng
  * @date 2022/1/14 01:06
  */

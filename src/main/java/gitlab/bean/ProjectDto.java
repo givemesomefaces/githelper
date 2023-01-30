@@ -8,8 +8,6 @@ import org.gitlab.api.models.GitlabProject;
 import java.util.Objects;
 
 /**
- *
- *
  * @author Lv LiFeng
  * @date 2022/1/7 00:14
  */

@@ -12,8 +12,6 @@ import java.awt.event.MouseEvent;
 import java.util.List;
 
 /**
- *
- *
  * @author Lv LiFeng
  * @date 2022/1/11 23:24
  */
@@ -47,7 +45,8 @@ public class ResultDialog extends DialogWrapper {
             }
         });
     }
-    private void selectAll(){
+
+    private void selectAll() {
         if (StringUtils.isNotBlank(result.getText())) {
             result.setSelectionStart(0);
             result.setSelectionEnd(result.getText().length());

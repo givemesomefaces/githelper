@@ -1,8 +1,6 @@
 package gitlab.common;
 
 /**
- *
- *
  * @author Lv Lifeng
  * @date 2022-09-17 14:40
  */

@@ -13,8 +13,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 import javax.swing.table.TableModel;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
@@ -23,8 +21,6 @@ import java.awt.event.MouseEvent;
 import java.util.Collection;
 
 /**
- *
- *
  * @author Lv LiFeng
  * @date 2022/1/23 10:16
  */
@@ -108,7 +104,7 @@ public class SettingsView extends DialogWrapper implements SearchableConfigurabl
     }
 
     private GitlabServer getSelectedServer() {
-        if(serverTable.getSelectedRow() >= 0) {
+        if (serverTable.getSelectedRow() >= 0) {
             return (GitlabServer) serverTable.getValueAt(serverTable.getSelectedRow(), 0);
         }
         return null;
@@ -201,6 +197,7 @@ public class SettingsView extends DialogWrapper implements SearchableConfigurabl
             public void focusGained(FocusEvent e) {
 
             }
+
             @Override
             public void focusLost(FocusEvent e) {
                 editButton.setEnabled(false);

@@ -1,6 +1,5 @@
 package gitlab.ui;
 
-import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollectionUtil;
 import com.github.lvlifeng.githelper.Bundle;
 import com.intellij.openapi.progress.ProgressIndicator;
@@ -23,18 +22,31 @@ import org.jetbrains.annotations.Nullable;
 import window.LcheckBox;
 
 import javax.swing.*;
-import java.awt.event.*;
-import java.util.*;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 /**
- *
- *
  * @author Lv LiFeng
  * @date 2022/1/12 01:04
  */
 public class MergeDialog extends DialogWrapper {
+    private static final String CLOSING_TITLE = "Close Requests";
+    private static final String CLOSED = "Merge requests closed";
+    private static final String CLOSING = "Closing merge requests";
+    private static final String MERGED = "Requests merged";
+    private static final String MERGING = "Merging requests";
     private JPanel contentPane;
     private JList mergeRequestList;
     private JComboBox sourceBranch;
@@ -56,11 +68,6 @@ public class MergeDialog extends DialogWrapper {
     private String inputSourceBranch = null;
     private String inputTargetBranch = null;
     private Project project;
-    private static final String CLOSING_TITLE = "Close Requests";
-    private static final String CLOSED = "Merge requests closed";
-    private static final String CLOSING = "Closing merge requests";
-    private static final String MERGED = "Requests merged";
-    private static final String MERGING = "Merging requests";
 
     public MergeDialog(Project project, SelectedProjectDto selectedProjectDto, List<MergeRequest> gitlabMergeRequests) {
         super(null, null, true, IdeModalityType.IDE, false);
@@ -242,10 +249,10 @@ public class MergeDialog extends DialogWrapper {
                 .filter(u -> StringUtils.equalsIgnoreCase(u.getMergeStatus(), MergeStatusEnum.CAN_BE_MERGED.getMergeStatus()))
                 .map(o -> {
                     try {
-                        indicator.setText2("("+ index.getAndIncrement() +"/"+ selectedMergeRequests.size()+") " + o.getProjectName());
+                        indicator.setText2("(" + index.getAndIncrement() + "/" + selectedMergeRequests.size() + ") " + o.getProjectName());
                         GitlabRestApi api = selectedProjectDto.getGitLabSettingsState().api(o.getGitlabServer());
                         GitlabMergeRequest gitlabMergeRequest = api.acceptMergeRequest(o.getProjectId(), o.getIid(), null);
-                        Result rs =  new Result(gitlabMergeRequest)
+                        Result rs = new Result(gitlabMergeRequest)
                                 .setType(OperationTypeEnum.MERGE)
                                 .setProjectName(o.getProjectName());
                         info.append(rs.toString()).append("\n");
@@ -270,11 +277,11 @@ public class MergeDialog extends DialogWrapper {
         List<Result> results = selectedMergeRequests.stream()
                 .map(o -> {
                     try {
-                        indicator.setText2("("+ index.getAndIncrement() +"/"+ selectedMergeRequests.size()+") " + o.getProjectName());
+                        indicator.setText2("(" + index.getAndIncrement() + "/" + selectedMergeRequests.size() + ") " + o.getProjectName());
                         GitlabRestApi api = selectedProjectDto.getGitLabSettingsState().api(o.getGitlabServer());
                         GitlabMergeRequest gitlabMergeRequest = api.updateMergeRequest(o.getProjectId(), o.getIid(), o.getTargetBranch(),
                                 api.getCurrentUser().getId(), null, null, OperationTypeEnum.CLOSE_MERGE_REQUEST.getType(), null);
-                        Result rs =  new Result(gitlabMergeRequest)
+                        Result rs = new Result(gitlabMergeRequest)
                                 .setType(OperationTypeEnum.CLOSE_MERGE_REQUEST)
                                 .setProjectName(o.getProjectName());
                         info.append(rs.toString()).append("\n");
@@ -293,11 +300,11 @@ public class MergeDialog extends DialogWrapper {
     }
 
     private Collection<Object> searchBranch(String text, Set<String> allSourcebranch) {
-        return allSourcebranch.stream().filter(s-> s.toLowerCase().contains(text.toLowerCase())).collect(Collectors.toList());
+        return allSourcebranch.stream().filter(s -> s.toLowerCase().contains(text.toLowerCase())).collect(Collectors.toList());
     }
 
     private List<MergeRequest> searchMergeRequest() {
-        String statusStr = status.getSelectedItem() != null ? status.getSelectedItem().toString()  == "all" ? null : status.getSelectedItem().toString() : null;
+        String statusStr = status.getSelectedItem() != null ? status.getSelectedItem().toString() == "all" ? null : status.getSelectedItem().toString() : null;
         String sourceBranchStr = inputSourceBranch != null ? inputSourceBranch : sourceBranch.getSelectedItem() != null ? sourceBranch.getSelectedItem().toString() : null;
         String targetBranchStr = inputTargetBranch != null ? inputTargetBranch : targetBranch.getSelectedItem() != null ? targetBranch.getSelectedItem().toString() : null;
         return filterMergeRequest = gitlabMergeRequests.stream().filter(o ->

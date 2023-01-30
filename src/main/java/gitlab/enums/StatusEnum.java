@@ -3,8 +3,6 @@ package gitlab.enums;
 import lombok.Getter;
 
 /**
- *
- *
  * @author Lv LiFeng
  * @date 2022/1/19 01:05
  */
@@ -16,9 +14,9 @@ public enum StatusEnum {
     ;
 
 
+    private String desc;
+
     StatusEnum(String desc) {
         this.desc = desc;
     }
-
-    private String desc;
 }

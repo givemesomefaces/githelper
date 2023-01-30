@@ -20,14 +20,20 @@ import org.apache.commons.lang3.StringUtils;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
-import java.util.*;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- *
- *
  * @author Lv LiFeng
  * @date 2022/1/2 15:56
  */
@@ -322,7 +328,7 @@ public class GitHelperWindow {
 
     }
 
-    private void reInitLocalAndRemoteDataList(){
+    private void reInitLocalAndRemoteDataList() {
         assembleCommonLocalBranchDataList();
         assembleCommonRemoteBranchDataList();
     }

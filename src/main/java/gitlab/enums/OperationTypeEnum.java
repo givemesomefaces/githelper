@@ -3,8 +3,6 @@ package gitlab.enums;
 import lombok.Getter;
 
 /**
- *
- *
  * @author Lv LiFeng
  * @date 2022/1/12 15:23
  */

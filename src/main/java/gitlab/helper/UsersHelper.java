@@ -3,7 +3,6 @@ package gitlab.helper;
 import cn.hutool.core.map.MapUtil;
 import com.intellij.openapi.progress.ProgressIndicator;
 import gitlab.bean.GitlabServer;
-import gitlab.bean.ProjectDto;
 import gitlab.bean.User;
 import gitlab.settings.GitLabSettingsState;
 import org.gitlab.api.models.GitlabUser;
@@ -16,14 +15,12 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
- *
- *
  * @author Lv LiFeng
  * @date 2022/1/28 15:01
  */
 public class UsersHelper {
 
-    public static List<User> getCurrentUser(ProgressIndicator indicator, Set<GitlabServer> serverDtos, GitLabSettingsState gitLabSettingsState){
+    public static List<User> getCurrentUser(ProgressIndicator indicator, Set<GitlabServer> serverDtos, GitLabSettingsState gitLabSettingsState) {
         return serverDtos.stream().filter(o -> !indicator.isCanceled()).map(o -> {
             GitlabUser m = gitLabSettingsState.api(o).getCurrentUser();
             User u = new User();
@@ -41,7 +38,7 @@ public class UsersHelper {
         })).values().stream().collect(Collectors.toList());
     }
 
-    public static Set<User> getAllUsers(ProgressIndicator indicator, Set<GitlabServer> serverDtos, GitLabSettingsState gitLabSettingsState){
+    public static Set<User> getAllUsers(ProgressIndicator indicator, Set<GitlabServer> serverDtos, GitLabSettingsState gitLabSettingsState) {
         return serverDtos.stream()
                 .filter(o -> !indicator.isCanceled())
                 .map(o -> gitLabSettingsState.api(o).getActiveUsers().stream().map(m -> {

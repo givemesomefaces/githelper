@@ -10,9 +10,11 @@
     <extensions defaultExtensionNs="com.intellij">
         <applicationService serviceImplementation="com.github.lvlifeng.githelper.services.GitHelperApplicationService"/>
         <projectService serviceImplementation="com.github.lvlifeng.githelper.services.GitHelperProjectService"/>
-        <toolWindow factoryClass="window.GitHelperWindowFactory" id="GitHelper" anchor="right" icon="/icons/window_dark.svg"/>
-        <applicationService serviceInterface="gitlab.settings.GitLabSettingsState" serviceImplementation="gitlab.settings.GitLabSettingsState"/>
-        <projectConfigurable id="GitLabConfigurableProvider"  provider="gitlab.settings.SettingsConfigurableProvider"
+        <toolWindow factoryClass="window.GitHelperWindowFactory" id="GitHelper" anchor="right"
+                    icon="/icons/window_dark.svg"/>
+        <applicationService serviceInterface="gitlab.settings.GitLabSettingsState"
+                            serviceImplementation="gitlab.settings.GitLabSettingsState"/>
+        <projectConfigurable id="GitLabConfigurableProvider" provider="gitlab.settings.SettingsConfigurableProvider"
                              parentId="project.propVCSSupport.Mappings" displayName="GitLab"/>
         <notificationGroup id="GitHelper Notification Group" displayType="BALLOON" key="notification.group.name"/>
     </extensions>

@@ -1,24 +1,34 @@
 package gitlab.api;
 
-import gitlab.common.Notifier;
 import org.apache.commons.compress.utils.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.gitlab.api.AuthMethod;
 import org.gitlab.api.GitlabAPI;
 import org.gitlab.api.TokenType;
 import org.gitlab.api.http.GitlabHTTPRequestor;
-import org.gitlab.api.models.*;
+import org.gitlab.api.models.GitlabBranch;
+import org.gitlab.api.models.GitlabMergeRequest;
+import org.gitlab.api.models.GitlabNamespace;
+import org.gitlab.api.models.GitlabProject;
+import org.gitlab.api.models.GitlabSession;
+import org.gitlab.api.models.GitlabTag;
+import org.gitlab.api.models.GitlabUser;
 
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.URLEncoder;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 
 /**
- *
- *
  * @author Lv LiFeng
  * @date 2022/1/7 00:34
  */
@@ -64,7 +74,7 @@ public class GitlabRestApi {
                 .with("target_branch", to)
                 .with("title", title)
                 .with("description", description);
-        if(removeSourceBranch) {
+        if (removeSourceBranch) {
             requestor.with("remove_source_branch", true);
         }
         if (assignee != null) {
@@ -139,8 +149,8 @@ public class GitlabRestApi {
         return api.getTags(project);
     }
 
-    public List<GitlabUser> getActiveUsers(){
-        try{
+    public List<GitlabUser> getActiveUsers() {
+        try {
             return api.getUsers()
                     .stream()
                     .filter(o -> StringUtils.equalsIgnoreCase(o.getState(), "active"))
@@ -149,12 +159,14 @@ public class GitlabRestApi {
             return Lists.newArrayList();
         }
     }
+
     public List<GitlabMergeRequest> getOpenMergeRequest(Serializable projectId) throws IOException {
         return api.getOpenMergeRequests(projectId);
     }
+
     public GitlabMergeRequest updateMergeRequest(Serializable projectId, Integer mergeRequestIid, String targetBranch,
-                                    Integer assigneeId, String title, String description, String stateEvent,
-                                    String labels) throws IOException {
+                                                 Integer assigneeId, String title, String description, String stateEvent,
+                                                 String labels) throws IOException {
         return api.updateMergeRequest(projectId, mergeRequestIid, targetBranch, assigneeId, title, description, stateEvent, labels);
     }
 

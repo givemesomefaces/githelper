@@ -22,13 +22,15 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
-import java.net.SocketException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
- *
- *
  * @author Lv LiFeng
  * @date 2022/1/7 00:13
  */
@@ -68,7 +70,7 @@ public class GitLabSettingsState implements PersistentStateComponent<GitLabSetti
     @SneakyThrows
     public Map<GitlabServer, List<ProjectDto>> loadMapOfServersAndProjects(List<GitlabServer> servers) {
         Map<GitlabServer, List<ProjectDto>> map = new HashMap<>();
-        for(GitlabServer server : servers) {
+        for (GitlabServer server : servers) {
             List<ProjectDto> projects = loadProjects(server);
             map.put(server, projects);
         }
@@ -102,7 +104,7 @@ public class GitLabSettingsState implements PersistentStateComponent<GitLabSetti
     }
 
     public void addServer(GitlabServer server) {
-        if(getGitlabServers().stream().noneMatch(s -> server.getApiUrl().equals(s.getApiUrl()))) {
+        if (getGitlabServers().stream().noneMatch(s -> server.getApiUrl().equals(s.getApiUrl()))) {
             getGitlabServers().add(server);
         } else {
             getGitlabServers().stream().filter(s -> Objects.nonNull(server) && server.getApiUrl().equals(s.getApiUrl())).forEach(changedServer -> {
@@ -124,7 +126,7 @@ public class GitLabSettingsState implements PersistentStateComponent<GitLabSetti
         }
     }
 
-    public boolean hasSettings(){
+    public boolean hasSettings() {
         return CollectionUtil.isNotEmpty(getGitlabServers());
     }
 
@@ -136,8 +138,8 @@ public class GitLabSettingsState implements PersistentStateComponent<GitLabSetti
     public GitlabServer getGitlabServer(GitRepository gitRepository) {
         for (GitRemote gitRemote : gitRepository.getRemotes()) {
             for (String remoteUrl : gitRemote.getUrls()) {
-                for(GitlabServer server : getGitlabServers()) {
-                    if(remoteUrl.contains(server.getRepositoryUrl())) {
+                for (GitlabServer server : getGitlabServers()) {
+                    if (remoteUrl.contains(server.getRepositoryUrl())) {
                         return server;
                     }
                 }

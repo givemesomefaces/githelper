@@ -14,8 +14,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
- *
- *
  * @author Lv LiFeng
  * @date 2022/1/22 18:54
  */
@@ -25,7 +23,7 @@ public class CheckOutDialog extends DialogWrapper {
     private JTextField newBranchName;
     private Set<GitRepository> choosedRepositories;
     private GitBrancher gitBrancher;
-    private String  startPoint;
+    private String startPoint;
 
     public CheckOutDialog(String title, Set<GitRepository> choosedRepositories, GitBrancher gitBrancher, String statPoint) {
         super(true);

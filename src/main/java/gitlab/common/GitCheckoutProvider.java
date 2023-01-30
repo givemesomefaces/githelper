@@ -36,42 +36,11 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- *
- *
  * @author Lv LiFeng
  * @date 2022/1/23 10:15
  */
 public class GitCheckoutProvider extends CheckoutProviderEx {
     private static final List<@NonNls String> NON_ERROR_LINE_PREFIXES = Arrays.asList("Cloning into", "remote:", "submodule");
-
-    @Override
-    public String getVcsName() {
-        return "_Git";
-    }
-
-    @Override
-    public void doCheckout(@NotNull Project project, @Nullable Listener listener, @Nullable String predefinedRepositoryUrl) {
-        FileDocumentManager.getInstance().saveAllDocuments();
-        GitCloneDialog dialog = new GitCloneDialog(project, predefinedRepositoryUrl);
-        if (!dialog.showAndGet()) {
-            return;
-        }
-
-        dialog.rememberSettings();
-        final LocalFileSystem lfs = LocalFileSystem.getInstance();
-        final File parent = new File(dialog.getParentDirectory());
-        VirtualFile destinationParent = lfs.findFileByIoFile(parent);
-        if (destinationParent == null) {
-            destinationParent = lfs.refreshAndFindFileByIoFile(parent);
-        }
-        if (destinationParent == null) {
-            return;
-        }
-        final String sourceRepositoryURL = dialog.getSourceRepositoryURL();
-        final String directoryName = dialog.getDirectoryName();
-        final String parentDirectory = dialog.getParentDirectory();
-        clone(project, Git.getInstance(), listener, destinationParent, sourceRepositoryURL, directoryName, parentDirectory);
-    }
 
     public static void clone(final Project project, @NotNull final Git git, final Listener listener, final VirtualFile destinationParent,
                              final String sourceRepositoryURL, final String directoryName, final String parentDirectory) {
@@ -115,6 +84,35 @@ public class GitCheckoutProvider extends CheckoutProviderEx {
         String description = new HtmlBuilder().appendWithSeparators(HtmlChunk.br(), displayErrorLines).toString();
         VcsNotifier.getInstance(project).notifyError("git.clone.failed", DvcsBundle.message("error.title.cloning.repository.failed"), description, true);
         return false;
+    }
+
+    @Override
+    public String getVcsName() {
+        return "_Git";
+    }
+
+    @Override
+    public void doCheckout(@NotNull Project project, @Nullable Listener listener, @Nullable String predefinedRepositoryUrl) {
+        FileDocumentManager.getInstance().saveAllDocuments();
+        GitCloneDialog dialog = new GitCloneDialog(project, predefinedRepositoryUrl);
+        if (!dialog.showAndGet()) {
+            return;
+        }
+
+        dialog.rememberSettings();
+        final LocalFileSystem lfs = LocalFileSystem.getInstance();
+        final File parent = new File(dialog.getParentDirectory());
+        VirtualFile destinationParent = lfs.findFileByIoFile(parent);
+        if (destinationParent == null) {
+            destinationParent = lfs.refreshAndFindFileByIoFile(parent);
+        }
+        if (destinationParent == null) {
+            return;
+        }
+        final String sourceRepositoryURL = dialog.getSourceRepositoryURL();
+        final String directoryName = dialog.getDirectoryName();
+        final String parentDirectory = dialog.getParentDirectory();
+        clone(project, Git.getInstance(), listener, destinationParent, sourceRepositoryURL, directoryName, parentDirectory);
     }
 
     @Override

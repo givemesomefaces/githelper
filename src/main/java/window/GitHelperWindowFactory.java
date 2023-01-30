@@ -8,8 +8,6 @@ import com.intellij.ui.content.ContentFactory;
 import org.jetbrains.annotations.NotNull;
 
 /**
- *
- *
  * @author Lv LiFeng
  * @date 2022/1/3 17:03
  */

@@ -30,21 +30,25 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
-import java.util.*;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import static gitlab.common.Constants.NAME_SPLIT_SYMBOL;
 
 /**
- *
- *
  * @author Lv LiFeng
  * @date 2022/1/8 15:42
  */
 @Setter
 public class MergeRequestDialog extends DialogWrapper {
+    private static final String CREATING = "Merge request is creating...";
+    private static final String CREATED = "Merge request created";
     private JPanel contentPane;
     private JComboBox sourceBranch;
     private JComboBox targetBranch;
@@ -59,8 +63,6 @@ public class MergeRequestDialog extends DialogWrapper {
     private List<String> commonBranch;
     private List<User> currentUser;
     private Set<User> users;
-    private static final String CREATING = "Merge request is creating...";
-    private static final String CREATED = "Merge request created";
 
     public MergeRequestDialog(Project project, SelectedProjectDto selectedProjectDto, List<String> commonBranch, List<User> currentUser, Set<User> users) {
         super(true);
@@ -175,6 +177,7 @@ public class MergeRequestDialog extends DialogWrapper {
     private void showMergeDialog() {
         ProgressManager.getInstance().run(new Task.Modal(project, Bundle.message("mergeRequestDialogTitle"), true) {
             List<MergeRequest> gitlabMergeRequests = new ArrayList<>();
+
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
                 indicator.setText("Loading merge requests...");
@@ -188,7 +191,7 @@ public class MergeRequestDialog extends DialogWrapper {
                         .stream()
                         .filter(o -> !indicator.isCanceled())
                         .map(o -> {
-                            indicator.setText2("("+ index.getAndIncrement() +"/"+ selectedProjectDto.getSelectedProjectList().size()+") " + o.getName());
+                            indicator.setText2("(" + index.getAndIncrement() + "/" + selectedProjectDto.getSelectedProjectList().size() + ") " + o.getName());
                             List<GitlabMergeRequest> openMergeRequest = null;
                             try {
                                 openMergeRequest = selectedProjectDto.getGitLabSettingsState()
@@ -241,29 +244,29 @@ public class MergeRequestDialog extends DialogWrapper {
         StringBuilder error = new StringBuilder();
         AtomicInteger index = new AtomicInteger(1);
         List<Result> results = selectedProjectDto.getSelectedProjectList().stream().map(s -> {
-            indicator.setText2("("+ index.getAndIncrement() +"/"+ selectedProjectDto.getSelectedProjectList().size()+") " + s.getName());
-            return targets.stream().map(target -> {
-                try {
-                    GitlabMergeRequest mergeRequest = selectedProjectDto.getGitLabSettingsState().api(s.getGitlabServer())
-                            .createMergeRequest(s, finalUser == null ? null : finalUser.resetId(s.getGitlabServer().getApiUrl()),
-                                    source, target, mergeTitle.getText(), desc, false);
-                    Result re = new Result(mergeRequest);
-                    re.setType(OperationTypeEnum.CREATE_MERGE_REQUEST)
-                            .setProjectName(s.getName())
-                            .setChangeFilesCount(mergeRequest.getChangesCount());
-                    info.append("<a href=\"" + re.toString().replace(" [ChangeFiles:\" + getChangeFilesCount() + \"]",
-                            "") + "\">" + re +"</a>").append("\n");
-                    return re;
-                } catch (IOException ioException) {
-                    Result re = new Result(new GitlabMergeRequest());
-                    re.setType(OperationTypeEnum.CREATE_MERGE_REQUEST)
-                            .setProjectName(s.getName())
-                            .setErrorMsg(ioException.getMessage());
-                    error.append(re).append("\n");
-                    return re;
-                }
-            }).collect(Collectors.toList());
-        }).flatMap(Collection::stream)
+                    indicator.setText2("(" + index.getAndIncrement() + "/" + selectedProjectDto.getSelectedProjectList().size() + ") " + s.getName());
+                    return targets.stream().map(target -> {
+                        try {
+                            GitlabMergeRequest mergeRequest = selectedProjectDto.getGitLabSettingsState().api(s.getGitlabServer())
+                                    .createMergeRequest(s, finalUser == null ? null : finalUser.resetId(s.getGitlabServer().getApiUrl()),
+                                            source, target, mergeTitle.getText(), desc, false);
+                            Result re = new Result(mergeRequest);
+                            re.setType(OperationTypeEnum.CREATE_MERGE_REQUEST)
+                                    .setProjectName(s.getName())
+                                    .setChangeFilesCount(mergeRequest.getChangesCount());
+                            info.append("<a href=\"" + re.toString().replace(" [ChangeFiles:\" + getChangeFilesCount() + \"]",
+                                    "") + "\">" + re + "</a>").append("\n");
+                            return re;
+                        } catch (IOException ioException) {
+                            Result re = new Result(new GitlabMergeRequest());
+                            re.setType(OperationTypeEnum.CREATE_MERGE_REQUEST)
+                                    .setProjectName(s.getName())
+                                    .setErrorMsg(ioException.getMessage());
+                            error.append(re).append("\n");
+                            return re;
+                        }
+                    }).collect(Collectors.toList());
+                }).flatMap(Collection::stream)
                 .collect(Collectors.toList());
         Notifier.notify(project, info, error, null);
         return results;

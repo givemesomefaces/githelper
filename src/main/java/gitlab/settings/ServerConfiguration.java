@@ -22,8 +22,6 @@ import java.util.concurrent.TimeUnit;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
 /**
- *
- *
  * @author Lv LiFeng
  * @date 2022/1/23 10:16
  */
@@ -42,13 +40,22 @@ public class ServerConfiguration extends DialogWrapper {
 
     protected ServerConfiguration(@Nullable GitlabServer gitlabServer) {
         super(false);
-        if(gitlabServer == null) {
+        if (gitlabServer == null) {
             this.gitlabServer = new GitlabServer();
         } else {
             this.gitlabServer = gitlabServer;
         }
         init();
         setTitle("GitLab Server Details");
+    }
+
+    private static boolean isValidUrl(String s) {
+        try {
+            URI uri = new URI(s);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     @Override
@@ -66,10 +73,10 @@ public class ServerConfiguration extends DialogWrapper {
     protected ValidationInfo doValidate() {
         final String apiUrl = apiURl.getText();
         final String tokenString = token.getText();
-        if(StringUtils.isBlank(apiUrl)) {
+        if (StringUtils.isBlank(apiUrl)) {
             return new ValidationInfo(SettingError.URL_NOT_NULL.message(), apiURl);
         }
-        if(StringUtils.isBlank(tokenString)) {
+        if (StringUtils.isBlank(tokenString)) {
             return new ValidationInfo(SettingError.TOKEN_NOT_NULL.message(), token);
         }
         try {
@@ -112,15 +119,6 @@ public class ServerConfiguration extends DialogWrapper {
         settingsState.addServer(gitlabServer);
     }
 
-    private static boolean isValidUrl(String s) {
-        try {
-            URI uri = new URI(s);
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
     private void setupListeners() {
         tokenPage.addActionListener(e -> openWebPage(generateHelpUrl()));
         onServerChange();
@@ -153,7 +151,7 @@ public class ServerConfiguration extends DialogWrapper {
     }
 
     private void openWebPage(String uri) {
-        if (StringUtils.isBlank(uri)){
+        if (StringUtils.isBlank(uri)) {
             return;
         }
         Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;

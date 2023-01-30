@@ -7,12 +7,9 @@ import com.intellij.notification.NotificationType;
 import com.intellij.openapi.project.Project;
 import com.sun.istack.Nullable;
 import gitlab.enums.StatusEnum;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 
 /**
- *
- *
  * @author Lv LiFeng
  * @date 2022/1/18 23:04
  */

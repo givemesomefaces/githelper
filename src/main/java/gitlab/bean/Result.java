@@ -11,8 +11,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.gitlab.api.models.GitlabMergeRequest;
 
 /**
- *
- *
  * @author Lv LiFeng
  * @date 2022/1/11 23:49
  */
@@ -50,7 +48,7 @@ public class Result extends GitlabMergeRequest {
                 return getWebUrl() + " [ChangeFiles:" + getChangeFilesCount() + "]";
             case MERGE:
             case CLOSE_MERGE_REQUEST:
-                return projectName + "  "+ getSourceBranch() + "->" + getTargetBranch()+"  " +  getState();
+                return projectName + "  " + getSourceBranch() + "->" + getTargetBranch() + "  " + getState();
             case CREATE_TAG:
                 return projectName + " Tag " + desc + " created";
             default:

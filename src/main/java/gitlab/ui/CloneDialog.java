@@ -29,8 +29,6 @@ import java.util.List;
 import java.util.Set;
 
 /**
- *
- *
  * @author Lv LiFeng
  * @date 2022/1/8 10:59
  */
@@ -88,7 +86,7 @@ public class CloneDialog extends DialogWrapper {
         Notifier.notify(project, info, null, null);
     }
 
-    private void initDefaultDirectory(){
+    private void initDefaultDirectory() {
         directoryButton.setIcon(Icons.DirectoryDir);
         directoryButton.setBorder(null);
         directory.setText(project.getBasePath());
@@ -103,11 +101,11 @@ public class CloneDialog extends DialogWrapper {
                 LocalFileSystem lfs = LocalFileSystem.getInstance();
                 VirtualFile preSelect = lfs.findFileByIoFile(file);
                 FileChooser.chooseFiles(new FileChooserDescriptor(false,
-                        true,
-                        false,
-                        false,
-                        false,
-                        false),
+                                true,
+                                false,
+                                false,
+                                false,
+                                false),
                         project,
                         preSelect,
                         new Consumer<List<VirtualFile>>() {

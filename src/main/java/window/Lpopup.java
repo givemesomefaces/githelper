@@ -3,30 +3,22 @@ package window;
 import com.github.lvlifeng.githelper.Bundle;
 import com.google.common.collect.Lists;
 import com.intellij.openapi.ui.Messages;
-import com.intellij.openapi.ui.messages.MessageDialog;
-import com.intellij.openapi.ui.popup.JBPopupFactory;
 import com.intellij.openapi.ui.popup.PopupStep;
 import com.intellij.openapi.ui.popup.util.BaseListPopupStep;
-import com.intellij.openapi.util.NlsContexts;
-import com.intellij.ui.components.JBOptionButton;
 import git4idea.branch.GitBrancher;
 import git4idea.repo.GitRepository;
 import org.apache.commons.lang.StringUtils;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import javax.swing.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
 /**
- *
- *
  * @author Lv LiFeng
  * @date 2022/1/22 20:23
  */
-public class Lpopup extends BaseListPopupStep{
+public class Lpopup extends BaseListPopupStep {
 
     private String selectedBranchName;
     private Set<GitRepository> choosedRepositories;
@@ -75,7 +67,7 @@ public class Lpopup extends BaseListPopupStep{
                 @Override
                 public void run() {
                     if (popupConfirmDialog(isRemote, selectedBranchName)) {
-                        if (isRemote){
+                        if (isRemote) {
                             gitBrancher.deleteRemoteBranch(selectedBranchName, new ArrayList<>(choosedRepositories));
                         } else {
                             gitBrancher.deleteBranch(selectedBranchName, new ArrayList<>(choosedRepositories));
