@@ -81,7 +81,7 @@ public class CloneDialog extends DialogWrapper {
         selectedProjectList.stream().forEach(s -> {
             GitCheckoutProvider.clone(project, Git.getInstance(), checkoutListener, finalDestinationParent,
                     s.getSshUrl(), s.getName(), directory.getText());
-            info.append(s.getName() + " " + s.getSshUrl() + " cloned successful!").append("\n");
+            info.append(s.getName() + " " + s.getSshUrl() + " clone successfully!").append("\n");
         });
         Notifier.notify(project, info, null, null);
     }

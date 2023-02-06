@@ -6,6 +6,9 @@ package gitlab.settings;
  * @date 2022/1/14 01:06
  */
 public enum SettingError {
+    /**
+     * server is not valid
+     */
     NOT_A_URL("Provided server url is not valid (must be in format http(s)://server.com)"),
     SERVER_CANNOT_BE_REACHED("Provided server cannot be reached"),
     INVALID_API_TOKEN("Provided API Token is not valid"),

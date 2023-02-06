@@ -12,8 +12,8 @@
         <projectService serviceImplementation="com.github.lvlifeng.githelper.services.GitHelperProjectService"/>
         <toolWindow factoryClass="window.GitHelperWindowFactory" id="GitHelper" anchor="right"
                     icon="/icons/window_dark.svg"/>
-        <applicationService serviceInterface="gitlab.settings.GitLabSettingsState"
-                            serviceImplementation="gitlab.settings.GitLabSettingsState"/>
+        <applicationService
+                serviceImplementation="gitlab.settings.GitLabSettingsState"/>
         <projectConfigurable id="GitLabConfigurableProvider" provider="gitlab.settings.SettingsConfigurableProvider"
                              parentId="project.propVCSSupport.Mappings" displayName="GitLab"/>
         <notificationGroup id="GitHelper Notification Group" displayType="BALLOON" key="notification.group.name"/>
@@ -31,11 +31,11 @@
             <add-to-group group-id="Git.MainMenu" anchor="after" relative-to-action="GitHub.MainMenu"/>
         </action>
         <action id="CreateMergeRequest" class="gitlab.actions.CreateMergeRequestAction" text="Create Merge Request"
-                description="Create Merge Request">
+                description="Create merge request">
             <add-to-group group-id="Git.ContextMenu" anchor="last"/>
         </action>
         <action id="MergeRequest" class="gitlab.actions.MergeRequestAction" text="Merge Request"
-                description="Merge Request">
+                description="Merge request">
             <add-to-group group-id="Git.ContextMenu" anchor="last"/>
         </action>
     </actions>
