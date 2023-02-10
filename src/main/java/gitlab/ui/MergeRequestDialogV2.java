@@ -48,7 +48,7 @@ public class MergeRequestDialogV2 extends DialogWrapper {
     private static final String CREATED = "Merge request created";
     private JPanel contentPane;
     private JComboBox sourceBranch;
-    private JComboBox targetBranch;
+    private JPanel targetBranch;
     private JComboBox assignee;
     private JTextField description;
     private JTextField mergeTitle;
@@ -78,8 +78,29 @@ public class MergeRequestDialogV2 extends DialogWrapper {
         sortDatas();
         sourceBranch.setModel(new DefaultComboBoxModel(commonBranch.toArray()));
         sourceBranch.setSelectedIndex(-1);
-        targetBranch.setModel(new DefaultComboBoxModel(commonBranch.toArray()));
-        targetBranch.setSelectedIndex(-1);
+        targetBranch.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                super.mouseClicked(e);
+                if (e.getButton() != 1) {
+                    return;
+                }
+                JBList<String> list = new JBList<>(commonBranch.toArray(new String[0]));
+                JBScrollPane scrollPane = new JBScrollPane(list);
+                scrollPane.setPreferredSize(new Dimension(200, 200));
+                int result = Messages.showDialog(scrollPane, "", "Select Target Branch", new String[]{"OK", "Cancel"}, 0, Messages.getQuestionIcon());
+                if (result == 0) {
+                    String selectedValue = list.getSelectedValue();
+                    if (StringUtils.isNotBlank(selectedValue)) {
+                        targetBranch.removeAll();
+                        targetBranch.add(new JLabel(selectedValue));
+                        targetBranch.updateUI();
+                    }
+                }
+            }
+        });
+//        targetBranch.setModel(new DefaultComboBoxModel(commonBranch.toArray()));
+//        targetBranch.setSelectedIndex(-1);
         assignee.setModel(new DefaultComboBoxModel(users.toArray()));
         assignee.setSelectedIndex(-1);
         mergeTitle.setText("merge");
@@ -94,17 +115,17 @@ public class MergeRequestDialogV2 extends DialogWrapper {
                 sourceBranch.showPopup();
             }
         });
-        targetBranch.getEditor().getEditorComponent().addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyReleased(KeyEvent e) {
-                super.keyReleased(e);
-                JTextField textField = (JTextField) e.getSource();
-                String text = textField.getText();
-                targetBranch.setModel(new DefaultComboBoxModel(searchBranch(text, commonBranch).toArray()));
-                textField.setText(text);
-                targetBranch.showPopup();
-            }
-        });
+//        targetBranch.getEditor().getEditorComponent().addKeyListener(new KeyAdapter() {
+//            @Override
+//            public void keyReleased(KeyEvent e) {
+//                super.keyReleased(e);
+//                JTextField textField = (JTextField) e.getSource();
+//                String text = textField.getText();
+//                targetBranch.setModel(new DefaultComboBoxModel(searchBranch(text, commonBranch).toArray()));
+//                textField.setText(text);
+//                targetBranch.showPopup();
+//            }
+//        });
         assignee.getEditor().getEditorComponent().addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent e) {
@@ -226,7 +247,7 @@ public class MergeRequestDialogV2 extends DialogWrapper {
 
     private List<Result> createMergeRequests(ProgressIndicator indicator) {
         String source = (String) sourceBranch.getSelectedItem();
-        String targetStr = (String) targetBranch.getSelectedItem();
+        String targetStr = null; //(String) targetBranch.getSelectedItem();
         String desc = description.getText();
         if (StringUtils.isEmpty(source) || StringUtils.isEmpty(targetStr) || StringUtils.isEmpty(mergeTitle.getText())) {
             return Lists.newArrayList();
@@ -304,29 +325,29 @@ public class MergeRequestDialogV2 extends DialogWrapper {
                 && !commonBranch.contains(sourceBranch.getSelectedItem().toString())) {
             return new ValidationInfo("This source branch does not exist, please choose again!", sourceBranch);
         }
-        if (targetBranch.getSelectedItem() == null || StringUtils.isBlank(targetBranch.getSelectedItem().toString())) {
-            return new ValidationInfo("Target Branch cannot be empty.", targetBranch);
-        }
-
-        if (targetBranch.getSelectedItem() != null
-                && StringUtils.isNotBlank(targetBranch.getSelectedItem().toString())) {
-            Set<String> targets = Arrays.stream(StringUtils.split(targetBranch.getSelectedItem().toString(), NAME_SPLIT_SYMBOL))
-                    .map(String::toLowerCase)
-                    .collect(Collectors.toSet());
-            Set<String> notExistTargets = targets.stream().filter(target -> !commonBranch.contains(target)).collect(Collectors.toSet());
-            if (CollectionUtil.isNotEmpty(notExistTargets)) {
-                return new ValidationInfo(String.format("This target branch does not exist, Please reselect! %s", notExistTargets), targetBranch);
-            }
-        }
-
-        if (targetBranch.getSelectedItem() != null && sourceBranch.getSelectedItem() != null) {
-            Set<String> targets = Arrays.stream(StringUtils.split(targetBranch.getSelectedItem().toString(), NAME_SPLIT_SYMBOL))
-                    .map(String::toLowerCase)
-                    .collect(Collectors.toSet());
-            if (targets.contains(sourceBranch.getSelectedItem().toString().toLowerCase())) {
-                return new ValidationInfo(String.format("Target branch must be different from Source branch. [%s]", sourceBranch.getSelectedItem().toString()), targetBranch);
-            }
-        }
+//        if (targetBranch.getSelectedItem() == null || StringUtils.isBlank(targetBranch.getSelectedItem().toString())) {
+//            return new ValidationInfo("Target Branch cannot be empty.", targetBranch);
+//        }
+//
+//        if (targetBranch.getSelectedItem() != null
+//                && StringUtils.isNotBlank(targetBranch.getSelectedItem().toString())) {
+//            Set<String> targets = Arrays.stream(StringUtils.split(targetBranch.getSelectedItem().toString(), NAME_SPLIT_SYMBOL))
+//                    .map(String::toLowerCase)
+//                    .collect(Collectors.toSet());
+//            Set<String> notExistTargets = targets.stream().filter(target -> !commonBranch.contains(target)).collect(Collectors.toSet());
+//            if (CollectionUtil.isNotEmpty(notExistTargets)) {
+//                return new ValidationInfo(String.format("This target branch does not exist, Please reselect! %s", notExistTargets), targetBranch);
+//            }
+//        }
+//
+//        if (targetBranch.getSelectedItem() != null && sourceBranch.getSelectedItem() != null) {
+//            Set<String> targets = Arrays.stream(StringUtils.split(targetBranch.getSelectedItem().toString(), NAME_SPLIT_SYMBOL))
+//                    .map(String::toLowerCase)
+//                    .collect(Collectors.toSet());
+//            if (targets.contains(sourceBranch.getSelectedItem().toString().toLowerCase())) {
+//                return new ValidationInfo(String.format("Target branch must be different from Source branch. [%s]", sourceBranch.getSelectedItem().toString()), targetBranch);
+//            }
+//        }
         if (assignee.getSelectedItem() != null
                 && StringUtils.isNotBlank(assignee.getSelectedItem().toString())
                 && !users.stream().map(User::toString).collect(Collectors.toList()).contains(assignee.getSelectedItem().toString())) {
@@ -349,7 +370,7 @@ public class MergeRequestDialogV2 extends DialogWrapper {
         JBList targetList = new JBList();
         targetList.setModel(new DefaultListModel());
         targetList.setCellRenderer(new LcheckBox());
-//        targetList.setListData(commonBranch.toArray());
+        targetList.setListData(commonBranch.toArray());
         targetList.setEnabled(true);
         targetList.setSelectionModel(new DefaultListSelectionModel() {
             @Override
@@ -374,9 +395,9 @@ public class MergeRequestDialogV2 extends DialogWrapper {
             @Override
             public void keyReleased(KeyEvent e) {
                 super.keyReleased(e);
-//                List<String> searchBranch = searchBranch(searchField.getText(), commonBranch);
-//                targetList.setModel(new DefaultListModel());
-//                targetList.setListData(searchBranch.toArray());
+                List<String> searchBranch = searchBranch(searchField.getText(), commonBranch);
+                targetList.setModel(new DefaultListModel());
+                targetList.setListData(searchBranch.toArray());
             }
         });
 
