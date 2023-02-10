@@ -10,6 +10,8 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.ui.ValidationInfo;
+import com.intellij.ui.components.JBList;
+import com.intellij.ui.components.JBScrollPane;
 import gitlab.bean.MergeRequest;
 import gitlab.bean.Result;
 import gitlab.bean.SelectedProjectDto;
@@ -21,6 +23,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.gitlab.api.models.GitlabMergeRequest;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import window.LcheckBox;
 
 import javax.swing.*;
 import java.awt.*;
@@ -339,10 +342,49 @@ public class MergeRequestDialogV2 extends DialogWrapper {
 
 
     private JPanel getTargetsJpanel() {
-        JPanel jPanel = new JPanel();
-        jPanel.setLayout(new BoxLayout(jPanel, BoxLayout.Y_AXIS));
-        jPanel.add(targetBranch);
-        return jPanel;
+        JPanel targetPanel = new JPanel();
+
+        // targetList
+        JScrollPane targetScrollPane = new JBScrollPane(targetPanel);
+        JBList targetList = new JBList();
+        targetList.setModel(new DefaultListModel());
+        targetList.setCellRenderer(new LcheckBox());
+//        targetList.setListData(commonBranch.toArray());
+        targetList.setEnabled(true);
+        targetList.setSelectionModel(new DefaultListSelectionModel() {
+            @Override
+            public void setSelectionInterval(int index0, int index1) {
+                if (super.isSelectedIndex(index0)) {
+                    super.removeSelectionInterval(index0, index1);
+                } else {
+                    super.addSelectionInterval(index0, index1);
+                }
+            }
+        });
+        targetScrollPane.add(targetList);
+
+        // search
+        JPanel searchPanel = new JPanel();
+        searchPanel.setLayout(new BoxLayout(searchPanel, BoxLayout.X_AXIS));
+        searchPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
+
+        JTextField searchField = new JTextField();
+        searchField.setPreferredSize(new Dimension(200, 30));
+        searchField.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent e) {
+                super.keyReleased(e);
+//                List<String> searchBranch = searchBranch(searchField.getText(), commonBranch);
+//                targetList.setModel(new DefaultListModel());
+//                targetList.setListData(searchBranch.toArray());
+            }
+        });
+
+        searchPanel.add(searchField);
+
+        targetPanel.add(searchPanel);
+        targetPanel.add(targetScrollPane);
+        return targetPanel;
     }
 
 }
