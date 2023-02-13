@@ -96,6 +96,23 @@ public class GitLabServersDialog extends DialogWrapper {
         return contentPane;
     }
 
+    private void getProjectListAndSortByName() {
+        unEnableBottomButton();
+        unEnableOtherButtonWhenLoadingData();
+        if (CollectionUtil.isEmpty(gitlabServerList)) {
+            return;
+        }
+        enableOtherButtonAfterLoadingData();
+        bottomButtonState();
+        Collections.sort(gitlabServerList, new Comparator<GitlabServer>() {
+            @Override
+            public int compare(GitlabServer o1, GitlabServer o2) {
+                return StringUtils.compareIgnoreCase(o1.getRepositoryUrl(), o2.getRepositoryUrl());
+            }
+        });
+        initServerList(filterProjectsByProject(null));
+    }
+
 
 
     private void onCancel() {
