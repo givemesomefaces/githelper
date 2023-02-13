@@ -65,6 +65,8 @@ public class GitLabServersDialog extends DialogWrapper {
 
     private JButton cancelButton;
 
+    private JButton okButton;
+
     private JTextField search;
 
     private JCheckBox selectAllCheckBox;
@@ -111,6 +113,24 @@ public class GitLabServersDialog extends DialogWrapper {
             }
         });
         initServerList(filterProjectsByProject(null));
+    }
+
+    private void unEnableOtherButtonWhenLoadingData() {
+        selectAllCheckBox.setEnabled(false);
+    }
+
+    private void enableOtherButtonAfterLoadingData() {
+        selectAllCheckBox.setEnabled(true);
+    }
+
+    private void unEnableBottomButton() {
+        okButton.setEnabled(false);
+    }
+
+    private void bottomButtonState() {
+        if (CollectionUtil.isEmpty(gitlabServerList) || CollectionUtil.isEmpty(selectedGitlabServerList)) {
+            okButton.setEnabled(false);
+        }
     }
 
 
