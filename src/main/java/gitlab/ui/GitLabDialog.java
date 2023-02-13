@@ -71,7 +71,7 @@ public class GitLabDialog extends DialogWrapper {
     private JButton tagButton;
 
     private GitLabSettingsState gitLabSettingsState = GitLabSettingsState.getInstance();
-    private List<ProjectDto> projectDtoList = new ArrayList<>();
+    private List<ProjectDto> projectDtoList;
     private List<ProjectDto> projectDtoListByBranch = new ArrayList<>();
     private Set<ProjectDto> selectedProjectList = new HashSet<>();
     private Project project;
@@ -85,7 +85,7 @@ public class GitLabDialog extends DialogWrapper {
         this.project = project;
         this.projectDtoList = projectDtoList;
         getProjectListAndSortByName();
-        initSerach();
+        initSearch();
         initRadioButton();
         initProjectList(filterProjectsByProject(null));
         initSelectAllCheckBox();
@@ -354,7 +354,7 @@ public class GitLabDialog extends DialogWrapper {
         });
     }
 
-    private void initSerach() {
+    private void initSearch() {
         search.setToolTipText("Search for projects in all gitlab server by project name");
         search.addKeyListener(new KeyAdapter() {
             @Override
