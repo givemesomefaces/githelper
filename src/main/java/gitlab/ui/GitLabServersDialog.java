@@ -171,11 +171,58 @@ public class GitLabServersDialog extends DialogWrapper {
         });
     }
 
-    private void clearSelected() {
-        selectedGitlabServerList.clear();
-        gitlabServers.clearSelection();
-        selectAllCheckBox.setSelected(false);
-        selectedCount.setText("(0 Selected)");
+    private void setSelectedCount() {
+        selectedCount.setText(String.format("(%s Selected)", selectedCount.size()));
+    }
+
+    private List<GitlabServer> filterServersByProject(String searchWord) {
+        return filterGitLabServerList = gitlabServerList
+                .stream()
+                .filter(o -> filterServers(o, searchWord))
+                .collect(Collectors.toList());
+    }
+
+    private boolean filterServers(GitlabServer o, String searchWord) {
+        Set<String> searchProjectList = new HashSet<>();
+        if (StringUtils.isNotBlank(searchWord)) {
+            searchProjectList = Arrays.stream(StringUtils.split(searchWord, NAME_SPLIT_SYMBOL)).collect(Collectors.toSet());
+        }
+        return (CollectionUtil.isNotEmpty(searchProjectList)
+                && ((searchProjectList.size() == 1 && o.getRepositoryUrl().toLowerCase().contains(new ArrayList<>(searchProjectList).get(0)))
+                || (searchProjectList.size() != 1 && searchProjectList.stream().anyMatch(s -> StringUtils.equals(o.getRepositoryUrl().toLowerCase(), s.toLowerCase())))))
+                || CollectionUtil.isEmpty(searchProjectList);
+
+    }
+
+    private void initServerList(List<GitlabServer> gitlabServerList) {
+
+        this.gitlabServers.setListData(gitlabServerList.toArray());
+        this.gitlabServers.setCellRenderer(new LcheckBox());
+        this.gitlabServers.setEnabled(true);
+        this.gitlabServers.setSelectionModel(new DefaultListSelectionModel() {
+            @Override
+            public void setSelectionInterval(int index0, int index1) {
+                if (super.isSelectedIndex(index0)) {
+                    super.removeSelectionInterval(index0, index1);
+                    selectedGitlabServerList.remove(gitlabServerList.get(index0));
+                } else {
+                    super.addSelectionInterval(index0, index1);
+                    selectedGitlabServerList.add(gitlabServerList.get(index0));
+                    checkAll(gitlabServerList);
+                }
+                setSelectedCount();
+                bottomButtonState();
+            }
+        });
+        if (CollectionUtil.isNotEmpty(selectedGitlabServerList)) {
+            this.gitlabServers.setSelectedIndices(selectedGitlabServerList.stream()
+                    .map(o -> gitlabServerList.indexOf(o))
+                    .mapToInt(Integer::valueOf)
+                    .toArray());
+            checkAll(gitlabServerList);
+        } else {
+            this.gitlabServers.clearSelection();
+        }
     }
 
     private void onCancel() {
