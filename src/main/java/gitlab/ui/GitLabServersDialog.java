@@ -133,6 +133,33 @@ public class GitLabServersDialog extends DialogWrapper {
         }
     }
 
+    private void initBottomButton() {
+        okButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // TODO
+            }
+        });
+        cancelButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                onCancel();
+            }
+        });
+
+    }
+
+    private void initSearch() {
+        search.setToolTipText("Search for projects in all gitlab server by project name");
+        search.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent e) {
+                super.keyReleased(e);
+                searchProject(e);
+            }
+        });
+    }
+
 
 
     private void onCancel() {
