@@ -58,7 +58,7 @@ public class GitLabServersDialog extends DialogWrapper {
 
     public GitLabServersDialog(@Nullable Project project, List<GitlabServer> gitlabServerList) {
         super(project, null, true, DialogWrapper.IdeModalityType.IDE, false);
-        setTitle("GitLab");
+        setTitle("GitLab Servers");
         init();
         this.project = project;
         this.gitlabServerList = gitlabServerList;
@@ -223,6 +223,21 @@ public class GitLabServersDialog extends DialogWrapper {
         } else {
             this.gitlabServers.clearSelection();
         }
+    }
+
+
+    private void checkAll(List<GitlabServer> filterServerList) {
+        if (selectedGitlabServerList.size() == gitlabServerList.size()
+                && filterServerList.size() == gitlabServerList.size()) {
+            selectAllCheckBox.setSelected(true);
+        }
+    }
+
+    private void clearSelected() {
+        selectedGitlabServerList.clear();
+        gitlabServers.clearSelection();
+        selectAllCheckBox.setSelected(false);
+        selectedCount.setText("(0 Selected)");
     }
 
     private void onCancel() {
