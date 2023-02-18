@@ -217,7 +217,7 @@ public class GitLabServersDialog extends DialogWrapper {
     }
 
     private void setSelectedCount() {
-//        selectedCount.setText(String.format("(%s Selected)", selectedCount.size()));
+        selectedCount.setText(String.format("(%s Selected)", selectedGitlabServerList.size()));
     }
 
     private List<GitlabServer> filterServersByProject(String searchWord) {
