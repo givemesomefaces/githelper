@@ -120,6 +120,8 @@ public class GitLabServersDialog extends DialogWrapper {
     private void bottomButtonState() {
         if (CollectionUtil.isEmpty(gitlabServerList) || CollectionUtil.isEmpty(selectedGitlabServerList)) {
             okButton.setEnabled(false);
+        } else {
+            okButton.setEnabled(true);
         }
     }
 
@@ -138,7 +140,7 @@ public class GitLabServersDialog extends DialogWrapper {
                                 .stream()
                                 .filter(o -> !indicator.isCanceled())
                                 .map(o -> {
-                                    indicator.setText2("(" + index.getAndIncrement() + "/" + gitlabServers.size() + ") " + o.getRepositoryUrl());
+                                    indicator.setText2("(" + index.getAndIncrement() + "/" + selectedGitlabServerList.size() + ") " + o.getRepositoryUrl());
                                     return gitLabSettingsState.loadMapOfServersAndProjects(Lists.newArrayList(o)).values();
                                 }).flatMap(Collection::stream)
                                 .flatMap(Collection::stream)
@@ -152,6 +154,7 @@ public class GitLabServersDialog extends DialogWrapper {
                     @Override
                     public void onSuccess() {
                         super.onSuccess();
+                        dispose();
                         if (CollectionUtil.isNotEmpty(projectDtoList)) {
                             new GitLabDialog(project, projectDtoList).showAndGet();
                         }
@@ -169,17 +172,17 @@ public class GitLabServersDialog extends DialogWrapper {
     }
 
     private void initSearch() {
-        search.setToolTipText("Search for projects in all gitlab server by project name");
+        search.setToolTipText("Search for Gitlab server by domain keyword");
         search.addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent e) {
                 super.keyReleased(e);
-                searchProject(e);
+                searchServer(e);
             }
         });
     }
 
-    private void searchProject(KeyEvent e) {
+    private void searchServer(KeyEvent e) {
         String searchWord = ((JTextField) e.getSource()).getText();
 
         initServerList(filterServersByProject(searchWord));
@@ -214,7 +217,7 @@ public class GitLabServersDialog extends DialogWrapper {
     }
 
     private void setSelectedCount() {
-        selectedCount.setText(String.format("(%s Selected)", selectedCount.size()));
+//        selectedCount.setText(String.format("(%s Selected)", selectedCount.size()));
     }
 
     private List<GitlabServer> filterServersByProject(String searchWord) {
@@ -250,8 +253,8 @@ public class GitLabServersDialog extends DialogWrapper {
                 } else {
                     super.addSelectionInterval(index0, index1);
                     selectedGitlabServerList.add(gitlabServerList.get(index0));
-                    checkAll(gitlabServerList);
                 }
+                checkAll(filterGitLabServerList);
                 setSelectedCount();
                 bottomButtonState();
             }
@@ -272,6 +275,8 @@ public class GitLabServersDialog extends DialogWrapper {
         if (selectedGitlabServerList.size() == gitlabServerList.size()
                 && filterServerList.size() == gitlabServerList.size()) {
             selectAllCheckBox.setSelected(true);
+        } else {
+            selectAllCheckBox.setSelected(false);
         }
     }
 
