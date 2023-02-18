@@ -62,6 +62,7 @@ public class GitLabServersDialog extends DialogWrapper {
         init();
         this.project = project;
         this.gitlabServerList = gitlabServerList;
+        this.createSouthPanel().setVisible(false);
         getProjectListAndSortByName();
         initSearch();
         initServerList(filterServersByProject(null));

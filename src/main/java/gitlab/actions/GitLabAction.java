@@ -14,6 +14,7 @@ import gitlab.bean.ProjectDto;
 import gitlab.settings.GitLabSettingsState;
 import gitlab.settings.SettingsView;
 import gitlab.ui.GitLabDialog;
+import gitlab.ui.GitLabServersDialog;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -42,6 +43,10 @@ public class GitLabAction extends AnAction {
             }
         }
 
+    }
+
+    private void showSettingsDialog(Project project, GitLabSettingsState gitLabSettingsState) {
+        new GitLabServersDialog(project, gitLabSettingsState.getGitlabServers()).showAndGet();
     }
 
     private void showGitLabDialog(Project project, GitLabSettingsState gitLabSettingsState) {
