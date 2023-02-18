@@ -1,11 +1,18 @@
 package gitlab.ui;
 
 import cn.hutool.core.collection.CollectionUtil;
+import com.google.common.collect.Lists;
 import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.progress.ProgressIndicator;
+import com.intellij.openapi.progress.ProgressManager;
+import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import gitlab.bean.GitlabServer;
+import gitlab.bean.ProjectDto;
+import gitlab.settings.GitLabSettingsState;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import window.LcheckBox;
 
@@ -18,11 +25,13 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import static gitlab.common.Constants.NAME_SPLIT_SYMBOL;
@@ -54,16 +63,19 @@ public class GitLabServersDialog extends DialogWrapper {
     private Set<GitlabServer> selectedGitlabServerList = new HashSet<>();
     private Project project;
 
+    private GitLabSettingsState gitLabSettingsState;
+
     private List<GitlabServer> filterGitLabServerList = new ArrayList<>();
 
-    public GitLabServersDialog(@Nullable Project project, List<GitlabServer> gitlabServerList) {
+    public GitLabServersDialog(@Nullable Project project, GitLabSettingsState gitLabSettingsState) {
         super(project, null, true, DialogWrapper.IdeModalityType.IDE, false);
         setTitle("GitLab Servers");
         init();
         this.project = project;
-        this.gitlabServerList = gitlabServerList;
+        this.gitLabSettingsState = gitLabSettingsState;
+        this.gitlabServerList = gitLabSettingsState.getGitlabServers();
         this.createSouthPanel().setVisible(false);
-        getProjectListAndSortByName();
+        getServerListAndSortByName();
         initSearch();
         initServerList(filterServersByProject(null));
         initSelectAllCheckBox();
@@ -76,7 +88,7 @@ public class GitLabServersDialog extends DialogWrapper {
         return contentPane;
     }
 
-    private void getProjectListAndSortByName() {
+    private void getServerListAndSortByName() {
         unEnableBottomButton();
         unEnableOtherButtonWhenLoadingData();
         if (CollectionUtil.isEmpty(gitlabServerList)) {
@@ -115,7 +127,36 @@ public class GitLabServersDialog extends DialogWrapper {
         okButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                // TODO
+                ProgressManager.getInstance().run(new Task.Modal(project, "GitLab", true) {
+                    List<ProjectDto> projectDtoList = new ArrayList<>();
+
+                    @Override
+                    public void run(@NotNull ProgressIndicator indicator) {
+                        indicator.setText("Loading projects...");
+                        AtomicInteger index = new AtomicInteger(1);
+                        projectDtoList = selectedGitlabServerList
+                                .stream()
+                                .filter(o -> !indicator.isCanceled())
+                                .map(o -> {
+                                    indicator.setText2("(" + index.getAndIncrement() + "/" + gitlabServers.size() + ") " + o.getRepositoryUrl());
+                                    return gitLabSettingsState.loadMapOfServersAndProjects(Lists.newArrayList(o)).values();
+                                }).flatMap(Collection::stream)
+                                .flatMap(Collection::stream)
+                                .collect(Collectors.toList());
+                        if (CollectionUtil.isEmpty(projectDtoList)) {
+                            return;
+                        }
+                        indicator.setText("Projects loaded");
+                    }
+
+                    @Override
+                    public void onSuccess() {
+                        super.onSuccess();
+                        if (CollectionUtil.isNotEmpty(projectDtoList)) {
+                            new GitLabDialog(project, projectDtoList).showAndGet();
+                        }
+                    }
+                });
             }
         });
         cancelButton.addActionListener(new ActionListener() {

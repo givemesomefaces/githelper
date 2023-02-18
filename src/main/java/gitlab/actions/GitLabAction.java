@@ -46,7 +46,7 @@ public class GitLabAction extends AnAction {
     }
 
     private void showSettingsDialog(Project project, GitLabSettingsState gitLabSettingsState) {
-        new GitLabServersDialog(project, gitLabSettingsState.getGitlabServers()).showAndGet();
+        new GitLabServersDialog(project, gitLabSettingsState).showAndGet();
     }
 
     private void showGitLabDialog(Project project, GitLabSettingsState gitLabSettingsState) {
