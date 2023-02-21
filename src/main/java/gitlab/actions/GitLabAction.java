@@ -35,11 +35,11 @@ public class GitLabAction extends AnAction {
         Project project = e.getRequiredData(CommonDataKeys.PROJECT);
         GitLabSettingsState gitLabSettingsState = GitLabSettingsState.getInstance();
         if (gitLabSettingsState.hasSettings()) {
-            showGitLabDialog(project, gitLabSettingsState);
+            showSettingsDialog(project, gitLabSettingsState);
         } else {
             boolean b = new SettingsView(null).showAndGet();
             if (gitLabSettingsState.hasSettings()) {
-                showGitLabDialog(project, gitLabSettingsState);
+                showSettingsDialog(project, gitLabSettingsState);
             }
         }
 
