@@ -14,6 +14,7 @@ import gitlab.bean.ProjectDto;
 import gitlab.settings.GitLabSettingsState;
 import gitlab.settings.SettingsView;
 import gitlab.ui.GitLabDialogV2;
+import gitlab.ui.GitLabServersDialog;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -34,14 +35,18 @@ public class GitLabV2Action extends AnAction {
         Project project = e.getRequiredData(CommonDataKeys.PROJECT);
         GitLabSettingsState gitLabSettingsState = GitLabSettingsState.getInstance();
         if (gitLabSettingsState.hasSettings()) {
-            showGitLabDialog(project, gitLabSettingsState);
+            showSettingsDialog(project, gitLabSettingsState);
         } else {
             boolean b = new SettingsView(null).showAndGet();
             if (gitLabSettingsState.hasSettings()) {
-                showGitLabDialog(project, gitLabSettingsState);
+                showSettingsDialog(project, gitLabSettingsState);
             }
         }
 
+    }
+
+    private void showSettingsDialog(Project project, GitLabSettingsState gitLabSettingsState) {
+        new GitLabServersDialog(project, gitLabSettingsState).showAndGet();
     }
 
     private void showGitLabDialog(Project project, GitLabSettingsState gitLabSettingsState) {
