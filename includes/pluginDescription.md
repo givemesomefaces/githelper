@@ -1,4 +1,4 @@
-### GitHelper is a JetBrains IDE plugin, such as IntelliJ IDEA, that allows for Git or GitLab operations on multiple repositories simultaneously.
+### GitHelper is a plugin for JetBrains IDEs, such as IntelliJ IDEA, that enables Git or GitLab operations on multiple repositories simultaneously.
 ### Features:
 
 - Supports checking out the same branch for multiple local or remote repositories simultaneously.
