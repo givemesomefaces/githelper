@@ -5,6 +5,8 @@
 <!--- ![Build](https://github.com/Lv-lifeng/GitHelper/workflows/Build/badge.svg) --->
 [![Version](https://img.shields.io/jetbrains/plugin/v/18328.svg)](https://plugins.jetbrains.com/plugin/18328)
 [![Downloads](https://img.shields.io/jetbrains/plugin/d/18328.svg)](https://plugins.jetbrains.com/plugin/18328)
+![](https://komarev.com/ghpvc/?username=itisokey-githelper&color=orange&style=flat&label=pv)
+
 
 <!-- Plugin description -->
 ### GitHelper is a JetBrains IDE plugin, such as IntelliJ IDEA, that allows for Git or GitLab operations on multiple repositories simultaneously.
