@@ -156,7 +156,7 @@ public class GitLabServersDialog extends DialogWrapper {
                         super.onSuccess();
                         dispose();
                         if (CollectionUtil.isNotEmpty(projectDtoList)) {
-                            new GitLabDialog(project, projectDtoList).showAndGet();
+                            new GitLabDialogV2(project, projectDtoList).showAndGet();
                         }
                     }
                 });

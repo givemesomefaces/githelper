@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
  * @author Lv LiFeng
  * @date 2022/1/6 20:10
  */
-public class GitLabV2Action extends AnAction {
+public class GitLabActionV2 extends AnAction {
 
     @Override
     public void actionPerformed(AnActionEvent e) {
