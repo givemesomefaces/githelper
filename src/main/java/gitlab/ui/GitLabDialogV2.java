@@ -87,9 +87,10 @@ public class GitLabDialogV2 extends DialogWrapper {
         setTitle("GitLab");
         init();
         this.project = project;
-        this.serverProjectsMap = projectDtoList.stream().collect(Collectors.groupingBy(ProjectDto::getGitlabServerName));
+        this.serverProjectsMap = projectDtoList.stream().collect(Collectors.groupingBy(ProjectDto::getGitlabServerRepositoryUrl));
         this.projectDtoList = projectDtoList;
         this.selectedGitlabServerList = new ArrayList<>(selectedGitlabServerList);
+        this.selectedGitRemoteServerList = selectedGitlabServerList.stream().map(GitlabServer::getRepositoryUrl).collect(Collectors.toList());
         initAll();
         initGitLabServerList();
     }
