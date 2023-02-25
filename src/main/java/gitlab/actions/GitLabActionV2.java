@@ -77,7 +77,7 @@ public class GitLabActionV2 extends AnAction {
             public void onSuccess() {
                 super.onSuccess();
                 if (CollectionUtil.isNotEmpty(projectDtoList)) {
-                    new GitLabDialogV2(project, projectDtoList).showAndGet();
+                    new GitLabDialogV2(project, projectDtoList, null).showAndGet();
                 }
             }
         });

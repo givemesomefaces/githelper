@@ -80,13 +80,16 @@ public class GitLabDialogV2 extends DialogWrapper {
 
     private Map<String, List<ProjectDto>> serverProjectsMap = null;
 
-    public GitLabDialogV2(@Nullable Project project, List<ProjectDto> projectDtoList) {
+    private List<GitlabServer> selectedGitlabServerList;
+
+    public GitLabDialogV2(@Nullable Project project, List<ProjectDto> projectDtoList, Set<GitlabServer> selectedGitlabServerList) {
         super(project, null, true, DialogWrapper.IdeModalityType.IDE, false);
         setTitle("GitLab");
         init();
         this.project = project;
         this.serverProjectsMap = projectDtoList.stream().collect(Collectors.groupingBy(ProjectDto::getGitlabServerName));
         this.projectDtoList = projectDtoList;
+        this.selectedGitlabServerList = new ArrayList<>(selectedGitlabServerList);
         initAll();
         initGitLabServerList();
     }
@@ -102,17 +105,17 @@ public class GitLabDialogV2 extends DialogWrapper {
     }
 
     private void initGitLabServerList() {
-        List<GitlabServer> gitlabServerList = gitLabSettingsState.getGitlabServers();
-        if (CollectionUtil.isEmpty(gitlabServerList)) {
+        if (CollectionUtil.isEmpty(selectedGitlabServerList)) {
+            gitRemoteServerList.setEnabled(false);
             return;
         }
-        this.gitRemoteServerList.setListData(gitlabServerList.toArray());
+        this.gitRemoteServerList.setListData(selectedGitlabServerList.toArray());
         this.gitRemoteServerList.setCellRenderer(new LcheckBox());
         this.gitRemoteServerList.setEnabled(true);
         this.gitRemoteServerList.setSelectionModel(new DefaultListSelectionModel() {
             @Override
             public void setSelectionInterval(int index0, int index1) {
-                GitlabServer gitlabServer = gitlabServerList.get(index0);
+                GitlabServer gitlabServer = selectedGitlabServerList.get(index0);
                 if (super.isSelectedIndex(index0)) {
                     super.removeSelectionInterval(index0, index1);
                     selectedGitRemoteServerList.remove(gitlabServer.getRepositoryUrl());
@@ -126,7 +129,7 @@ public class GitLabDialogV2 extends DialogWrapper {
                 initAll();
             }
         });
-        this.gitRemoteServerList.addSelectionInterval(0, gitlabServerList.size());
+        this.gitRemoteServerList.addSelectionInterval(0, selectedGitlabServerList.size());
     }
 
     @Override
