@@ -78,7 +78,7 @@ public class CloneDialog extends DialogWrapper {
         VirtualFile finalDestinationParent = destinationParent;
         checkoutListener = ProjectLevelVcsManager.getInstance(project).getCompositeCheckoutListener();
         StringBuilder info = new StringBuilder();
-        selectedProjectList.stream().forEach(s -> {
+        selectedProjectList.forEach(s -> {
             GitCheckoutProvider.clone(project, Git.getInstance(), checkoutListener, finalDestinationParent,
                     s.getSshUrl(), s.getName(), directory.getText());
             info.append(s.getName() + " " + s.getSshUrl() + " clone successfully!").append("\n");
