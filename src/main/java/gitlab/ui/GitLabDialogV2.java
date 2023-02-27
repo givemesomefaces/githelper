@@ -67,6 +67,7 @@ public class GitLabDialogV2 extends DialogWrapper {
     private JButton mergeButton;
     private JButton tagButton;
     private JList gitRemoteServerList;
+    private JPanel gitlabServerListJpanel;
 
     private List<String> selectedGitRemoteServerList = new ArrayList<>();
 
@@ -97,7 +98,7 @@ public class GitLabDialogV2 extends DialogWrapper {
 
     private void initAll() {
         getProjectListAndSortByName();
-        initSerach();
+        initSearch();
         initRadioButton();
         initProjectList(filterProjectsByProject(null));
         initSelectAllCheckBox();
@@ -106,8 +107,8 @@ public class GitLabDialogV2 extends DialogWrapper {
     }
 
     private void initGitLabServerList() {
-        if (CollectionUtil.isEmpty(selectedGitlabServerList)) {
-            gitRemoteServerList.setEnabled(false);
+        if (CollectionUtil.isEmpty(selectedGitlabServerList) || selectedGitlabServerList.size() == 1) {
+            gitlabServerListJpanel.setVisible(false);
             return;
         }
         this.gitRemoteServerList.setListData(selectedGitlabServerList.toArray());
@@ -394,7 +395,7 @@ public class GitLabDialogV2 extends DialogWrapper {
         });
     }
 
-    private void initSerach() {
+    private void initSearch() {
         search.setToolTipText("Search for projects in all gitlab server by project name");
         search.addKeyListener(new KeyAdapter() {
             @Override
