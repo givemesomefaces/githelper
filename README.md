@@ -9,8 +9,8 @@
 
 
 <!-- Plugin description -->
-### GitHelper is a plugin for JetBrains IDEs, such as IntelliJ IDEA, that enables Git or GitLab operations on multiple repositories simultaneously.
-### Features:
+## GitHelper is a plugin for JetBrains IDEs, such as IntelliJ IDEA, that enables Git or GitLab operations on multiple repositories simultaneously.
+## Features:
 
 - Supports checking out the same branch for multiple local or remote repositories simultaneously.
 - Supports deleting branches for multiple local or remote repositories simultaneously.
@@ -20,15 +20,15 @@
 - Supports merging Gitlab merge requests for multiple repositories simultaneously.
 - Supports tagging multiple GitLab repositories with the same tag simultaneously.
 
-#### Git operation in right toolwindow is called GitHelper.
-#### GitLab operation:
+### Git operation in right toolwindow is called GitHelper.
+### GitLab operation:
 1. Configure Gitlab server in Settings -> Version Control -> GitLab.
 2. Use batch operations in top menu Git -> GitLab.
 3. Or in git menu of right mouse button.[Create Merge Request..., Merge Request...],supports select multiple projects.
 
+---
 
-
-### 功能:
+## 功能:
 
 - 支持从本地、远程同时为多个项目checkout同一分支。
 - 支持从本地、远程同时为多个项目删除同一分支。
@@ -38,8 +38,8 @@
 - 支持同时合并多个项目的GitLab合并请求。
 - 支持同时为多个Gitlab项目创建相同的标签。
 
-#### Git批操作在右侧菜单GitHelper中
-#### GitLab操作:
+### Git批操作在右侧菜单GitHelper中
+### GitLab操作:
 
 1. 在Settings -> Version Control-> GitLab中配置
 2. 顶部菜单Git -> GitLab中使用
