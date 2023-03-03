@@ -26,7 +26,6 @@ import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -57,11 +56,11 @@ public class GitLabServersDialog extends DialogWrapper {
 
     private JLabel selectedCount;
 
-    private List<GitlabServer> gitlabServerList;
-    private Set<GitlabServer> selectedGitlabServerList = new HashSet<>();
-    private Project project;
+    private final List<GitlabServer> gitlabServerList;
+    private final Set<GitlabServer> selectedGitlabServerList = new HashSet<>();
+    private final Project project;
 
-    private GitLabSettingsState gitLabSettingsState;
+    private final GitLabSettingsState gitLabSettingsState;
 
     private List<GitlabServer> filterGitLabServerList = new ArrayList<>();
 
@@ -94,12 +93,7 @@ public class GitLabServersDialog extends DialogWrapper {
         }
         enableOtherButtonAfterLoadingData();
         bottomButtonState();
-        Collections.sort(gitlabServerList, new Comparator<GitlabServer>() {
-            @Override
-            public int compare(GitlabServer o1, GitlabServer o2) {
-                return StringUtils.compareIgnoreCase(o1.getRepositoryUrl(), o2.getRepositoryUrl());
-            }
-        });
+        gitlabServerList.sort(Comparator.comparing(GitlabServer::getRepositoryUrl));
         initServerList(filterServersByProject(null));
     }
 
@@ -205,7 +199,7 @@ public class GitLabServersDialog extends DialogWrapper {
                     selectedGitlabServerList.addAll(filterGitLabServerList);
                     gitlabServers.addSelectionInterval(0, filterGitLabServerList.size());
                 } else {
-                    selectedGitlabServerList.removeAll(filterGitLabServerList);
+                    filterGitLabServerList.forEach(selectedGitlabServerList::remove);
                     gitlabServers.clearSelection();
                 }
                 setSelectedCount();
@@ -259,7 +253,7 @@ public class GitLabServersDialog extends DialogWrapper {
         });
         if (CollectionUtil.isNotEmpty(selectedGitlabServerList)) {
             this.gitlabServers.setSelectedIndices(selectedGitlabServerList.stream()
-                    .map(o -> gitlabServerList.indexOf(o))
+                    .map(gitlabServerList::indexOf)
                     .mapToInt(Integer::valueOf)
                     .toArray());
             checkAll(gitlabServerList);
