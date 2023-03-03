@@ -29,7 +29,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -58,16 +57,16 @@ public class MergeDialog extends DialogWrapper {
     private JButton closeButton;
     private JButton mergeButton;
     private JCheckBox backgroudCheckBox;
-    private Set<MergeRequest> selectedMergeRequests = new HashSet<>();
-    private SelectedProjectDto selectedProjectDto;
+    private final Set<MergeRequest> selectedMergeRequests = new HashSet<>();
+    private final SelectedProjectDto selectedProjectDto;
     private List<MergeRequest> filterMergeRequest;
-    private List<MergeRequest> gitlabMergeRequests;
-    private Set<String> allSourcebranch;
-    private Set<String> allTargebranch;
+    private final List<MergeRequest> gitlabMergeRequests;
+    private final Project project;
+    private Set<String> allSourceBranches;
     private Set<String> allMergeStatus;
     private String inputSourceBranch = null;
     private String inputTargetBranch = null;
-    private Project project;
+    private Set<String> allTargetBranches;
 
     public MergeDialog(Project project, SelectedProjectDto selectedProjectDto, List<MergeRequest> gitlabMergeRequests) {
         super(null, null, true, IdeModalityType.IDE, false);
@@ -104,19 +103,15 @@ public class MergeDialog extends DialogWrapper {
             selectAllCheckBox.setEnabled(false);
             return;
         }
-        Collections.sort(gitlabMergeRequests, new Comparator<MergeRequest>() {
-            @Override
-            public int compare(MergeRequest o1, MergeRequest o2) {
-                return StringUtils.compareIgnoreCase(o1.getProjectName(), o2.getProjectName());
-            }
-        });
-        allSourcebranch = gitlabMergeRequests.stream().map(MergeRequest::getSourceBranch).collect(Collectors.toSet());
-        allTargebranch = gitlabMergeRequests.stream().map(MergeRequest::getTargetBranch).collect(Collectors.toSet());
+        gitlabMergeRequests.sort(Comparator.comparing(MergeRequest::getProjectName));
+
+        allSourceBranches = gitlabMergeRequests.stream().map(MergeRequest::getSourceBranch).collect(Collectors.toSet());
+        allTargetBranches = gitlabMergeRequests.stream().map(MergeRequest::getTargetBranch).collect(Collectors.toSet());
         allMergeStatus = gitlabMergeRequests.stream().map(MergeRequest::getMergeStatus).collect(Collectors.toSet());
 
-        sourceBranch.setModel(new DefaultComboBoxModel(allSourcebranch.toArray()));
+        sourceBranch.setModel(new DefaultComboBoxModel(allSourceBranches.toArray()));
         sourceBranch.setSelectedIndex(-1);
-        targetBranch.setModel(new DefaultComboBoxModel(allTargebranch.toArray()));
+        targetBranch.setModel(new DefaultComboBoxModel(allTargetBranches.toArray()));
         targetBranch.setSelectedIndex(-1);
         status.setModel(new DefaultComboBoxModel(allMergeStatus.toArray()));
         status.insertItemAt("all", 0);
@@ -145,7 +140,7 @@ public class MergeDialog extends DialogWrapper {
                 super.keyReleased(e);
                 JTextField textField = (JTextField) e.getSource();
                 String text = textField.getText();
-                sourceBranch.setModel(new DefaultComboBoxModel(searchBranch(text, allSourcebranch).toArray()));
+                sourceBranch.setModel(new DefaultComboBoxModel(searchBranch(text, allSourceBranches).toArray()));
                 sourceBranch.setSelectedItem(null);
                 textField.setText(text);
                 sourceBranch.showPopup();
@@ -166,7 +161,7 @@ public class MergeDialog extends DialogWrapper {
                 super.keyReleased(e);
                 JTextField textField = (JTextField) e.getSource();
                 String text = textField.getText();
-                targetBranch.setModel(new DefaultComboBoxModel(searchBranch(text, allTargebranch).toArray()));
+                targetBranch.setModel(new DefaultComboBoxModel(searchBranch(text, allTargetBranches).toArray()));
                 targetBranch.setSelectedItem(null);
                 textField.setText(text);
                 targetBranch.showPopup();
@@ -350,7 +345,7 @@ public class MergeDialog extends DialogWrapper {
                     selectedMergeRequests.addAll(filterMergeRequest);
                     mergeRequestList.setSelectionInterval(0, filterMergeRequest.size());
                 } else {
-                    selectedMergeRequests.removeAll(filterMergeRequest);
+                    filterMergeRequest.forEach(selectedMergeRequests::remove);
                     mergeRequestList.clearSelection();
                 }
                 setSelectedCount();
