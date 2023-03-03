@@ -1,6 +1,7 @@
 package gitlab.ui;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.CollectionUtil;
 import com.github.lvlifeng.githelper.Bundle;
 import com.intellij.openapi.diagnostic.Logger;
@@ -18,7 +19,6 @@ import gitlab.bean.MergeRequest;
 import gitlab.bean.ProjectDto;
 import gitlab.bean.SelectedProjectDto;
 import gitlab.bean.User;
-import gitlab.helper.RepositoryHelper;
 import gitlab.helper.UsersHelper;
 import gitlab.settings.GitLabSettingsState;
 import org.apache.commons.compress.utils.Lists;
@@ -41,7 +41,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -69,19 +68,19 @@ public class GitLabDialogV2 extends DialogWrapper {
     private JList gitRemoteServerList;
     private JPanel gitlabServerListJpanel;
 
-    private List<String> selectedGitRemoteServerList = new ArrayList<>();
+    private final List<String> selectedGitRemoteServerList;
 
-    private GitLabSettingsState gitLabSettingsState = GitLabSettingsState.getInstance();
+    private final GitLabSettingsState gitLabSettingsState = GitLabSettingsState.getInstance();
     private List<ProjectDto> projectDtoList;
     private List<ProjectDto> projectDtoListByBranch = new ArrayList<>();
-    private Set<ProjectDto> selectedProjectList = new HashSet<>();
-    private Project project;
+    private final Set<ProjectDto> selectedProjectList = new HashSet<>();
+    private final Project project;
 
     private List<ProjectDto> filterProjectList = new ArrayList<>();
 
-    private Map<String, List<ProjectDto>> serverProjectsMap = null;
+    private final Map<String, List<ProjectDto>> serverProjectsMap;
 
-    private List<GitlabServer> selectedGitlabServerList;
+    private final List<GitlabServer> selectedGitlabServerList;
 
     public GitLabDialogV2(@Nullable Project project, List<ProjectDto> projectDtoList, Set<GitlabServer> selectedGitlabServerList) {
         super(project, null, true, DialogWrapper.IdeModalityType.IDE, false);
@@ -90,8 +89,8 @@ public class GitLabDialogV2 extends DialogWrapper {
         this.project = project;
         this.serverProjectsMap = projectDtoList.stream().collect(Collectors.groupingBy(ProjectDto::getGitlabServerRepositoryUrl));
         this.projectDtoList = projectDtoList;
-        this.selectedGitlabServerList = new ArrayList<>(selectedGitlabServerList);
-        this.selectedGitRemoteServerList = selectedGitlabServerList.stream().map(GitlabServer::getRepositoryUrl).collect(Collectors.toList());
+        this.selectedGitlabServerList = CollUtil.isNotEmpty(selectedGitlabServerList) ? new ArrayList<>(selectedGitlabServerList) : Lists.newArrayList()
+        this.selectedGitRemoteServerList = CollUtil.isNotEmpty(selectedGitlabServerList) ? selectedGitlabServerList.stream().map(GitlabServer::getRepositoryUrl).collect(Collectors.toList()) : Lists.newArrayList();
         initAll();
         initGitLabServerList();
     }
@@ -147,12 +146,7 @@ public class GitLabDialogV2 extends DialogWrapper {
         }
         enableOtherButtonAfterLoadingData();
         bottomButtonState();
-        Collections.sort(projectDtoList, new Comparator<ProjectDto>() {
-            @Override
-            public int compare(ProjectDto o1, ProjectDto o2) {
-                return StringUtils.compareIgnoreCase(o1.getName(), o2.getName());
-            }
-        });
+        projectDtoList.sort(Comparator.comparing(ProjectDto::getName));
         initProjectList(filterProjectsByProject(null));
     }
 
@@ -282,7 +276,7 @@ public class GitLabDialogV2 extends DialogWrapper {
                                 })
                                 .collect(Collectors.toList())
                                 .stream()
-                                .reduce((a, b) -> CollectionUtil.intersectionDistinct(a, b).stream().collect(Collectors.toList()))
+                                .reduce((a, b) -> new ArrayList<>(CollectionUtil.intersectionDistinct(a, b)))
                                 .orElse(Lists.newArrayList());
                         commonBranch.stream().sorted(String::compareToIgnoreCase);
                         if (CollectionUtil.isEmpty(commonBranch)) {
@@ -329,7 +323,7 @@ public class GitLabDialogV2 extends DialogWrapper {
                         indicator.setText("Loading common branches");
                         AtomicInteger indexBranch = new AtomicInteger(1);
                         commonFrom = new ArrayList<>();
-                        List<String> commonBranch = selectedProjectList.stream()
+                        List<String> commonBranches = selectedProjectList.stream()
                                 .filter(o -> !indicator.isCanceled())
                                 .map(o -> {
                                     indicator.setText2("(" + indexBranch.getAndIncrement() + "/" + selectedProjectList.size() + ") " + o.getName());
@@ -341,15 +335,15 @@ public class GitLabDialogV2 extends DialogWrapper {
                                 })
                                 .collect(Collectors.toList())
                                 .stream()
-                                .reduce((a, b) -> CollectionUtil.intersectionDistinct(a, b).stream().collect(Collectors.toList()))
+                                .reduce((a, b) -> new ArrayList<>(CollectionUtil.intersectionDistinct(a, b)))
                                 .orElse(Lists.newArrayList());
-                        commonBranch.stream().sorted(String::compareToIgnoreCase);
+                        commonBranches.sort(String::compareToIgnoreCase);
                         if (indicator.isCanceled()) {
                             return;
                         }
                         indicator.setText("Loading common tags");
                         AtomicInteger indexTag = new AtomicInteger(1);
-                        List<String> commonTag = selectedProjectList.stream()
+                        List<String> commonTags = selectedProjectList.stream()
                                 .filter(o -> !indicator.isCanceled())
                                 .map(o -> {
                                     indicator.setText2("(" + indexTag.getAndIncrement() + "/" + selectedProjectList.size() + ") " + o.getName());
@@ -361,14 +355,14 @@ public class GitLabDialogV2 extends DialogWrapper {
                                 })
                                 .collect(Collectors.toList())
                                 .stream()
-                                .reduce((a, b) -> CollectionUtil.intersectionDistinct(a, b).stream().collect(Collectors.toList()))
+                                .reduce((a, b) -> new ArrayList<>(CollectionUtil.intersectionDistinct(a, b)))
                                 .orElse(Lists.newArrayList());
-                        commonTag.stream().sorted(String::compareToIgnoreCase);
-                        if (CollectionUtil.isNotEmpty(commonBranch)) {
-                            commonFrom.addAll(commonBranch);
+                        commonTags.sort(String::compareToIgnoreCase);
+                        if (CollectionUtil.isNotEmpty(commonBranches)) {
+                            commonFrom.addAll(commonBranches);
                         }
-                        if (CollectionUtil.isNotEmpty(commonTag)) {
-                            commonFrom.addAll(commonTag);
+                        if (CollectionUtil.isNotEmpty(commonTags)) {
+                            commonFrom.addAll(commonTags);
                         }
                         indicator.setText("Common branches and tags loaded");
                     }
@@ -382,7 +376,7 @@ public class GitLabDialogV2 extends DialogWrapper {
                     public void onSuccess() {
                         super.onSuccess();
                         if (CollectionUtil.isEmpty(commonFrom)) {
-                            Messages.showMessageDialog("No common from, please reselect project!", Bundle.message("createTagDialogTitle"), null);
+                            Messages.showMessageDialog("No common branches or tags, please reselect project!", Bundle.message("createTagDialogTitle"), null);
                             return;
                         }
                         new TagDialog(project, new SelectedProjectDto()
@@ -436,7 +430,7 @@ public class GitLabDialogV2 extends DialogWrapper {
                     selectedProjectList.addAll(filterProjectList);
                     projectList.addSelectionInterval(0, filterProjectList.size());
                 } else {
-                    selectedProjectList.removeAll(filterProjectList);
+                    filterProjectList.forEach(selectedProjectList::remove);
                     projectList.clearSelection();
                 }
                 setSelectedCount();
@@ -490,7 +484,7 @@ public class GitLabDialogV2 extends DialogWrapper {
         });
         if (CollectionUtil.isNotEmpty(selectedProjectList)) {
             this.projectList.setSelectedIndices(selectedProjectList.stream()
-                    .map(o -> projectList.indexOf(o))
+                    .map(projectList::indexOf)
                     .mapToInt(Integer::valueOf)
                     .toArray());
             checkAll(projectList);
@@ -566,8 +560,8 @@ public class GitLabDialogV2 extends DialogWrapper {
     }
 
     private List<ProjectDto> filterProjectListByBranch(String searchWord) {
-        List<GitRepository> repositories = GitUtil.getRepositories(project).stream().collect(Collectors.toList());
-        RepositoryHelper.sortRepositoriesByName(repositories);
+        List<GitRepository> repositories = new ArrayList<>(GitUtil.getRepositories(project));
+        repositories.sort(Comparator.comparing(o -> o.getRoot().getName()));
         projectDtoListByBranch = projectDtoList.stream()
                 .filter(o -> repositories.stream()
                         .map(GitRepository::getRoot)
