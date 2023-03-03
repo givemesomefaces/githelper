@@ -39,9 +39,9 @@ public class CloneDialog extends DialogWrapper {
     private JPanel clonePane;
     private JTextField directory;
     private JLabel directoryButton;
-    private Set<ProjectDto> selectedProjectList;
+    private final Set<ProjectDto> selectedProjectList;
     private CheckoutProvider.Listener checkoutListener;
-    private Project project;
+    private final Project project;
     private VirtualFile destinationParent;
 
     protected CloneDialog(Project project, Set<ProjectDto> selectedProjectList) {
@@ -81,7 +81,7 @@ public class CloneDialog extends DialogWrapper {
         selectedProjectList.forEach(s -> {
             GitCheckoutProvider.clone(project, Git.getInstance(), checkoutListener, finalDestinationParent,
                     s.getSshUrl(), s.getName(), directory.getText());
-            info.append(s.getName() + " " + s.getSshUrl() + " clone successfully!").append("\n");
+            info.append(s.getName()).append(" ").append(s.getSshUrl()).append(" clone successfully!").append("\n");
         });
         Notifier.notify(project, info, null, null);
     }
