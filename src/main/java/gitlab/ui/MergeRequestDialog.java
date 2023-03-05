@@ -78,7 +78,7 @@ public class MergeRequestDialog extends DialogWrapper {
     @Override
     protected void init() {
         super.init();
-        sortDatas();
+        sortData();
         sourceBranch.setModel(new DefaultComboBoxModel(commonBranch.toArray()));
         sourceBranch.setSelectedIndex(-1);
         targetBranch.setModel(new DefaultComboBoxModel(commonBranch.toArray()));
@@ -128,13 +128,8 @@ public class MergeRequestDialog extends DialogWrapper {
         });
     }
 
-    private void sortDatas() {
-        CollectionUtil.sort(commonBranch, new Comparator<String>() {
-            @Override
-            public int compare(String o1, String o2) {
-                return StringUtils.compareIgnoreCase(o1, o2);
-            }
-        });
+    private void sortData() {
+        commonBranch.sort(Comparator.comparing(String::toLowerCase));
         CollectionUtil.sort(users, new Comparator<User>() {
             @Override
             public int compare(User o1, User o2) {

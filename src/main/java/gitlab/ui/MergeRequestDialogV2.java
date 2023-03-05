@@ -53,20 +53,20 @@ public class MergeRequestDialogV2 extends DialogWrapper {
     private JTextField description;
     private JTextField mergeTitle;
     private JLabel assign2me;
-    private JCheckBox backgroudCheckBox;
+    private final SelectedProjectDto selectedProjectDto;
     private JCheckBox jumpToMergeMenuCheckBox;
-    private SelectedProjectDto selectedProjectDto;
-    private Project project;
-    private List<String> commonBranch;
-    private List<User> currentUser;
-    private Set<User> users;
+    private final Project project;
+    private final List<String> commonBranches;
+    private final List<User> currentUser;
+    private final Set<User> users;
+    private JCheckBox backgroundCheckBox;
 
-    public MergeRequestDialogV2(Project project, SelectedProjectDto selectedProjectDto, List<String> commonBranch, List<User> currentUser, Set<User> users) {
+    public MergeRequestDialogV2(Project project, SelectedProjectDto selectedProjectDto, List<String> commonBranches, List<User> currentUser, Set<User> users) {
         super(true);
         this.project = project;
         this.setTitle(Bundle.message("createMergeRequestDialogTitle"));
         this.selectedProjectDto = selectedProjectDto;
-        this.commonBranch = commonBranch;
+        this.commonBranches = commonBranches;
         this.currentUser = currentUser;
         this.users = users;
         init();
@@ -75,8 +75,8 @@ public class MergeRequestDialogV2 extends DialogWrapper {
     @Override
     protected void init() {
         super.init();
-        sortDatas();
-        sourceBranch.setModel(new DefaultComboBoxModel(commonBranch.toArray()));
+        sortData();
+        sourceBranch.setModel(new DefaultComboBoxModel(commonBranches.toArray()));
         sourceBranch.setSelectedIndex(-1);
         targetBranch.addMouseListener(new MouseAdapter() {
             @Override
@@ -85,7 +85,7 @@ public class MergeRequestDialogV2 extends DialogWrapper {
                 if (e.getButton() != 1) {
                     return;
                 }
-                JBList<String> list = new JBList<>(commonBranch.toArray(new String[0]));
+                JBList<String> list = new JBList<>(commonBranches.toArray(new String[0]));
                 JBScrollPane scrollPane = new JBScrollPane(list);
                 scrollPane.setPreferredSize(new Dimension(200, 200));
                 int result = Messages.showDialog(scrollPane, "", "Select Target Branch", new String[]{"OK", "Cancel"}, 0, Messages.getQuestionIcon());
@@ -110,7 +110,7 @@ public class MergeRequestDialogV2 extends DialogWrapper {
                 super.keyReleased(e);
                 JTextField textField = (JTextField) e.getSource();
                 String text = textField.getText();
-                sourceBranch.setModel(new DefaultComboBoxModel(searchBranch(text, commonBranch).toArray()));
+                sourceBranch.setModel(new DefaultComboBoxModel(searchBranch(text, commonBranches).toArray()));
                 textField.setText(text);
                 sourceBranch.showPopup();
             }
@@ -146,13 +146,8 @@ public class MergeRequestDialogV2 extends DialogWrapper {
         });
     }
 
-    private void sortDatas() {
-        CollectionUtil.sort(commonBranch, new Comparator<String>() {
-            @Override
-            public int compare(String o1, String o2) {
-                return StringUtils.compareIgnoreCase(o1, o2);
-            }
-        });
+    private void sortData() {
+        commonBranches.sort(String::compareToIgnoreCase);
         CollectionUtil.sort(users, new Comparator<User>() {
             @Override
             public int compare(User o1, User o2) {
@@ -164,7 +159,7 @@ public class MergeRequestDialogV2 extends DialogWrapper {
     @Override
     protected void doOKAction() {
         super.doOKAction();
-        if (backgroudCheckBox.isSelected()) {
+        if (backgroundCheckBox.isSelected()) {
             ProgressManager.getInstance().run(new Task.Backgroundable(project, Bundle.message("createMergeRequestDialogTitle"), false) {
                 @Override
                 public void run(@NotNull ProgressIndicator indicator) {
@@ -272,8 +267,8 @@ public class MergeRequestDialogV2 extends DialogWrapper {
                             re.setType(OperationTypeEnum.CREATE_MERGE_REQUEST)
                                     .setProjectName(s.getName())
                                     .setChangeFilesCount(mergeRequest.getChangesCount());
-                            info.append("<a href=\"" + re.toString().replace(" [ChangeFiles:\" + getChangeFilesCount() + \"]",
-                                    "") + "\">" + re + "</a>").append("\n");
+                            info.append("<a href=\"").append(re.toString().replace(" [ChangeFiles:\" + getChangeFilesCount() + \"]",
+                                    "")).append("\">").append(re).append("</a>").append("\n");
                             return re;
                         } catch (IOException ioException) {
                             Result re = new Result(new GitlabMergeRequest());
@@ -322,7 +317,7 @@ public class MergeRequestDialogV2 extends DialogWrapper {
         }
         if (sourceBranch.getSelectedItem() != null
                 && StringUtils.isNotBlank(sourceBranch.getSelectedItem().toString())
-                && !commonBranch.contains(sourceBranch.getSelectedItem().toString())) {
+                && !commonBranches.contains(sourceBranch.getSelectedItem().toString())) {
             return new ValidationInfo("This source branch does not exist, please choose again!", sourceBranch);
         }
 //        if (targetBranch.getSelectedItem() == null || StringUtils.isBlank(targetBranch.getSelectedItem().toString())) {
@@ -370,7 +365,7 @@ public class MergeRequestDialogV2 extends DialogWrapper {
         JBList targetList = new JBList();
         targetList.setModel(new DefaultListModel());
         targetList.setCellRenderer(new LcheckBox());
-        targetList.setListData(commonBranch.toArray());
+        targetList.setListData(commonBranches.toArray());
         targetList.setEnabled(true);
         targetList.setSelectionModel(new DefaultListSelectionModel() {
             @Override
@@ -395,7 +390,7 @@ public class MergeRequestDialogV2 extends DialogWrapper {
             @Override
             public void keyReleased(KeyEvent e) {
                 super.keyReleased(e);
-                List<String> searchBranch = searchBranch(searchField.getText(), commonBranch);
+                List<String> searchBranch = searchBranch(searchField.getText(), commonBranches);
                 targetList.setModel(new DefaultListModel());
                 targetList.setListData(searchBranch.toArray());
             }
