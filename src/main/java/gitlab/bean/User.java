@@ -5,6 +5,7 @@ import lombok.Setter;
 import org.gitlab.api.models.GitlabUser;
 
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * @author Lv LiFeng
@@ -26,5 +27,22 @@ public class User extends GitlabUser {
     @Override
     public String toString() {
         return this.getName() + "@" + this.getUsername();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        User user = (User) o;
+        return Objects.equals(this.toString(), user.toString());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.toString());
     }
 }
