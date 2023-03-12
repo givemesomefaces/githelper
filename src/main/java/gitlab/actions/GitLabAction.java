@@ -9,7 +9,7 @@ import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
-import gitlab.bean.GitlabServer;
+import com.github.lvlifeng.githelper.bean.GitlabServer;
 import gitlab.bean.ProjectDto;
 import gitlab.settings.GitLabSettingsState;
 import gitlab.settings.SettingsView;

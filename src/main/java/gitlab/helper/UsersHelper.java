@@ -2,7 +2,7 @@ package gitlab.helper;
 
 import cn.hutool.core.map.MapUtil;
 import com.intellij.openapi.progress.ProgressIndicator;
-import gitlab.bean.GitlabServer;
+import com.github.lvlifeng.githelper.bean.GitlabServer;
 import gitlab.bean.User;
 import gitlab.settings.GitLabSettingsState;
 import org.gitlab.api.models.GitlabUser;

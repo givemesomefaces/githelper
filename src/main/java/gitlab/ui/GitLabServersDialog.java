@@ -8,7 +8,7 @@ import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
-import gitlab.bean.GitlabServer;
+import com.github.lvlifeng.githelper.bean.GitlabServer;
 import gitlab.bean.ProjectDto;
 import gitlab.settings.GitLabSettingsState;
 import org.apache.commons.lang3.StringUtils;

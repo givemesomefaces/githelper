@@ -2,6 +2,7 @@ package gitlab.settings;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollectionUtil;
+import com.github.lvlifeng.githelper.bean.GitlabServer;
 import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.components.State;
@@ -10,7 +11,6 @@ import com.intellij.util.xmlb.XmlSerializerUtil;
 import git4idea.repo.GitRemote;
 import git4idea.repo.GitRepository;
 import gitlab.api.GitlabRestApi;
-import gitlab.bean.GitlabServer;
 import gitlab.bean.ProjectDto;
 import gitlab.common.Notifier;
 import lombok.Getter;

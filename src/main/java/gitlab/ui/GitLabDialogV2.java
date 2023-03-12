@@ -14,7 +14,7 @@ import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.vfs.VirtualFile;
 import git4idea.GitUtil;
 import git4idea.repo.GitRepository;
-import gitlab.bean.GitlabServer;
+import com.github.lvlifeng.githelper.bean.GitlabServer;
 import gitlab.bean.MergeRequest;
 import gitlab.bean.ProjectDto;
 import gitlab.bean.SelectedProjectDto;

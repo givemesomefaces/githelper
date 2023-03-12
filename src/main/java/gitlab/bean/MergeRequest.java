@@ -3,6 +3,7 @@ package gitlab.bean;
 
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateUtil;
+import com.github.lvlifeng.githelper.bean.GitlabServer;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;

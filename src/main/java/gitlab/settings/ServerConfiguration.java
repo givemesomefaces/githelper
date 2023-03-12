@@ -3,7 +3,7 @@ package gitlab.settings;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.ValidationInfo;
 import com.intellij.ui.EnumComboBoxModel;
-import gitlab.bean.GitlabServer;
+import com.github.lvlifeng.githelper.bean.GitlabServer;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.Nullable;
 
