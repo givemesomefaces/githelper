@@ -16,7 +16,7 @@
                 serviceImplementation="gitlab.settings.GitLabSettingsState"/>
         <projectConfigurable id="GitLabConfigurableProvider" provider="gitlab.settings.SettingsConfigurableProvider"
                              parentId="project.propVCSSupport.Mappings" displayName="GitLab"/>
-        <notificationGroup id="GitHelper Notification Group" displayType="BALLOON" key="notification.group.name"/>
+        <notificationGroup id="GitHelper" displayType="BALLOON" key="notification.group.name"/>
     </extensions>
 
     <applicationListeners>
