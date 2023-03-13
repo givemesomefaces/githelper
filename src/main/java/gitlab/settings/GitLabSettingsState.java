@@ -2,7 +2,11 @@ package gitlab.settings;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollectionUtil;
+import com.github.lvlifeng.githelper.Bundle;
 import com.github.lvlifeng.githelper.bean.GitlabServer;
+import com.intellij.notification.NotificationGroupManager;
+import com.intellij.notification.NotificationType;
+import com.intellij.notification.Notifications;
 import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.components.State;
@@ -10,9 +14,9 @@ import com.intellij.openapi.components.Storage;
 import com.intellij.util.xmlb.XmlSerializerUtil;
 import git4idea.repo.GitRemote;
 import git4idea.repo.GitRepository;
+import gitlab.actions.OpenGitLabSettingsAction;
 import gitlab.api.GitlabRestApi;
 import gitlab.bean.ProjectDto;
-import gitlab.common.Notifier;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
@@ -95,10 +99,23 @@ public class GitLabSettingsState implements PersistentStateComponent<GitLabSetti
     }
 
     public GitlabRestApi api(GitlabServer serverDto) {
+        String apiUrl = serverDto.getApiUrl();
         try {
             isApiValid(serverDto.getApiUrl(), serverDto.getApiToken());
-        } catch (IOException e) {
-            Notifier.notifyError(null, "The GitLab server error occurred! (" + serverDto.getApiUrl() + ")\n " + e.getMessage());
+        } catch (Exception e) {
+            String errorMsg = e.getMessage();
+            Notifications.Bus.notify(
+                    NotificationGroupManager.getInstance().getNotificationGroup(Bundle.message("notifierGroup"))
+                            .createNotification(
+                                    Bundle.message("notifierGroup"),
+                                    "GitLab server \"" + apiUrl + "\" is invalid. The reason is '" + errorMsg + "'," +
+                                            " Please click the button below to configure.",
+                                    NotificationType.WARNING,
+                                    null
+                            ).addAction(
+                                    new OpenGitLabSettingsAction()
+                            )
+            );
         }
         return new GitlabRestApi(serverDto.getApiUrl(), serverDto.getApiToken());
     }
