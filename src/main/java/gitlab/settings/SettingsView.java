@@ -1,12 +1,13 @@
 package gitlab.settings;
 
+import com.github.lvlifeng.githelper.Bundle;
 import com.github.lvlifeng.githelper.icons.Icons;
 import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.openapi.options.SearchableConfigurable;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import git4idea.DialogManager;
-import gitlab.bean.GitlabServer;
+import com.github.lvlifeng.githelper.bean.GitlabServer;
 import gitlab.bean.ReadOnlyTableModel;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
@@ -26,7 +27,7 @@ import java.util.Collection;
  */
 public class SettingsView extends DialogWrapper implements SearchableConfigurable {
 
-    public static final String DIALOG_TITLE = "GitLab Settings";
+    public static final String DIALOG_TITLE = Bundle.message("gitlab_settings_name");
     GitLabSettingsState settingsState = GitLabSettingsState.getInstance();
 
     private JPanel mainPanel;

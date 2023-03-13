@@ -14,8 +14,10 @@
                     icon="/icons/window_dark.svg"/>
         <applicationService
                 serviceImplementation="gitlab.settings.GitLabSettingsState"/>
-        <projectConfigurable id="GitLabConfigurableProvider" provider="gitlab.settings.SettingsConfigurableProvider"
-                             parentId="project.propVCSSupport.Mappings" displayName="GitLab"/>
+<!--        <projectConfigurable id="preferences.githelper.gitlab" provider="gitlab.settings.SettingsConfigurableProvider"-->
+<!--                             parentId="project.propVCSSupport.Mappings" displayName="GitLab"/>-->
+        <projectConfigurable parentId="project.propVCSSupport.Mappings" displayName="GitLab"
+                             id="preferences.githelper.gitlab" instance="gitlab.settings.SettingsComponent"/>
         <notificationGroup id="GitHelper" displayType="BALLOON" key="notification.group.name"/>
     </extensions>
 
