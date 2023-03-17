@@ -20,6 +20,7 @@ import java.awt.event.FocusListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Collection;
+import java.util.Objects;
 
 /**
  * @author Lv LiFeng
@@ -27,7 +28,7 @@ import java.util.Collection;
  */
 public class SettingsView extends DialogWrapper implements SearchableConfigurable {
 
-    public static final String DIALOG_TITLE = Bundle.message("gitlab_settings_name");
+    public static final String DIALOG_TITLE = Bundle.message("gitlab_settings");
     GitLabSettingsState settingsState = GitLabSettingsState.getInstance();
 
     private JPanel mainPanel;
@@ -121,7 +122,7 @@ public class SettingsView extends DialogWrapper implements SearchableConfigurabl
             }
             Object[] row = new Object[columnNames.length];
             row[0] = server;
-            row[1] = server.getApiUrl();
+            row[1] = server.toString();
             row[2] = server.getApiToken();
             row[3] = server.getPreferredConnection().name();
             data[i] = row;

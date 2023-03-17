@@ -29,6 +29,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -239,12 +240,16 @@ public class GitLabServersDialog extends DialogWrapper {
         this.gitlabServers.setSelectionModel(new DefaultListSelectionModel() {
             @Override
             public void setSelectionInterval(int index0, int index1) {
+                GitlabServer gitlabServer = gitlabServerList.get(index0);
+                if (Objects.equals(false, gitlabServer.getValidFlag())) {
+                    return;
+                }
                 if (super.isSelectedIndex(index0)) {
                     super.removeSelectionInterval(index0, index1);
-                    selectedGitlabServerList.remove(gitlabServerList.get(index0));
+                    selectedGitlabServerList.remove(gitlabServer);
                 } else {
                     super.addSelectionInterval(index0, index1);
-                    selectedGitlabServerList.add(gitlabServerList.get(index0));
+                    selectedGitlabServerList.add(gitlabServer);
                 }
                 checkAll(filterGitLabServerList);
                 setSelectedCount();

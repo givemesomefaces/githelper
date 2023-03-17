@@ -26,7 +26,7 @@ public class OpenGitLabSettingsAction extends AnAction implements DumbAware {
     private static final Icon SETTINGS_ICON = AllIcons.General.Settings;
 
     public OpenGitLabSettingsAction() {
-        super(Bundle.message("gitlab_settings_name"), "Edit the GitLab settings for the current project", SETTINGS_ICON);
+        super(Bundle.message("notify_gitlab_settings_name"), "Edit the GitLab settings for the current project", SETTINGS_ICON);
     }
 
     @Override

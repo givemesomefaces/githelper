@@ -1,7 +1,11 @@
 package window;
 
+import com.github.lvlifeng.githelper.bean.GitlabServer;
+import org.apache.commons.lang3.BooleanUtils;
+
 import javax.swing.*;
 import java.awt.*;
+import java.util.Objects;
 
 /**
  * @author Lv LiFeng
@@ -21,6 +25,10 @@ public class LcheckBox extends JCheckBox implements ListCellRenderer {
         this.setForeground(isSelected ? list.getSelectionForeground() : list.getForeground());
         this.setSelected(isSelected);
         this.setEnabled(true);
+        if (value instanceof GitlabServer) {
+            this.setEnabled(BooleanUtils.isTrue(((GitlabServer) value).getValidFlag())
+                    || Objects.isNull(((GitlabServer) value).getValidFlag()));
+        }
         return this;
     }
 }

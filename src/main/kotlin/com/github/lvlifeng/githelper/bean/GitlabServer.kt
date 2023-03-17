@@ -3,6 +3,7 @@ package com.github.lvlifeng.githelper.bean
 import lombok.Getter
 import lombok.Setter
 import lombok.experimental.Accessors
+import org.apache.commons.lang3.BooleanUtils
 import java.util.*
 
 /**
@@ -19,6 +20,9 @@ class GitlabServer {
     var preferredConnection = CloneType.SSH
     var validFlag: Boolean? = null
     override fun toString(): String {
+        if (Objects.equals(false, validFlag)) {
+            return "(invalid) $apiUrl"
+        }
         return apiUrl
     }
 
