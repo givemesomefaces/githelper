@@ -45,6 +45,7 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -117,6 +118,9 @@ public class GitLabDialogV2 extends DialogWrapper {
             @Override
             public void setSelectionInterval(int index0, int index1) {
                 GitlabServer gitlabServer = selectedGitlabServerList.get(index0);
+                if (Objects.equals(false, gitlabServer.getValidFlag())) {
+                    return;
+                }
                 if (super.isSelectedIndex(index0)) {
                     super.removeSelectionInterval(index0, index1);
                     selectedGitRemoteServerList.remove(gitlabServer.getRepositoryUrl());
