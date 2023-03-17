@@ -116,6 +116,7 @@ public class ServerConfiguration extends DialogWrapper {
         gitlabServer.setApiToken(token.getText());
         gitlabServer.setRepositoryUrl(ApiToRepoUrlConverter.convertApiUrlToRepoUrl(apiURl.getText()));
         gitlabServer.setPreferredConnection(GitlabServer.CloneType.values()[checkoutMethod.getSelectedIndex()]);
+        gitlabServer.setValidFlag(true);
         settingsState.addServer(gitlabServer);
     }
 

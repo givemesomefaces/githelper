@@ -25,6 +25,7 @@ class GitHelperProjectService(project: Project) {
                 try {
                     this.isApiValid(it.apiUrl, it.apiToken)
                 } catch (e: Exception) {
+                    it.validFlag = false
                     invalidServerList.add(it.apiUrl)
                     errotMsg += "GitLab server \"${it.apiUrl}\" is invalid. The reason is '${e.message}' \n"
                 }

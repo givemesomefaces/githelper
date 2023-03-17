@@ -103,12 +103,13 @@ public class GitLabSettingsState implements PersistentStateComponent<GitLabSetti
         try {
             isApiValid(serverDto.getApiUrl(), serverDto.getApiToken());
         } catch (Exception e) {
+            serverDto.setValidFlag(false);
             String errorMsg = e.getMessage();
             Notifications.Bus.notify(
                     NotificationGroupManager.getInstance().getNotificationGroup(Bundle.message("notifierGroup"))
                             .createNotification(
                                     Bundle.message("notifierGroup"),
-                                    "GitLab server \"" + apiUrl + "\" is invalid. The reason is '" + errorMsg + "'," +
+                                    "GitLab server \"" + apiUrl + "\" is invalid. The reason is '" + errorMsg + "' \n" +
                                             " Please click the button below to configure.",
                                     NotificationType.WARNING,
                                     null
