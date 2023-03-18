@@ -1,6 +1,7 @@
 package gitlab.ui;
 
 import cn.hutool.core.collection.CollectionUtil;
+import com.github.lvlifeng.githelper.bean.GitlabServer;
 import com.google.common.collect.Lists;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.progress.ProgressIndicator;
@@ -8,7 +9,6 @@ import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
-import com.github.lvlifeng.githelper.bean.GitlabServer;
 import gitlab.bean.ProjectDto;
 import gitlab.settings.GitLabSettingsState;
 import org.apache.commons.lang3.StringUtils;
@@ -115,7 +115,13 @@ public class GitLabServersDialog extends DialogWrapper {
             okButton.setEnabled(false);
         } else {
             okButton.setEnabled(true);
+            if (selectedGitlabServerList.size() == gitlabServerList.size()) {
+                selectAllCheckBox.setSelected(true);
+            } else {
+                selectAllCheckBox.setSelected(false);
+            }
         }
+
     }
 
     private void initBottomButton() {
@@ -197,8 +203,14 @@ public class GitLabServersDialog extends DialogWrapper {
                 }
                 JCheckBox jCheckBox = (JCheckBox) e.getSource();
                 if (jCheckBox.isSelected()) {
-                    selectedGitlabServerList.addAll(filterGitLabServerList);
-                    gitlabServers.addSelectionInterval(0, filterGitLabServerList.size());
+                    filterGitLabServerList.stream()
+                            .filter(server -> !Objects.equals(false, server.getValidFlag()))
+                            .forEach(o -> {
+                                selectedGitlabServerList.add(o);
+                                gitlabServers.setSelectedValue(o, true);
+                            });
+//                    selectedGitlabServerList.addAll(filterGitLabServerList);
+//                    gitlabServers.addSelectionInterval(0, filterGitLabServerList.size());
                 } else {
                     filterGitLabServerList.forEach(selectedGitlabServerList::remove);
                     gitlabServers.clearSelection();
