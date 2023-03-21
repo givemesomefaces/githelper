@@ -2,6 +2,14 @@
 
 # GitHelper Changelog
 
+## [231.1.4]
+
+### FEAT
+
+- Add setup guide.
+- Add GitLab server filter.
+- Fix bugs.
+
 ## [231.1.3]
 
 ### FEAT
