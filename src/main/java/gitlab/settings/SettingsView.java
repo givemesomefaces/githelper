@@ -20,7 +20,6 @@ import java.awt.event.FocusListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Collection;
-import java.util.Objects;
 
 /**
  * @author Lv LiFeng
@@ -28,7 +27,7 @@ import java.util.Objects;
  */
 public class SettingsView extends DialogWrapper implements SearchableConfigurable {
 
-    public static final String DIALOG_TITLE = Bundle.message("gitlab_settings");
+    public static final String DIALOG_TITLE = Bundle.message("gitlabSettings");
     GitLabSettingsState settingsState = GitLabSettingsState.getInstance();
 
     private JPanel mainPanel;

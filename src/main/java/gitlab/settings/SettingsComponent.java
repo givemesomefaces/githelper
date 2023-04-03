@@ -45,7 +45,7 @@ public class SettingsComponent implements SearchableConfigurable {
 
     @Override
     public String getHelpTopic() {
-        return Bundle.message("gitlab_settings_id");
+        return Bundle.message("gitlabSettingsId");
     }
 
     public void apply() throws ConfigurationException {
@@ -60,7 +60,7 @@ public class SettingsComponent implements SearchableConfigurable {
 
     @Nls
     public String getDisplayName() {
-        return Bundle.message("gitlab_settings_id");
+        return Bundle.message("gitlabSettingsId");
     }
 
     @Override
@@ -73,7 +73,7 @@ public class SettingsComponent implements SearchableConfigurable {
     @NotNull
     @Override
     public String getId() {
-        return Bundle.message("gitlab_settings_id");
+        return Bundle.message("gitlabSettingsId");
     }
 }
 

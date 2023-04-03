@@ -108,7 +108,7 @@ public class GitLabSettingsState implements PersistentStateComponent<GitLabSetti
             Notifications.Bus.notify(
                     NotificationGroupManager.getInstance().getNotificationGroup(Bundle.message("notifierGroup"))
                             .createNotification(
-                                    Bundle.message("notifierGroup"),
+                                    Bundle.message("gitlabSettings"),
                                     "GitLab server \"" + apiUrl + "\" is invalid. The reason is '" + errorMsg + "' \n" +
                                             " Please click the button below to configure.",
                                     NotificationType.WARNING,
@@ -125,7 +125,7 @@ public class GitLabSettingsState implements PersistentStateComponent<GitLabSetti
         if (getGitlabServers().stream().noneMatch(s -> server.getApiUrl().equals(s.getApiUrl()))) {
             getGitlabServers().add(server);
         } else {
-            getGitlabServers().stream().filter(s -> Objects.nonNull(server) && server.getApiUrl().equals(s.getApiUrl())).forEach(changedServer -> {
+            getGitlabServers().stream().filter(s -> server.getApiUrl().equals(s.getApiUrl())).forEach(changedServer -> {
                 changedServer.setApiUrl(server.getApiUrl());
                 changedServer.setRepositoryUrl(server.getRepositoryUrl());
                 changedServer.setApiToken(server.getApiToken());

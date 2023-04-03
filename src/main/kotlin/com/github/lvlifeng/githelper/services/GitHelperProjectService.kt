@@ -18,7 +18,7 @@ class GitHelperProjectService(project: Project) {
 
     private fun validateGitlabServer() {
         var invalidServerList = mutableListOf<String>()
-        var errotMsg = ""
+        var errorMsg = ""
         val gitLabSettingsState = GitLabSettingsState.getInstance()
         gitLabSettingsState.apply {
             this.gitlabServers.stream().forEach {
@@ -27,18 +27,18 @@ class GitHelperProjectService(project: Project) {
                 } catch (e: Exception) {
                     it.validFlag = false
                     invalidServerList.add(it.apiUrl)
-                    errotMsg += "GitLab server \"${it.apiUrl}\" is invalid. The reason is '${e.message}' \n"
+                    errorMsg += "GitLab server \"${it.apiUrl}\" is invalid. The reason is '${e.message}' \n"
                 }
             }
-            if (errotMsg.isNotEmpty()) {
-                errotMsg += "Please click the button below to configure."
+            if (errorMsg.isNotEmpty()) {
+                errorMsg += "Please click the button below to configure."
             }
         }
         if (gitLabSettingsState.gitlabServers.isEmpty()) {
             Notifications.Bus.notify(
                 NotificationGroupManager.getInstance().getNotificationGroup(message("notifierGroup"))
                     .createNotification(
-                        message("notifierGroup"),
+                        message("gitlabSettings"),
                         "GitLab cannot be used without configuring GitLab server. Please click the button below to configure.",
                         NotificationType.WARNING,
                         null
@@ -51,8 +51,8 @@ class GitHelperProjectService(project: Project) {
             Notifications.Bus.notify(
                 NotificationGroupManager.getInstance().getNotificationGroup(message("notifierGroup"))
                     .createNotification(
-                        message("notifierGroup"),
-                        errotMsg,
+                        message("gitlabSettings"),
+                        errorMsg,
                         NotificationType.WARNING,
                         null
                     ).addAction(

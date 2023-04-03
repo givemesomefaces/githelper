@@ -35,7 +35,7 @@ public class Notifier {
 
     public static void notify(@Nullable Project project, StringBuilder info, StringBuilder error, StringBuilder warn) {
         if (ObjectUtil.isNotNull(info) && StringUtils.isNotEmpty(info)) {
-            info.insert(0, StatusEnum.SUCCESSED.getDesc() + "\n");
+            info.insert(0, StatusEnum.SUCCESSES.getDesc() + "\n");
             notifyInfo(project, info.toString());
         }
         if (ObjectUtil.isNotNull(error) && StringUtils.isNotEmpty(error)) {

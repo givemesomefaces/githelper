@@ -9,7 +9,7 @@ import lombok.Getter;
 @Getter
 public enum StatusEnum {
 
-    SUCCESSED("GitLab Operation Successful:"),
+    SUCCESSES("GitLab Operation Successful:"),
     FAILED("GitLab Operation Failed:"),
     ;
 
