@@ -3,6 +3,9 @@ package gitlab.actions;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollectionUtil;
 import com.github.lvlifeng.githelper.Bundle;
+import com.intellij.notification.NotificationGroupManager;
+import com.intellij.notification.NotificationType;
+import com.intellij.notification.Notifications;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.progress.ProgressIndicator;
@@ -65,7 +68,7 @@ public class CreateMergeRequestAction extends DumbAwareAction {
 
         GitRepositoryManager manager = GitUtil.getRepositoryManager(project);
 
-        Set<GitRepository> repositories = Arrays.stream(data).map(o -> manager.getRepositoryForFileQuick(o)).collect(Collectors.toSet());
+        Set<GitRepository> repositories = Arrays.stream(data).map(manager::getRepositoryForFileQuick).collect(Collectors.toSet());
         if (CollectionUtil.isEmpty(repositories)) {
             showMessageDialog();
             return;
@@ -80,11 +83,20 @@ public class CreateMergeRequestAction extends DumbAwareAction {
         repSets.removeAll(gitlabServers.stream().map(GitlabServer::getRepositoryUrl).collect(Collectors.toSet()));
         if (CollectionUtil.isNotEmpty(repSets)) {
             StringBuilder sb = new StringBuilder();
-            repSets.stream().forEach(s -> sb.append(s).append("\n"));
-            Messages.showInfoMessage("The following Gitlab server is not configured!  Please go to \n" +
-                            "'Settings->Version Control->GitLab' to configure.\n\n" +
-                            sb.toString(),
-                    Bundle.message("gitLab"));
+            repSets.forEach(s -> sb.append(s).append("\n"));
+            // TODO
+            Notifications.Bus.notify(
+                    NotificationGroupManager.getInstance().getNotificationGroup(Bundle.message("notifierGroup"))
+                            .createNotification(
+                                    Bundle.message("gitlabSettings"),
+                                    "The following Gitlab server is not configured!" + sb + "' \n" +
+                                            " Please click the button below to configure.",
+                                    NotificationType.WARNING,
+                                    null
+                            ).addAction(
+                                    new OpenGitLabSettingsAction()
+                            )
+            );
             return;
         }
 
@@ -117,7 +129,7 @@ public class CreateMergeRequestAction extends DumbAwareAction {
                                 if (CollectionUtil.isEmpty(commonBranch)) {
                                     commonBranch = new ArrayList<>(currentBranchNames);
                                 }
-                                commonBranch = CollectionUtil.intersectionDistinct(currentBranchNames, commonBranch).stream().collect(Collectors.toList());
+                                commonBranch = new ArrayList<>(CollectionUtil.intersectionDistinct(currentBranchNames, commonBranch));
                             }
                         }
                     } catch (IOException ioException) {
