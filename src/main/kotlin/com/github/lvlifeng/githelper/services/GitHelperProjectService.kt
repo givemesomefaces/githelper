@@ -1,18 +1,23 @@
 package com.github.lvlifeng.githelper.services
 
-import com.github.lvlifeng.githelper.Bundle
 import com.github.lvlifeng.githelper.Bundle.message
+import com.intellij.ide.plugins.PluginManagerCore
 import com.intellij.notification.NotificationGroupManager
 import com.intellij.notification.NotificationType
 import com.intellij.notification.Notifications
+import com.intellij.openapi.actionSystem.ActionManager
+import com.intellij.openapi.extensions.PluginId
+import com.intellij.openapi.options.ShowSettingsUtil
 import com.intellij.openapi.project.Project
+import com.intellij.structuralsearch.plugin.ui.ConfigurationManager
 import gitlab.actions.OpenGitLabSettingsAction
 import gitlab.settings.GitLabSettingsState
+
 
 class GitHelperProjectService(project: Project) {
 
     init {
-        println(Bundle.message("projectService", project.name))
+        println(message("projectService", project.name))
         validateGitlabServer()
     }
 
@@ -38,7 +43,7 @@ class GitHelperProjectService(project: Project) {
             Notifications.Bus.notify(
                 NotificationGroupManager.getInstance().getNotificationGroup(message("notifierGroup"))
                     .createNotification(
-                        message("gitlabSettings"),
+                        message("notifierGroup"),
                         "GitLab cannot be used without configuring GitLab server. Please click the button below to configure.",
                         NotificationType.WARNING,
                         null
@@ -51,7 +56,7 @@ class GitHelperProjectService(project: Project) {
             Notifications.Bus.notify(
                 NotificationGroupManager.getInstance().getNotificationGroup(message("notifierGroup"))
                     .createNotification(
-                        message("gitlabSettings"),
+                        message("notifierGroup"),
                         errorMsg,
                         NotificationType.WARNING,
                         null

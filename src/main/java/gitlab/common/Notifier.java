@@ -17,19 +17,19 @@ public class Notifier {
 
     public static void notifyError(@Nullable Project project, String content) {
         NotificationGroupManager.getInstance().getNotificationGroup(Bundle.message("notifierGroup"))
-                .createNotification(content, NotificationType.ERROR)
+                .createNotification(Bundle.message("notifierGroup"), content, NotificationType.ERROR, null)
                 .notify(project);
     }
 
     public static void notifyInfo(@Nullable Project project, String content) {
         NotificationGroupManager.getInstance().getNotificationGroup(Bundle.message("notifierGroup"))
-                .createNotification(content, NotificationType.INFORMATION)
+                .createNotification(Bundle.message("notifierGroup"), content, NotificationType.INFORMATION, null)
                 .notify(project);
     }
 
     public static void notifyWarn(@Nullable Project project, String content) {
         NotificationGroupManager.getInstance().getNotificationGroup(Bundle.message("notifierGroup"))
-                .createNotification(content, NotificationType.WARNING)
+                .createNotification(Bundle.message("notifierGroup"), content, NotificationType.WARNING, null)
                 .notify(project);
     }
 

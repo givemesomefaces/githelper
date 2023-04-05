@@ -88,7 +88,7 @@ public class CreateMergeRequestAction extends DumbAwareAction {
             Notifications.Bus.notify(
                     NotificationGroupManager.getInstance().getNotificationGroup(Bundle.message("notifierGroup"))
                             .createNotification(
-                                    Bundle.message("gitlabSettings"),
+                                    Bundle.message("notifierGroup"),
                                     "The following Gitlab server is not configured!" + sb + "' \n" +
                                             " Please click the button below to configure.",
                                     NotificationType.WARNING,

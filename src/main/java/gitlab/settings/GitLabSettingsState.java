@@ -22,6 +22,7 @@ import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.experimental.Accessors;
 import org.apache.commons.lang3.StringUtils;
+import org.gitlab.api.models.GitlabSession;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -42,18 +43,13 @@ import java.util.stream.Collectors;
 @Setter
 @Accessors(chain = true)
 @State(
-        name = "SettingsState",
+        name = "GitHelperGitLabSettingsState",
         storages = {
-                @Storage("$APP_CONFIG$/gitlab-settings-persistentstate.xml")
+                @Storage("$APP_CONFIG$/githelper-gitlab-settings-state.xml"),
+                @Storage("$APP_CONFIG$/gitlab-project-settings-new-format.xml")
         }
 )
 public class GitLabSettingsState implements PersistentStateComponent<GitLabSettingsState> {
-
-    private String host;
-
-    private String token;
-
-    private boolean defaultRemoveBranch;
 
     private List<GitlabServer> gitlabServers = new ArrayList<>();
 
@@ -92,10 +88,10 @@ public class GitLabSettingsState implements PersistentStateComponent<GitLabSetti
         }).collect(Collectors.toList());
     }
 
-    public void isApiValid(String host, String key) throws IOException {
+    public GitlabSession isApiValid(String host, String key) throws IOException {
         GitlabRestApi gitlabRestApi = new GitlabRestApi();
         gitlabRestApi.reload(host, key);
-        gitlabRestApi.getSession();
+        return gitlabRestApi.getSession();
     }
 
     public GitlabRestApi api(GitlabServer serverDto) {
@@ -108,7 +104,7 @@ public class GitLabSettingsState implements PersistentStateComponent<GitLabSetti
             Notifications.Bus.notify(
                     NotificationGroupManager.getInstance().getNotificationGroup(Bundle.message("notifierGroup"))
                             .createNotification(
-                                    Bundle.message("gitlabSettings"),
+                                    Bundle.message("notifierGroup"),
                                     "GitLab server \"" + apiUrl + "\" is invalid. The reason is '" + errorMsg + "' \n" +
                                             " Please click the button below to configure.",
                                     NotificationType.WARNING,

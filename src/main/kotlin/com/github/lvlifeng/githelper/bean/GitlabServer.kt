@@ -19,6 +19,9 @@ class GitlabServer {
     var repositoryUrl = ""
     var preferredConnection = CloneType.SSH
     var validFlag: Boolean? = null
+    var name = ""
+    var userName = ""
+    var avatarUrl = ""
     override fun toString(): String {
         if (Objects.equals(false, validFlag)) {
             return "(invalid) $apiUrl"

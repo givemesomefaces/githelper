@@ -11,7 +11,12 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 
-
+/**
+ *
+ *
+ * @author Lv Lifeng
+ * @date 2023-04-05 18:04
+ */
 public class SettingsComponent implements SearchableConfigurable {
 
     private final GitLabSettingsState gitLabSettingsState;
@@ -75,5 +80,7 @@ public class SettingsComponent implements SearchableConfigurable {
     public String getId() {
         return Bundle.message("gitlabSettingsId");
     }
+
+
 }
 
