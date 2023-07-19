@@ -25,7 +25,7 @@
 
 ### GitLab operation:
 
-1. Configure Gitlab server in Settings -> Version Control -> GitLab.
+1. Configure Gitlab server in Settings -> Version Control -> GitHelper.
 2. Use batch operations in top menu Git -> GitLab.
 3. Or in git menu of right mouse button.[Create Merge Request..., Merge Request...],supports select multiple projects.
 
@@ -45,7 +45,7 @@
 
 ### GitLab操作:
 
-1. 在Settings -> Version Control-> GitLab中配置
+1. 在Settings -> Version Control-> GitHelper中配置
 2. 顶部菜单Git -> GitLab中使用
 3. 或选中多个项目，在右键git菜单中(Create Merge Request...,Merge Request...)
 
