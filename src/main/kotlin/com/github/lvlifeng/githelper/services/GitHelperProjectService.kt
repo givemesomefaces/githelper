@@ -6,8 +6,8 @@ import com.intellij.notification.NotificationGroupManager
 import com.intellij.notification.NotificationType
 import com.intellij.notification.Notifications
 import com.intellij.openapi.project.Project
-import gitlab.actions.OpenGitLabSettingsAction
-import gitlab.settings.GitLabSettingsState
+import com.github.itisokey.githelper.gitlab.actions.OpenGitLabSettingsAction
+import com.github.itisokey.githelper.gitlab.settings.GitLabSettingsState
 
 class GitHelperProjectService(project: Project) {
 
