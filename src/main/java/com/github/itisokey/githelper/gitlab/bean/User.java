@@ -1,7 +1,5 @@
 package com.github.itisokey.githelper.gitlab.bean;
 
-import lombok.Getter;
-import lombok.Setter;
 import org.gitlab.api.models.GitlabUser;
 
 import java.util.Map;
@@ -12,8 +10,6 @@ import java.util.Objects;
  * @date 2022/1/9 11:25
  */
 
-@Getter
-@Setter
 public class User extends GitlabUser {
 
     private Map<String, Integer> serverUserIdMap;
@@ -44,5 +40,13 @@ public class User extends GitlabUser {
     @Override
     public int hashCode() {
         return Objects.hash(this.toString());
+    }
+
+    public Map<String, Integer> getServerUserIdMap() {
+        return serverUserIdMap;
+    }
+
+    public void setServerUserIdMap(Map<String, Integer> serverUserIdMap) {
+        this.serverUserIdMap = serverUserIdMap;
     }
 }

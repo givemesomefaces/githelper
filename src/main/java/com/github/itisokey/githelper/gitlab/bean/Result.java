@@ -4,9 +4,6 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.github.itisokey.githelper.gitlab.enums.OperationTypeEnum;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.experimental.Accessors;
 import org.apache.commons.lang3.StringUtils;
 import org.gitlab.api.models.GitlabMergeRequest;
 
@@ -14,9 +11,6 @@ import org.gitlab.api.models.GitlabMergeRequest;
  * @author Lv LiFeng
  * @date 2022/1/11 23:49
  */
-@Getter
-@Setter
-@Accessors(chain = true)
 public class Result extends GitlabMergeRequest {
     private String projectName;
     private String errorMsg;
@@ -55,4 +49,46 @@ public class Result extends GitlabMergeRequest {
         }
         return null;
     }
+
+    public String getProjectName() {
+        return projectName;
+    }
+
+    public Result setProjectName(String projectName) {
+        this.projectName = projectName;
+        return this;
+    }
+
+    public String getErrorMsg() {
+        return errorMsg;
+    }
+
+    public String getChangeFilesCount() {
+        return changeFilesCount;
+    }
+
+    public Result setChangeFilesCount(String changeFilesCount) {
+        this.changeFilesCount = changeFilesCount;
+        return this;
+    }
+
+    public OperationTypeEnum getType() {
+        return type;
+    }
+
+    public Result setType(OperationTypeEnum type) {
+        this.type = type;
+        return this;
+    }
+
+    public String getDesc() {
+        return desc;
+    }
+
+    public Result setDesc(String desc) {
+        this.desc = desc;
+        return this;
+    }
+
+
 }

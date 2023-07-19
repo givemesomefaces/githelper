@@ -1,8 +1,7 @@
 package com.github.itisokey.githelper.gitlab.settings;
 
-import lombok.SneakyThrows;
-
 import java.net.URI;
+import java.net.URISyntaxException;
 
 /**
  * @author Lv LiFeng
@@ -10,9 +9,13 @@ import java.net.URI;
  */
 public class ApiToRepoUrlConverter {
 
-    @SneakyThrows
     public static String convertApiUrlToRepoUrl(String apiUrl) {
-        URI uri = new URI(apiUrl);
+        URI uri = null;
+        try {
+            uri = new URI(apiUrl);
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
         String domain = uri.getHost();
         return domain.startsWith("www.") ? domain.substring(4) : domain;
     }

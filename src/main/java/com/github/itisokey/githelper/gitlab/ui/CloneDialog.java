@@ -18,7 +18,6 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.util.Consumer;
 import git4idea.commands.Git;
 import com.github.itisokey.githelper.gitlab.common.Notifier;
-import lombok.Getter;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
@@ -32,7 +31,6 @@ import java.util.Set;
  * @author Lv LiFeng
  * @date 2022/1/8 10:59
  */
-@Getter
 public class CloneDialog extends DialogWrapper {
     private static final Logger LOG = Logger.getInstance(CloneDialog.class);
     private JPanel contentPane;

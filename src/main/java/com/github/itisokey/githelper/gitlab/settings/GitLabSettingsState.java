@@ -17,10 +17,6 @@ import git4idea.repo.GitRepository;
 import com.github.itisokey.githelper.gitlab.actions.OpenGitLabSettingsAction;
 import com.github.itisokey.githelper.gitlab.api.GitlabRestApi;
 import com.github.itisokey.githelper.gitlab.bean.ProjectDto;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.SneakyThrows;
-import lombok.experimental.Accessors;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -38,9 +34,6 @@ import java.util.stream.Collectors;
  * @author Lv LiFeng
  * @date 2022/1/7 00:13
  */
-@Getter
-@Setter
-@Accessors(chain = true)
 @State(
         name = "GitHelperGitLabSettingsState",
         storages = {
@@ -71,11 +64,15 @@ public class GitLabSettingsState implements PersistentStateComponent<GitLabSetti
         XmlSerializerUtil.copyBean(state, this);
     }
 
-    @SneakyThrows
     public Map<GitlabServer, List<ProjectDto>> loadMapOfServersAndProjects(List<GitlabServer> servers) {
         Map<GitlabServer, List<ProjectDto>> map = new HashMap<>();
         for (GitlabServer server : servers) {
-            List<ProjectDto> projects = loadProjects(server);
+            List<ProjectDto> projects = null;
+            try {
+                projects = loadProjects(server);
+            } catch (Throwable e) {
+                throw new RuntimeException(e);
+            }
             map.put(server, projects);
         }
         return map;

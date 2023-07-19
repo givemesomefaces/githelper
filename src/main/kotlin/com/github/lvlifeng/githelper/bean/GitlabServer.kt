@@ -1,18 +1,11 @@
 package com.github.lvlifeng.githelper.bean
 
-import lombok.Getter
-import lombok.Setter
-import lombok.experimental.Accessors
-import org.apache.commons.lang3.BooleanUtils
 import java.util.*
 
 /**
  * @author Lv LiFeng
  * @date 2022/1/7 00:18
  */
-@Getter
-@Setter
-@Accessors(chain = true)
 class GitlabServer {
     var apiUrl = ""
     var apiToken = ""
@@ -44,4 +37,6 @@ class GitlabServer {
     override fun hashCode(): Int {
         return Objects.hash(apiUrl, apiToken, repositoryUrl, preferredConnection)
     }
+
+
 }

@@ -1,8 +1,6 @@
 package com.github.itisokey.githelper.gitlab.bean;
 
 import com.github.lvlifeng.githelper.bean.GitlabServer;
-import lombok.Getter;
-import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 import org.gitlab.api.models.GitlabProject;
 
@@ -13,8 +11,6 @@ import java.util.Objects;
  * @date 2022/1/7 00:14
  */
 
-@Getter
-@Setter
 public class ProjectDto extends GitlabProject {
 
     private GitlabServer gitlabServer;
@@ -36,5 +32,13 @@ public class ProjectDto extends GitlabProject {
 
     public String getGitlabServerRepositoryUrl() {
         return this.getGitlabServer().getRepositoryUrl();
+    }
+
+    public GitlabServer getGitlabServer() {
+        return gitlabServer;
+    }
+
+    public void setGitlabServer(GitlabServer gitlabServer) {
+        this.gitlabServer = gitlabServer;
     }
 }

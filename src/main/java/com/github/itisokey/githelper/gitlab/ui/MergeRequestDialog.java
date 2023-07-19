@@ -16,7 +16,6 @@ import com.github.itisokey.githelper.gitlab.bean.SelectedProjectDto;
 import com.github.itisokey.githelper.gitlab.bean.User;
 import com.github.itisokey.githelper.gitlab.common.Notifier;
 import com.github.itisokey.githelper.gitlab.enums.OperationTypeEnum;
-import lombok.Setter;
 import org.apache.commons.compress.utils.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.gitlab.api.models.GitlabMergeRequest;
@@ -45,7 +44,6 @@ import static com.github.itisokey.githelper.gitlab.common.Constants.NAME_SPLIT_S
  * @author Lv LiFeng
  * @date 2022/1/8 15:42
  */
-@Setter
 public class MergeRequestDialog extends DialogWrapper {
     private static final String CREATING = "Merge request is creating...";
     private static final String CREATED = "Merge request created";

@@ -1,8 +1,5 @@
 package com.github.itisokey.githelper.gitlab.bean;
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.experimental.Accessors;
 
 import java.io.Serializable;
 import java.util.Objects;
@@ -11,9 +8,6 @@ import java.util.Objects;
  * @author Lv LiFeng
  * @date 2022/1/28 10:20
  */
-@Getter
-@Setter
-@Accessors(chain = true)
 public class GitLabProjectDto implements Serializable {
     private String namespace;
     private String projectName;
@@ -30,5 +24,32 @@ public class GitLabProjectDto implements Serializable {
     @Override
     public int hashCode() {
         return Objects.hash(namespace, projectName, repUrl);
+    }
+
+    public String getNamespace() {
+        return namespace;
+    }
+
+    public GitLabProjectDto setNamespace(String namespace) {
+        this.namespace = namespace;
+        return this;
+    }
+
+    public String getProjectName() {
+        return projectName;
+    }
+
+    public GitLabProjectDto setProjectName(String projectName) {
+        this.projectName = projectName;
+        return this;
+    }
+
+    public String getRepUrl() {
+        return repUrl;
+    }
+
+    public GitLabProjectDto setRepUrl(String repUrl) {
+        this.repUrl = repUrl;
+        return this;
     }
 }

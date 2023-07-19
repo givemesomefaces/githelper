@@ -1,12 +1,9 @@
 package com.github.itisokey.githelper.gitlab.enums;
 
-import lombok.Getter;
-
 /**
  * @author Lv LiFeng
  * @date 2022/1/12 15:23
  */
-@Getter
 public enum OperationTypeEnum {
     CREATE_MERGE_REQUEST("create", "Results Of Creating Merge Request"),
     CLOSE_MERGE_REQUEST("close", "Results Of Closing Merge Request"),
@@ -21,5 +18,17 @@ public enum OperationTypeEnum {
     OperationTypeEnum(String type, String dialogTitle) {
         this.type = type;
         this.dialogTitle = dialogTitle;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public String getDialogTitle() {
+        return dialogTitle;
     }
 }
