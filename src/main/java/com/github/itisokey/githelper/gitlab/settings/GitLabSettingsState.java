@@ -7,10 +7,15 @@ import com.github.lvlifeng.githelper.bean.GitlabServer;
 import com.intellij.notification.NotificationGroupManager;
 import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
+import com.intellij.openapi.Disposable;
+import com.intellij.openapi.application.Application;
+import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.components.ComponentManager;
 import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
+import com.intellij.openapi.project.Project;
 import com.intellij.util.xmlb.XmlSerializerUtil;
 import git4idea.repo.GitRemote;
 import git4idea.repo.GitRepository;
@@ -51,7 +56,7 @@ public class GitLabSettingsState implements PersistentStateComponent<GitLabSetti
     private List<GitlabServer> gitlabServers = new ArrayList<>();
 
     public static GitLabSettingsState getInstance() {
-        return ServiceManager.getService(GitLabSettingsState.class);
+        return ApplicationManager.getApplication().getService(GitLabSettingsState.class);
     }
 
     @Override
