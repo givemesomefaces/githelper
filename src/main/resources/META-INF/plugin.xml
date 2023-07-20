@@ -29,14 +29,14 @@
     <actions>
         <!-- Add your actions here -->
 
-        <action id="GitLab" class="com.github.itisokey.githelper.gitlab.actions.GitLabActionV2" text="GitLab" icon="/icons/gitLab.png">
+        <action id="GitHelper_GitLab" class="com.github.itisokey.githelper.gitlab.actions.GitLabActionV2" text="GitHelper" icon="/icons/gitLab.png">
             <add-to-group group-id="Git.MainMenu" anchor="after" relative-to-action="GitHub.MainMenu"/>
         </action>
-        <action id="CreateMergeRequest" class="com.github.itisokey.githelper.gitlab.actions.CreateMergeRequestAction" text="Create Merge Request"
+        <action id="GitHelper_CreateMergeRequest" class="com.github.itisokey.githelper.gitlab.actions.CreateMergeRequestAction" text="Create Merge Request"
                 description="Create merge request">
             <add-to-group group-id="Git.ContextMenu" anchor="last"/>
         </action>
-        <action id="MergeRequest" class="com.github.itisokey.githelper.gitlab.actions.MergeRequestAction" text="Merge Request"
+        <action id="GitHelper_MergeRequest" class="com.github.itisokey.githelper.gitlab.actions.MergeRequestAction" text="Merge Request"
                 description="Merge request">
             <add-to-group group-id="Git.ContextMenu" anchor="last"/>
         </action>
