@@ -38,7 +38,7 @@ public class ServerConfiguration extends DialogWrapper {
     private JButton tokenPage;
     private JComboBox checkoutMethod;
 
-    protected ServerConfiguration(@Nullable GitlabServer gitlabServer) {
+    protected ServerConfiguration( GitlabServer gitlabServer) {
         super(false);
         if (gitlabServer == null) {
             this.gitlabServer = new GitlabServer();

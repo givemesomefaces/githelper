@@ -67,8 +67,7 @@ public class SettingsView extends DialogWrapper implements SearchableConfigurabl
                 if (e.getButton() != 1) {
                     return;
                 }
-                ServerConfiguration serverConfiguration = new ServerConfiguration(null);
-                DialogManager.show(serverConfiguration);
+                DialogManager.show(new ServerConfiguration(null));
                 reset();
             }
         });

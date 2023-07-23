@@ -21,11 +21,6 @@
         <notificationGroup id="GitHelper" displayType="BALLOON" key="notification.group.name"/>
     </extensions>
 
-    <applicationListeners>
-        <listener class="com.github.lvlifeng.githelper.listeners.GitHelperManagerListener"
-                  topic="com.intellij.openapi.project.ProjectManagerListener"/>
-    </applicationListeners>
-
     <actions>
         <!-- Add your actions here -->
 

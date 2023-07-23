@@ -40,8 +40,7 @@ class GitHelperProjectService(project: Project) {
                     .createNotification(
                         message("gitlabSettings"),
                         "GitLab cannot be used without configuring GitLab server. Please click the button below to configure.",
-                        NotificationType.WARNING,
-                        null
+                        NotificationType.WARNING
                     ).addAction(
                         OpenGitLabSettingsAction()
                     )
@@ -53,8 +52,7 @@ class GitHelperProjectService(project: Project) {
                     .createNotification(
                         message("gitlabSettings"),
                         errorMsg,
-                        NotificationType.WARNING,
-                        null
+                        NotificationType.WARNING
                     ).addAction(
                         OpenGitLabSettingsAction()
                     )
