@@ -6,8 +6,8 @@ import com.intellij.notification.NotificationGroupManager
 import com.intellij.notification.NotificationType
 import com.intellij.notification.Notifications
 import com.intellij.openapi.project.Project
-import gitlab.actions.OpenGitLabSettingsAction
-import gitlab.settings.GitLabSettingsState
+import com.github.itisokey.githelper.gitlab.actions.OpenGitLabSettingsAction
+import com.github.itisokey.githelper.gitlab.settings.GitLabSettingsState
 
 class GitHelperProjectService(project: Project) {
 
@@ -40,8 +40,7 @@ class GitHelperProjectService(project: Project) {
                     .createNotification(
                         message("gitlabSettings"),
                         "GitLab cannot be used without configuring GitLab server. Please click the button below to configure.",
-                        NotificationType.WARNING,
-                        null
+                        NotificationType.WARNING
                     ).addAction(
                         OpenGitLabSettingsAction()
                     )
@@ -53,8 +52,7 @@ class GitHelperProjectService(project: Project) {
                     .createNotification(
                         message("gitlabSettings"),
                         errorMsg,
-                        NotificationType.WARNING,
-                        null
+                        NotificationType.WARNING
                     ).addAction(
                         OpenGitLabSettingsAction()
                     )
